@@ -1,3 +1,15 @@
 <resources>
-    <string name="app_name">CasHub</string>
+    <string name="app_name" translatable="false">CashHub</string>
+    <string name="welcome">Welcome</string>
+    <string name="are_you_already_registered">Are you already registered?</string>
+    <string name="password" translatable="false">Password</string>
+    <string name="did_you_forget_your_password">Did you forget your password?</string>
+    <string name="login">Login</string>
+    <string name="email" translatable="false">Email</string>
+    <string name="or">OR</string>
+    <string name="login_with_google">Login with Google</string>
+    <string name="check_email">Check your email</string>
+    <string name="check_password">Check your password</string>
+    <string name="pick_some_categories">Pick some categories</string>
+
 </resources>
