@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CasHub</string>
+    <string name="next">Prossimo</string>
+    <string name="previous">Precedente</string>
+    <string name="welcome">Benvenuto</string>
+    <string name="are_you_already_registered">Sei già registrato?</string>
+    <string name="did_you_forget_your_password">Hai dimenticato la password?</string>
+    <string name="login">Accedi</string>
+    <string name="or">O</string>
+    <string name="login_with_google">Accedi con Google</string>
+</resources>
