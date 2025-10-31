@@ -1,3 +1,17 @@
 <resources>
-    <string name="app_name">CasHub</string>
+    <string name="app_name" translatable="false">CasHub</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+    <string name="welcome">Welcome</string>
+    <string name="are_you_already_registered">Are you already registered?</string>
+    <string name="password" translatable="false">Password</string>
+    <string name="did_you_forget_your_password">Did you forget your password?</string>
+    <string name="login">Login</string>
+    <string name="email" translatable="false">Email</string>
+    <string name="or">OR</string>
+    <string name="login_with_google">Login with Google</string>
+
 </resources>
