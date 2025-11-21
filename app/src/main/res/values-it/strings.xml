@@ -9,4 +9,6 @@
     <string name="login">Accedi</string>
     <string name="or">O</string>
     <string name="login_with_google">Accedi con Google</string>
+    <string name="check_email">Controlla la tua email</string>
+    <string name="check_password">Controlla la tua password</string>
 </resources>

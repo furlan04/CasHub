@@ -13,6 +13,8 @@
     <string name="email" translatable="false">Email</string>
     <string name="or">OR</string>
     <string name="login_with_google">Login with Google</string>
+    <string name="check_email">Check your email</string>
+    <string name="check_password">Check your password</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 

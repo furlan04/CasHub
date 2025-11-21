@@ -13,11 +13,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".NavLoginHomeActivity"
-            android:exported="false"
-            android:theme="@style/AppTheme" />
-        <activity
-            android:name=".LoginActivity"
-            android:exported="true">
+            android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
