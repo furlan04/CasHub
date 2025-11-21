@@ -13,5 +13,7 @@
     <string name="email" translatable="false">Email</string>
     <string name="or">OR</string>
     <string name="login_with_google">Login with Google</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>
