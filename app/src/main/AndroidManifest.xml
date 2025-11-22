@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".TransactionActivity"
+            android:name=".FragmentTestActivity"
             android:exported="false" />
         <activity
             android:name=".LoginActivity"
