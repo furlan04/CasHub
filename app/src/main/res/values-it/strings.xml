@@ -18,4 +18,6 @@
     <string name="transaction_split_expense">Dividi spesa</string>
     <string name="transaction_confirm">Conferma</string>
     <string name="hello_blank_fragment">Ciao Frammento Bianco</string>
+    <string name="check_email">Controlla la tua email</string>
+    <string name="check_password">Controlla la tua password</string>
 </resources>

@@ -22,6 +22,8 @@
     <string name="transaction_more_options" translatable="false">More options</string>
     <string name="transaction_split_expense">Split expense</string>
     <string name="transaction_confirm">Confirm</string>
+    <string name="check_email">Check your email</string>
+    <string name="check_password">Check your password</string>
 
 
     <!-- TODO: Remove or change this placeholder text -->
