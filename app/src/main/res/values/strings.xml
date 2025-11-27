@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" translatable="false">CasHub</string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
@@ -24,6 +24,14 @@
     <string name="transaction_confirm">Confirm</string>
     <string name="check_email">Check your email</string>
     <string name="check_password">Check your password</string>
+    <string name="titoli_title" tools:ignore="MissingTranslation">TITOLI</string>
+    <string name="portfolio_return" tools:ignore="MissingTranslation">N €   M %</string>
+    <string name="stock_name1" tools:ignore="MissingTranslation">Nome1</string>
+    <string name="stock_name2" translatable="false">Nome2</string>
+    <string name="stock_name3" translatable="false">Nome3</string>
+    <string name="add_stock" translatable="false">+ Aggiungi Titolo</string>
+    <string name="remove_stock" tools:ignore="MissingTranslation">- Rimuovi Titolo</string>
+    <string name="home_label" tools:ignore="MissingTranslation">Home</string>
 
 
     <!-- TODO: Remove or change this placeholder text -->
