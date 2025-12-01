@@ -1,14 +1,176 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".TransactionFragment">
+    android:background="@color/md_theme_background">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/margin">
 
-</FrameLayout>
+        <!-- CARD CONTENITORE -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="24dp"
+            app:cardElevation="4dp"
+            app:cardCornerRadius="12dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/margin">
+
+                <!-- BOTTONI ENTRATA / USCITA -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/margin"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btnEntrata"
+                        style="@style/Widget.Material3.Button.ElevatedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/transaction_type_in"
+                        android:textAllCaps="false"
+                        android:textAppearance="@style/FontMainMedium" />
+
+                    <Button
+                        android:id="@+id/btnUscita"
+                        style="@style/Widget.Material3.Button.ElevatedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/margin"
+                        android:layout_weight="1"
+                        android:text="@string/transaction_type_exit"
+                        android:textAllCaps="false"
+                        android:textAppearance="@style/FontMainMedium" />
+                </LinearLayout>
+
+                <!-- CAMPO NOME -->
+                <com.google.android.material.textfield.TextInputLayout
+                    style="?attr/textInputOutlinedStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#05000000"
+                    android:hint="@string/transaction_name">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etNome"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="#00000000"
+                        android:textAppearance="@style/FontMainLarge" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- QUANTITÀ + SPINNER VALUTA -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="?attr/textInputOutlinedStyle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="#05000000"
+                        android:hint="@string/transaction_quantity">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etQuantita"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="#00000000"
+                            android:inputType="numberDecimal"
+                            android:textAppearance="@style/FontMainLarge" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <Spinner
+                        android:id="@+id/spinnerValuta"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/margin" />
+                </LinearLayout>
+
+                <!-- TITOLO CATEGORIA -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin"
+                    android:text="@string/transaction_category"
+                    android:textAppearance="@style/FontMainMedium"
+                    android:textStyle="bold" />
+
+                <!-- BOTTONI CATEGORIA -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btnCategoria"
+                        style="@style/Widget.Material3.Button.ElevatedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/transaction_select_category"
+                        android:textAppearance="@style/FontMainMedium" />
+
+                    <ImageButton
+                        android:id="@+id/btnMoreCategoria"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_marginStart="@dimen/margin"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/transaction_more_options"
+                        android:src="@android:drawable/ic_menu_more" />
+                </LinearLayout>
+
+                <!-- TITOLO DIVIDI SPESA -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin"
+                    android:text="@string/transaction_split_expense"
+                    android:textAppearance="@style/FontMainMedium"
+                    android:textStyle="bold" />
+
+                <ImageButton
+                    android:id="@+id/btnDividiSpesa"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/transaction_split_expense"
+                    android:src="@android:drawable/ic_menu_share" />
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- BOTTONE CONFERMA -->
+        <Button
+            android:id="@+id/btnConferma"
+            style="@style/Widget.Material3.Button.ElevatedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/transaction_confirm"
+            android:textAppearance="@style/FontMainMedium"
+            android:padding="14dp"
+            android:layout_marginTop="10dp" />
+    </LinearLayout>
+
+</ScrollView>
