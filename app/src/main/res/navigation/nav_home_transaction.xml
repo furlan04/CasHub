@@ -3,11 +3,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_home_transaction"
-    app:startDestination="@id/homepageStocksFragment">
+    app:startDestination="@id/homepageTransactionFragment">
 
+    <fragment
+        android:id="@+id/homepageTransactionFragment"
+        android:name="it.unimib.CasHub.ui.home.fragment.HomepageTransactionFragment"
+        android:label="fragment_homepage_transaction"
+        tools:layout="@layout/fragment_homepage_transaction" />
     <fragment
         android:id="@+id/homepageStocksFragment"
         android:name="it.unimib.CasHub.ui.home.fragment.HomepageStocksFragment"
         android:label="fragment_homepage_stocks"
         tools:layout="@layout/fragment_homepage_stocks" />
+
 </navigation>
