@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/registrationFragment"
-        android:name="it.unimib.CasHub.RegistrationFragment"
+        android:name="it.unimib.CasHub.ui.login.fragment.RegistrationFragment"
         android:label="fragment_registration"
         tools:layout="@layout/fragment_registration" >
         <action
@@ -16,12 +16,12 @@
     </fragment>
     <activity
         android:id="@+id/mainActivity"
-        android:name="it.unimib.CasHub.MainActivity"
+        android:name="it.unimib.CasHub.ui.home.HomeActivity"
         android:label="activity_main"
         tools:layout="@layout/activity_main" />
     <fragment
         android:id="@+id/loginFragment"
-        android:name="it.unimib.CasHub.LoginFragment"
+        android:name="it.unimib.CasHub.ui.login.fragment.LoginFragment"
         android:label="LoginFragment" >
         <action
             android:id="@+id/action_loginFragment_to_registrationFragment"

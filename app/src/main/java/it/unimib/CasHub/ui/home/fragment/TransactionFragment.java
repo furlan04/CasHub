@@ -1,4 +1,4 @@
-package it.unimib.CasHub;
+package it.unimib.CasHub.ui.home.fragment;
 
 import android.graphics.Color;
 import android.os.Bundle;
@@ -12,6 +12,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+
+import it.unimib.CasHub.R;
 
 /**
  * A simple {@link Fragment} subclass.

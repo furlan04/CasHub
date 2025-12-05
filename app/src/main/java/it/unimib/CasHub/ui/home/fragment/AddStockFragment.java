@@ -1,4 +1,4 @@
-package it.unimib.CasHub;
+package it.unimib.CasHub.ui.home.fragment;
 
 import android.os.Bundle;
 
@@ -8,12 +8,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import it.unimib.CasHub.R;
+
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link RemoveStockFragment#newInstance} factory method to
+ * Use the {@link AddStockFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class RemoveStockFragment extends Fragment {
+public class AddStockFragment extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -24,7 +26,7 @@ public class RemoveStockFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    public RemoveStockFragment() {
+    public AddStockFragment() {
         // Required empty public constructor
     }
 
@@ -34,11 +36,11 @@ public class RemoveStockFragment extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment RemoveStockFragment.
+     * @return A new instance of fragment AddStockFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static RemoveStockFragment newInstance(String param1, String param2) {
-        RemoveStockFragment fragment = new RemoveStockFragment();
+    public static AddStockFragment newInstance(String param1, String param2) {
+        AddStockFragment fragment = new AddStockFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -59,6 +61,6 @@ public class RemoveStockFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_remove_stock, container, false);
+        return inflater.inflate(R.layout.fragment_add_stock, container, false);
     }
 }

@@ -1,23 +1,15 @@
-package it.unimib.CasHub;
+package it.unimib.CasHub.ui.login;
 
 import android.os.Bundle;
-
-import com.google.android.material.snackbar.Snackbar;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.view.View;
-
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
 
-import it.unimib.CasHub.databinding.ActivityNavLoginHomeBinding;
+import it.unimib.CasHub.R;
 
 public class NavLoginHomeActivity extends AppCompatActivity {
 

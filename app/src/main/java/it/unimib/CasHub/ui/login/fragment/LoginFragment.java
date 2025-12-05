@@ -1,4 +1,4 @@
-package it.unimib.CasHub;
+package it.unimib.CasHub.ui.login.fragment;
 
 import android.os.Bundle;
 
@@ -7,7 +7,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +15,8 @@ import android.widget.Button;
 import org.apache.commons.validator.routines.EmailValidator;
 
 import com.google.android.material.textfield.TextInputEditText;
+
+import it.unimib.CasHub.R;
 
 /**
  * A simple {@link Fragment} subclass.

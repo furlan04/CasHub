@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    tools:context=".LoginFragment"
+    tools:context=".ui.login.fragment.LoginFragment"
     android:background="@color/md_theme_background">
 
     <ImageView
