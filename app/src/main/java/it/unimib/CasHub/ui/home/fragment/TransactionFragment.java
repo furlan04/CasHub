@@ -12,8 +12,17 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import it.unimib.CasHub.R;
+import it.unimib.CasHub.adapter.CurrencySpinnerAdapter;
+import it.unimib.CasHub.model.Currency;
+import it.unimib.CasHub.repository.ForexRepositoryInterface;
+import it.unimib.CasHub.service.ServiceLocator;
+import it.unimib.CasHub.utils.ResponseCallback;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -21,6 +30,11 @@ import it.unimib.CasHub.R;
  * create an instance of this fragment.
  */
 public class TransactionFragment extends Fragment {
+    
+    private Spinner spinnerValuta;
+    private CurrencySpinnerAdapter currencyAdapter;
+    private ForexRepositoryInterface forexRepository;
+    
     public TransactionFragment() {
         // Required empty public constructor
     }
@@ -51,16 +65,21 @@ public class TransactionFragment extends Fragment {
         Button btnUscita = view.findViewById(R.id.btnUscita);
         EditText etNome = view.findViewById(R.id.etNome);
         EditText etQuantita = view.findViewById(R.id.etQuantita);
-        Spinner spinnerValuta = view.findViewById(R.id.spinnerValuta);
+        spinnerValuta = view.findViewById(R.id.spinnerValuta);
 
-        String[] valute = {"€", "$", "£", "CHF", "¥", "C$"};
+        // Inizializza l'adapter con lista vuota
+        List<Currency> currencyList = new ArrayList<>();
+        currencyAdapter = new CurrencySpinnerAdapter(requireContext(), currencyList);
+        spinnerValuta.setAdapter(currencyAdapter);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                requireContext(),
-                android.R.layout.simple_spinner_dropdown_item,
-                valute
-        );
-        spinnerValuta.setAdapter(adapter);
+        // Inizializza il repository dopo che la view è stata creata
+        ServiceLocator serviceLocator = ServiceLocator.getInstance();
+        if (getContext() != null) {
+            forexRepository = serviceLocator.getForexRepository(getContext().getApplicationContext());
+        }
+
+        // Carica le valute dal repository
+        loadCurrencies();
 
         btnEntrata.setOnClickListener(v -> {
             btnEntrata.setBackgroundColor(Color.parseColor("#4CAF50")); // Verde
@@ -79,5 +98,82 @@ public class TransactionFragment extends Fragment {
         });
 
         return view;
+    }
+
+    private void loadCurrencies() {
+        if (forexRepository == null) {
+            // Fallback: usa valute di default se il repository non è disponibile
+            List<Currency> defaultCurrencies = new ArrayList<>();
+            defaultCurrencies.add(new Currency("EUR", "Euro"));
+            defaultCurrencies.add(new Currency("USD", "United States Dollar"));
+            defaultCurrencies.add(new Currency("GBP", "British Pound"));
+            defaultCurrencies.add(new Currency("JPY", "Japanese Yen"));
+            defaultCurrencies.add(new Currency("CHF", "Swiss Franc"));
+            
+            currencyAdapter.clear();
+            currencyAdapter.addAll(defaultCurrencies);
+            currencyAdapter.notifyDataSetChanged();
+            return;
+        }
+
+        forexRepository.getCurrencies(new ResponseCallback() {
+            @Override
+            public void onCurrencyListSuccess(List<Currency> currencyList, long lastUpdate) {
+                // Aggiorna l'adapter sul thread principale
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        currencyAdapter.clear();
+                        if (currencyList != null && !currencyList.isEmpty()) {
+                            currencyAdapter.addAll(currencyList);
+                        } else {
+                            // Fallback se la lista è vuota
+                            currencyAdapter.add(new Currency("EUR", "Euro"));
+                            currencyAdapter.add(new Currency("USD", "United States Dollar"));
+                        }
+                        currencyAdapter.notifyDataSetChanged();
+                    });
+                }
+            }
+
+            @Override
+            public void onRatesSuccess(it.unimib.CasHub.model.ForexAPIResponse rates, long lastUpdate) {
+                // Non usato in questo contesto
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                // Fallback: usa valute di default in caso di errore
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        List<Currency> defaultCurrencies = new ArrayList<>();
+                        defaultCurrencies.add(new Currency("EUR", "Euro"));
+                        defaultCurrencies.add(new Currency("USD", "United States Dollar"));
+                        defaultCurrencies.add(new Currency("GBP", "British Pound"));
+                        defaultCurrencies.add(new Currency("JPY", "Japanese Yen"));
+                        
+                        currencyAdapter.clear();
+                        currencyAdapter.addAll(defaultCurrencies);
+                        currencyAdapter.notifyDataSetChanged();
+                        
+                        Toast.makeText(getContext(), "Errore nel caricamento valute: " + errorMessage, 
+                                Toast.LENGTH_SHORT).show();
+                    });
+                }
+            }
+        });
+    }
+
+    /**
+     * Ottiene la valuta selezionata nello spinner
+     * @return La valuta selezionata o null se nessuna è selezionata
+     */
+    public Currency getSelectedCurrency() {
+        if (spinnerValuta != null && currencyAdapter != null) {
+            int position = spinnerValuta.getSelectedItemPosition();
+            if (position >= 0 && position < currencyAdapter.getCount()) {
+                return currencyAdapter.getItem(position);
+            }
+        }
+        return null;
     }
 }

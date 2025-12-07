@@ -46,7 +46,13 @@ dependencies {
     implementation(libs.navigation.ui)
     implementation(libs.cardview)
 
+    implementation("com.squareup.retrofit2:retrofit:2.12.0")
+    implementation("com.squareup.retrofit2:converter-gson:3.0.0")
+    implementation(libs.room.common.jvm)
+    implementation(libs.room.runtime)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    annotationProcessor(libs.room.compiler)
 }
