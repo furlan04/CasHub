@@ -79,4 +79,20 @@
         libero vel nunc consequat, quis tincidunt nisl eleifend. Cras bibendum enim a justo luctus
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
+
+    <string name="check_nickname">Inserisci un nickname valido</string>
+    <string name="nickname_too_short">Il nickname deve avere almeno 3 caratteri</string>
+    <string name="check_email">Inserisci un\'email valida</string>
+    <string name="check_password">La password deve avere almeno 8 caratteri</string>
+    <string name="nickname">Nickname</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Conferma Password</string>
+    <string name="login">Login</string>
+    <string name="register">Registrati</string>
+    <string name="not_account">Non hai un account?</string>
+    <string name="did_you_forget_your_password">Hai dimenticato la password?</string>
+    <string name="or">OPPURE</string>
+    <string name="login_with_google">Accedi con Google</string>
+    <string name="register_with_google">Registrati con Google</string>
 </resources>
