@@ -1,8 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" translatable="false">CasHub</string>
     <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
+    <string name="first_fragment_label" translatable="false">First Fragment</string>
+    <string name="second_fragment_label" translatable="false">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
     <string name="welcome">Welcome</string>
@@ -15,7 +15,6 @@
     <string name="login_with_google">Login with Google</string>
     <string name="not_account">Register</string>
     <string name="nickname">Nickname</string>
-    <string name="confirm_password">Confirm password</string>
     <string name="already_have_account">You already have an account?</string>
     <string name="register">Register</string>
     <string name="register_with_google">Register with Google</string>
@@ -25,25 +24,27 @@
     <string name="transaction_quantity">Quantity</string>
     <string name="transaction_category">Category</string>
     <string name="transaction_select_category">Select Category</string>
-    <string name="transaction_more_options" translatable="false">More options</string>
+    <string name="transaction_more_options">More options</string>
     <string name="transaction_split_expense">Split expense</string>
     <string name="transaction_confirm">Confirm</string>
     <string name="check_email">Check your email</string>
     <string name="check_password">Check your password</string>
-    <string name="titoli_title" tools:ignore="MissingTranslation">TITOLI</string>
-    <string name="portfolio_return" tools:ignore="MissingTranslation">N €   M %</string>
-    <string name="stock_name1" tools:ignore="MissingTranslation">Nome1</string>
-    <string name="stock_name2" translatable="false">Nome2</string>
-    <string name="stock_name3" translatable="false">Nome3</string>
-    <string name="add_stock" translatable="false">+ Aggiungi Titolo</string>
-    <string name="remove_stock" tools:ignore="MissingTranslation">- Rimuovi Titolo</string>
+    <string name="titoli_title" tools:ignore="MissingTranslation">STOCK</string>
+    <string name="portfolio_return" tools:ignore="MissingTranslation" translatable="false">N €   M %</string>
+    <string name="stock_name1" tools:ignore="MissingTranslation">Name1</string>
+    <string name="stock_name2">Name2</string>
+    <string name="stock_name3">Name3</string>
+    <string name="add_stock">Add stock</string>
+    <string name="remove_stock" tools:ignore="MissingTranslation">Remove stock</string>
     <string name="home_label" tools:ignore="MissingTranslation">Home</string>
-
+    <string name="check_nickname">Insert a valid Nickname</string>
+    <string name="nickname_too_short">The Nickname must have 3 characters</string>
+    <string name="invalid_password">The Password must have 8 characters</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
-    <string name="lorem_ipsum">
+    <string name="lorem_ipsum" translatable="false">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
         volutpat, dolor id interdum ullamcorper, risus dolor egestas lectus, sit amet mattis purus
         dui nec risus. Maecenas non sodales nisi, vel dictum dolor. Class aptent taciti sociosqu ad
@@ -79,20 +80,5 @@
         libero vel nunc consequat, quis tincidunt nisl eleifend. Cras bibendum enim a justo luctus
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
-
-    <string name="check_nickname">Inserisci un nickname valido</string>
-    <string name="nickname_too_short">Il nickname deve avere almeno 3 caratteri</string>
-    <string name="check_email">Inserisci un\'email valida</string>
-    <string name="check_password">La password deve avere almeno 8 caratteri</string>
-    <string name="nickname">Nickname</string>
-    <string name="email">Email</string>
-    <string name="password">Password</string>
-    <string name="confirm_password">Conferma Password</string>
-    <string name="login">Login</string>
-    <string name="register">Registrati</string>
-    <string name="not_account">Non hai un account?</string>
-    <string name="did_you_forget_your_password">Hai dimenticato la password?</string>
-    <string name="or">OPPURE</string>
-    <string name="login_with_google">Accedi con Google</string>
-    <string name="register_with_google">Registrati con Google</string>
+    <string name="confirm_password">Confirm password</string>
 </resources>
