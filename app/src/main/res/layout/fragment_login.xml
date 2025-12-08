@@ -126,7 +126,7 @@
         <!-- Accedi -->
         <Button
             android:id="@+id/login_button"
-            style="@style/Widget.Material3.Button.Filled"
+            style="Widget.Material3.Button.Filled"
             app:backgroundTint="#003559"
             android:layout_width="match_parent"
             android:layout_height="56dp"
