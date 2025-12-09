@@ -1,13 +1,16 @@
 package it.unimib.CasHub.ui.login.fragment;
 
 import android.os.Bundle;
-
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-
+import androidx.navigation.Navigation;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
+import android.widget.Button;
+import com.google.android.material.textfield.TextInputEditText;
+import org.apache.commons.validator.routines.EmailValidator;
 import it.unimib.CasHub.R;
 
 /**
@@ -17,12 +20,9 @@ import it.unimib.CasHub.R;
  */
 public class RegistrationFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
@@ -30,15 +30,6 @@ public class RegistrationFragment extends Fragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment RegistrationFragment.
-     */
-    // TODO: Rename and change types and number of parameters
     public static RegistrationFragment newInstance(String param1, String param2) {
         RegistrationFragment fragment = new RegistrationFragment();
         Bundle args = new Bundle();
@@ -60,7 +51,76 @@ public class RegistrationFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_registration, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // Inizializza le view
+        TextInputEditText inputName = view.findViewById(R.id.textInputName);
+        TextInputEditText inputEmail = view.findViewById(R.id.textInputEmail);
+        TextInputEditText inputPassword = view.findViewById(R.id.textInputPassword);
+        Button registerButton = view.findViewById(R.id.register_button);
+        Button goToLoginButton = view.findViewById(R.id.goToLogin);
+        Button registerGoogleButton = view.findViewById(R.id.register_google_button);
+
+        // Listener per il bottone Registrati
+        registerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String name = inputName.getText().toString();
+                String email = inputEmail.getText().toString();
+                String password = inputPassword.getText().toString();
+
+                // Validazione
+                if (name.isEmpty()) {
+                    inputName.setError("Inserisci un nome");
+                    return;
+                }
+
+                if (!isEmailOk(email)) {
+                    inputEmail.setError(getString(R.string.check_email));
+                    return;
+                }
+
+                if (!isPasswordOk(password)) {
+                    inputPassword.setError(getString(R.string.check_password));
+                    return;
+                }
+
+                // TODO: Implementa la logica di registrazione
+                // Se la registrazione ha successo, naviga alla MainActivity
+                // Navigation.findNavController(v).navigate(R.id.action_registrationFragment_to_mainActivity);
+            }
+        });
+
+        // Listener per tornare al login
+        goToLoginButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Navigation.findNavController(v).navigate(R.id.action_registrationFragment_to_loginFragment);
+            }
+        });
+
+        // Gestisci il bottone Google se presente
+        if (registerGoogleButton != null) {
+            registerGoogleButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // TODO: Implementa registrazione con Google
+                }
+            });
+        }
+    }
+
+    // Funzioni di validazione
+    boolean isEmailOk(String email) {
+        return EmailValidator.getInstance().isValid(email);
+    }
+
+    boolean isPasswordOk(String password) {
+        return password.length() > 7;
     }
 }

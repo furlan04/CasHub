@@ -65,8 +65,15 @@ public class LoginFragment extends Fragment {
                 } else {
                     inputEmail.setError(getString(R.string.check_email));
                 }
+            }
+        });
 
+        Button goToRegistrationButton = view.findViewById(R.id.goToRegistration);
 
+        goToRegistrationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Navigation.findNavController(v).navigate(R.id.action_loginFragment_to_registrationFragment);
             }
         });
     }
