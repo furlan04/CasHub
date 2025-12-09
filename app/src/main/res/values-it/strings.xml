@@ -20,4 +20,6 @@
     <string name="hello_blank_fragment">Ciao Frammento Bianco</string>
     <string name="check_email">Controlla la tua email</string>
     <string name="check_password">Controlla la tua password</string>
+    <string name="error_retrieving_agencies">Errore nel recupero delle agenzie</string>
+    <string name="no_internet_connection">Nessuna connessione internet</string>
 </resources>

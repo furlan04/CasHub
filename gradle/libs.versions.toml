@@ -15,6 +15,7 @@ cardview = "1.0.0"
 roomCommonJvm = "2.8.4"
 roomRuntime = "2.8.4"
 roomCompiler = "2.8.4"
+webgpu = "1.0.0-alpha01"
 
 [libraries]
 commons-validator = { module = "commons-validator:commons-validator", version.ref = "commonsValidator" }
@@ -32,6 +33,7 @@ cardview = { group = "androidx.cardview", name = "cardview", version.ref = "card
 room-common-jvm = { group = "androidx.room", name = "room-common-jvm", version.ref = "roomCommonJvm" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "roomRuntime" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomCompiler" }
+webgpu = { group = "androidx.webgpu", name = "webgpu", version.ref = "webgpu" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

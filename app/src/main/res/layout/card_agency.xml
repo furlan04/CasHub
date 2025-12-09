@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp"
+    android:background="#FFFFFF"
+    android:elevation="2dp"
+    android:layout_marginVertical="4dp"
+    android:layout_marginHorizontal="8dp"
+    android:drawablePadding="4dp"
+    android:shape="rectangle">
+
+    <TextView
+        android:id="@+id/textCompanyName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Company Name"
+        android:textStyle="bold"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/textExchangeFull"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Exchange: NASDAQ Global Select"
+        android:textSize="12sp"
+        android:alpha="0.8"/>
+</LinearLayout>

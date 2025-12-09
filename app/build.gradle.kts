@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+
 plugins {
     alias(libs.plugins.android.application)
 }
@@ -16,6 +18,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        resValue("string", "stocks_api_key", gradleLocalProperties(rootDir, providers).getProperty("stocks_api_key"))
+        resValue("bool", "debug", gradleLocalProperties(rootDir, providers).getProperty("debug"))
     }
 
     buildTypes {
@@ -50,6 +55,7 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:3.0.0")
     implementation(libs.room.common.jvm)
     implementation(libs.room.runtime)
+    implementation(libs.webgpu)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)

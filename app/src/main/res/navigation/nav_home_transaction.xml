@@ -14,6 +14,15 @@
         android:id="@+id/homepageStocksFragment"
         android:name="it.unimib.CasHub.ui.home.fragment.HomepageStocksFragment"
         android:label="fragment_homepage_stocks"
-        tools:layout="@layout/fragment_homepage_stocks" />
+        tools:layout="@layout/fragment_homepage_stocks" >
+        <action
+            android:id="@+id/action_homepageStocksFragment_to_selectionAgencyStockFragment"
+            app:destination="@id/selectionAgencyStockFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/selectionAgencyStockFragment"
+        android:name="it.unimib.CasHub.ui.home.fragment.SelectionAgencyStockFragment"
+        android:label="fragment_selection_agency_stock"
+        tools:layout="@layout/fragment_selection_agency_stock" />
 
 </navigation>
