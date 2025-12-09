@@ -1,0 +1,701 @@
+[{
+  "symbol": "APC.F",
+  "name": "Apple Inc.",
+  "currency": "EUR",
+  "exchangeFullName": "Frankfurt Stock Exchange",
+  "exchange": "FSX"
+},
+  {
+    "symbol": "APC.DE",
+    "name": "Apple Inc.",
+    "currency": "EUR",
+    "exchangeFullName": "Deutsche Börse",
+    "exchange": "XETRA"
+  },
+  {
+    "symbol": "AAPL.NE",
+    "name": "Apple Inc.",
+    "currency": "CAD",
+    "exchangeFullName": "CBOE CA",
+    "exchange": "NEO"
+  },
+  {
+    "symbol": "AAPL.MX",
+    "name": "Apple Inc.",
+    "currency": "MXN",
+    "exchangeFullName": "Mexican Stock Exchange",
+    "exchange": "MEX"
+  },
+  {
+    "symbol": "AAPL.DE",
+    "name": "Apple Inc.",
+    "currency": "EUR",
+    "exchangeFullName": "Deutsche Börse",
+    "exchange": "XETRA"
+  },
+  {
+    "symbol": "AAPL",
+    "name": "Apple Inc.",
+    "currency": "USD",
+    "exchangeFullName": "NASDAQ Global Select",
+    "exchange": "NASDAQ"
+  },
+  {
+    "symbol": "APPCUSD",
+    "name": "AppCoins USD",
+    "currency": "USD",
+    "exchangeFullName": "CCC",
+    "exchange": "CRYPTO"
+  },
+  {
+    "symbol": "APYP",
+    "name": "AppYea, Inc.",
+    "currency": "USD",
+    "exchangeFullName": "Other OTC",
+    "exchange": "OTC"
+  },
+  {
+    "symbol": "APTI",
+    "name": "Apptio, Inc.",
+    "currency": "USD",
+    "exchangeFullName": "NASDAQ",
+    "exchange": "NASDAQ"
+  },
+  {
+    "symbol": "6177.T",
+    "name": "AppBank Inc.",
+    "currency": "JPY",
+    "exchangeFullName": "Tokyo Stock Exchange",
+    "exchange": "JPX"
+  },
+  {
+    "symbol": "APXYY",
+    "name": "Appen Limited",
+    "currency": "USD",
+    "exchangeFullName": "Other OTC",
+    "exchange": "OTC"
+  },
+  {
+    "symbol": "APX.AX",
+    "name": "Appen Limited",
+    "currency": "AUD",
+    "exchangeFullName": "Australian Securities Exchange",
+    "exchange": "ASX"
+  },
+  {
+    "symbol": "APPEF",
+    "name": "Appen Limited",
+    "currency": "USD",
+    "exchangeFullName": "Other OTC",
+    "exchange": "OTC"
+  },
+  {
+    "symbol": "APGT",
+    "name": "Appgate, Inc.",
+    "currency": "USD",
+    "exchangeFullName": "Other OTC",
+    "exchange": "OTC"
+  },
+  {
+    "symbol": "4174.T",
+    "name": "Appirits Inc.",
+    "currency": "JPY",
+    "exchangeFullName": "Tokyo Stock Exchange",
+    "exchange": "JPX"
+  },
+  {
+    "symbol": "APQT",
+    "name": "Appliqate Inc.",
+    "currency": "USD",
+    "exchangeFullName": "Other OTC",
+    "exchange": "OTC"
+  },
+  {
+    "symbol": "APPLX",
+    "name": "Appleseed Fund",
+    "currency": "USD",
+    "exchangeFullName": "NASDAQ",
+    "exchange": "NASDAQ"
+  },
+  {
+    "symbol": "APPF",
+    "name": "AppFolio, Inc.",
+    "currency": "USD",
+    "exchangeFullName": "NASDAQ Global Market",
+    "exchange": "NASDAQ"
+  },
+  {
+    "symbol": "SWRM",
+    "name": "App Swarm, Inc.",
+    "currency": "USD",
+    "exchangeFullName": "Other OTC",
+    "exchange": "OTC"
+  },
+  {
+    "symbol": "APUSD",
+    "name": "AppleSwap AI USD",
+    "currency": "USD",
+    "exchangeFullName": "CCC",
+    "exchange": "CRYPTO"
+  },
+  {
+    "symbol": "AUVIQ",
+    "name": "Applied UV, Inc.",
+    "currency": "USD",
+    "exchangeFullName": "Other OTC",
+    "exchange": "OTC"
+  },
+  {
+    "symbol": "AUVIP",
+    "name": "Applied UV, Inc.",
+    "currency": "USD",
+    "exchangeFullName": "NASDAQ Capital Market",
+    "exchange": "NASDAQ"
+  },
+  {
+    "symbol": "AUVI",
+    "name": "Applied UV, Inc.",
+    "currency": "USD",
+    "exchangeFullName": "NASDAQ Capital Market",
+    "exchange": "NASDAQ"
+  },
+  {
+    "symbol": "APPHW",
+    "name": "AppHarvest, Inc.",
+    "currency": "USD",
+    "exchangeFullName": "NASDAQ Global Select",
+    "exchange": "NASDAQ"
+  },
+  {
+    "symbol": "APPH",
+    "name": "AppHarvest, Inc.",
+    "currency": "USD",
+    "exchangeFullName": "NASDAQ Global Select",
+    "exchange": "NASDAQ"
+  },
+  {
+    "symbol": "AFW.AX",
+    "name": "Applyflow Limited",
+    "currency": "AUD",
+    "exchangeFullName": "Australian Securities Exchange",
+    "exchange": "ASX"
+  },
+  {
+    "symbol": "3020.T",
+    "name": "Applied Co., Ltd.",
+    "currency": "JPY",
+    "exchangeFullName": "Tokyo Stock Exchange",
+    "exchange": "JPX"
+  },
+  {
+    "symbol": "APTR.ST",
+    "name": "AppSpotr AB (publ)",
+    "currency": "SEK",
+    "exchangeFullName": "Stockholm Stock Exchange",
+    "exchange": "STO"
+  },
+  {
+    "symbol": "APPN",
+    "name": "Appian Corporation",
+    "currency": "USD",
+    "exchangeFullName": "NASDAQ Global Market",
+    "exchange": "NASDAQ"
+  },
+  {
+    "symbol": "4180.T",
+    "name": "Appier Group, Inc.",
+    "currency": "JPY",
+    "exchangeFullName": "Tokyo Stock Exchange",
+    "exchange": "JPX"
+  },
+  {
+    "symbol": "0HGM.L",
+    "name": "Appian Corporation",
+    "currency": "USD",
+    "exchangeFullName": "London Stock Exchange",
+    "exchange": "LSE"
+  },
+  {
+    "symbol": "APL.V",
+    "name": "Appulse Corporation",
+    "currency": "CAD",
+    "exchangeFullName": "Toronto Stock Exchange Ventures",
+    "exchange": "TSXV"
+  },
+  {
+    "symbol": "APP.L",
+    "name": "Appreciate Group plc",
+    "currency": "GBp",
+    "exchangeFullName": "London Stock Exchange",
+    "exchange": "LSE"
+  },
+  {
+    "symbol": "APP",
+    "name": "AppLovin Corporation",
+    "currency": "USD",
+    "exchangeFullName": "NASDAQ Global Select",
+    "exchange": "NASDAQ"
+  },
+  {
+    "symbol": "APPS.MC",
+    "name": "Applus Services, S.A.",
+    "currency": "EUR",
+    "exchangeFullName": "Madrid Stock Exchange",
+    "exchange": "BME"
+  },
+  {
+    "symbol": "APLUF",
+    "name": "Applus Services, S.A.",
+    "currency": "USD",
+    "exchangeFullName": "Other OTC",
+    "exchange": "OTC"
+  },
+  {
+    "symbol": "APCXW",
+    "name": "AppTech Payments Corp.",
+    "currency": "USD",
+    "exchangeFullName": "NASDAQ Capital Market",
+    "exchange": "NASDAQ"
+  },
+  {
+    "symbol": "APCX",
+    "name": "AppTech Payments Corp.",
+    "currency": "USD",
+    "exchangeFullName": "NASDAQ Capital Market",
+    "exchange": "NASDAQ"
+  },
+  {
+    "symbol": "AMNL",
+    "name": "Applied Minerals, Inc.",
+    "currency": "USD",
+    "exchangeFullName": "Other OTC",
+    "exchange": "OTC"
+  },
+  {
+    "symbol": "AP2.DE",
+    "name": "Applied Materials, Inc.",
+    "currency": "EUR",
+    "exchangeFullName": "Deutsche Börse",
+    "exchange": "XETRA"
+  },
+  {
+    "symbol": "AMAT",
+    "name": "Applied Materials, Inc.",
+    "currency": "USD",
+    "exchangeFullName": "NASDAQ Global Select",
+    "exchange": "NASDAQ"
+  },
+  {
+    "symbol": "4336.HK",
+    "name": "Applied Materials, Inc.",
+    "currency": "HKD",
+    "exchangeFullName": "Hong Kong Stock Exchange",
+    "exchange": "HKSE"
+  },
+  {
+    "symbol": "0R1A.L",
+    "name": "Applied Materials, Inc.",
+    "currency": "USD",
+    "exchangeFullName": "London Stock Exchange",
+    "exchange": "LSE"
+  },
+  {
+    "symbol": "APRU",
+    "name": "Apple Rush Company, Inc.",
+    "currency": "USD",
+    "exchangeFullName": "Other OTC",
+    "exchange": "OTC"
+  },
+  {
+    "symbol": "APLI.TO",
+    "name": "Appili Therapeutics Inc.",
+    "currency": "CAD",
+    "exchangeFullName": "Toronto Stock Exchange",
+    "exchange": "TSX"
+  },
+  {
+    "symbol": "APLIF",
+    "name": "Appili Therapeutics Inc.",
+    "currency": "USD",
+    "exchangeFullName": "Other OTC",
+    "exchange": "OTC"
+  },
+  {
+    "symbol": "AERG",
+    "name": "Applied Energetics, Inc.",
+    "currency": "USD",
+    "exchangeFullName": "Other OTC",
+    "exchange": "OTC"
+  },
+  {
+    "symbol": "6560.TWO",
+    "name": "Appro Photoelectron Inc.",
+    "currency": "TWD",
+    "exchangeFullName": "Taipei Exchange",
+    "exchange": "TWO"
+  },
+  {
+    "symbol": "SFRWW",
+    "name": "Appreciate Holdings, Inc.",
+    "currency": "USD",
+    "exchangeFullName": "NASDAQ Capital Market",
+    "exchange": "NASDAQ"
+  },
+  {
+    "symbol": "SFRT",
+    "name": "Appreciate Holdings, Inc.",
+    "currency": "USD",
+    "exchangeFullName": "Other OTC",
+    "exchange": "OTC"
+  },
+  {
+    "symbol": "SFR",
+    "name": "Appreciate Holdings, Inc.",
+    "currency": "USD",
+    "exchangeFullName": "NASDAQ Global Market",
+    "exchange": "NASDAQ"
+  },
+  {
+    "symbol": "APPB",
+    "name": "Applied Biosciences Corp.",
+    "currency": "USD",
+    "exchangeFullName": "Other OTC",
+    "exchange": "OTC"
+  },
+  {
+    "symbol": "ASFT",
+    "name": "AppSoft Technologies, Inc.",
+    "currency": "USD",
+    "exchangeFullName": "Other OTC",
+    "exchange": "OTC"
+  },
+  {
+    "symbol": "APLT",
+    "name": "Applied Therapeutics, Inc.",
+    "currency": "USD",
+    "exchangeFullName": "NASDAQ Global Market",
+    "exchange": "NASDAQ"
+  },
+  {
+    "symbol": "APDN",
+    "name": "Applied DNA Sciences, Inc.",
+    "currency": "USD",
+    "exchangeFullName": "NASDAQ Capital Market",
+    "exchange": "NASDAQ"
+  },
+  {
+    "symbol": "APLD",
+    "name": "Applied Digital Corporation",
+    "currency": "USD",
+    "exchangeFullName": "NASDAQ Global Select",
+    "exchange": "NASDAQ"
+  },
+  {
+    "symbol": "6598.TW",
+    "name": "Applied BioCode Corporation",
+    "currency": "TWD",
+    "exchangeFullName": "Taiwan Stock Exchange",
+    "exchange": "TAI"
+  },
+  {
+    "symbol": "APLE",
+    "name": "Apple Hospitality REIT, Inc.",
+    "currency": "USD",
+    "exchangeFullName": "New York Stock Exchange",
+    "exchange": "NYSE"
+  },
+  {
+    "symbol": "AMCC",
+    "name": "Applied Micro Circuits Corp.",
+    "currency": "USD",
+    "exchangeFullName": "NASDAQ",
+    "exchange": "NASDAQ"
+  },
+  {
+    "symbol": "4356.T",
+    "name": "Applied Technology Co., Ltd.",
+    "currency": "JPY",
+    "exchangeFullName": "Tokyo Stock Exchange",
+    "exchange": "JPX"
+  },
+  {
+    "symbol": "APVS",
+    "name": "Applied Visual Sciences, Inc.",
+    "currency": "USD",
+    "exchangeFullName": "Other OTC",
+    "exchange": "OTC"
+  },
+  {
+    "symbol": "APV.AX",
+    "name": "AppsVillage Australia Limited",
+    "currency": "AUD",
+    "exchangeFullName": "Australian Securities Exchange",
+    "exchange": "ASX"
+  },
+  {
+    "symbol": "AAOI",
+    "name": "Applied Optoelectronics, Inc.",
+    "currency": "USD",
+    "exchangeFullName": "NASDAQ Global Market",
+    "exchange": "NASDAQ"
+  },
+  {
+    "symbol": "2788.T",
+    "name": "Apple International Co., Ltd.",
+    "currency": "JPY",
+    "exchangeFullName": "Tokyo Stock Exchange",
+    "exchange": "JPX"
+  },
+  {
+    "symbol": "0HGV.L",
+    "name": "Applied Optoelectronics, Inc.",
+    "currency": "USD",
+    "exchangeFullName": "London Stock Exchange",
+    "exchange": "LSE"
+  },
+  {
+    "symbol": "APGMF",
+    "name": "Applied Graphene Materials plc",
+    "currency": "USD",
+    "exchangeFullName": "Other OTC",
+    "exchange": "OTC"
+  },
+  {
+    "symbol": "AGM.L",
+    "name": "Applied Graphene Materials plc",
+    "currency": "GBp",
+    "exchangeFullName": "London Stock Exchange",
+    "exchange": "LSE"
+  },
+  {
+    "symbol": "APP.BK",
+    "name": "Applicad Public Company Limited",
+    "currency": "THB",
+    "exchangeFullName": "Stock Exchange of Thailand",
+    "exchange": "SET"
+  },
+  {
+    "symbol": "ALDS",
+    "name": "APPlife Digital Solutions, Inc.",
+    "currency": "USD",
+    "exchangeFullName": "Other OTC",
+    "exchange": "OTC"
+  },
+  {
+    "symbol": "688007.SS",
+    "name": "Appotronics Corporation Limited",
+    "currency": "CNY",
+    "exchangeFullName": "Shanghai Stock Exchange",
+    "exchange": "SHH"
+  },
+  {
+    "symbol": "AMTI",
+    "name": "Applied Molecular Transport Inc.",
+    "currency": "USD",
+    "exchangeFullName": "NASDAQ Global Select",
+    "exchange": "NASDAQ"
+  },
+  {
+    "symbol": "API.CN",
+    "name": "Appia Rare Earths & Uranium Corp.",
+    "currency": "CAD",
+    "exchangeFullName": "Canadian Securities Exchange",
+    "exchange": "CNQ"
+  },
+  {
+    "symbol": "APAAF",
+    "name": "Appia Rare Earths & Uranium Corp.",
+    "currency": "USD",
+    "exchangeFullName": "Other OTC",
+    "exchange": "OTC"
+  },
+  {
+    "symbol": "ADB.BK",
+    "name": "Applied DB Public Company Limited",
+    "currency": "THB",
+    "exchangeFullName": "Stock Exchange of Thailand",
+    "exchange": "SET"
+  },
+  {
+    "symbol": "APLY.NE",
+    "name": "Apple (AAPL) Yield Shares Purpose ETF",
+    "currency": "CAD",
+    "exchangeFullName": "CBOE CA",
+    "exchange": "NEO"
+  },
+  {
+    "symbol": "AIT",
+    "name": "Applied Industrial Technologies, Inc.",
+    "currency": "USD",
+    "exchangeFullName": "New York Stock Exchange",
+    "exchange": "NYSE"
+  },
+  {
+    "symbol": "APPM",
+    "name": "Apparel Manufacturing Associates, Inc.",
+    "currency": "USD",
+    "exchangeFullName": "Other OTC",
+    "exchange": "OTC"
+  },
+  {
+    "symbol": "603020.SS",
+    "name": "Apple Flavor & Fragrance Group Co.,Ltd.",
+    "currency": "CNY",
+    "exchangeFullName": "Shanghai Stock Exchange",
+    "exchange": "SHH"
+  },
+  {
+    "symbol": "AGTC",
+    "name": "Applied Genetic Technologies Corporation",
+    "currency": "USD",
+    "exchangeFullName": "NASDAQ Global Market",
+    "exchange": "NASDAQ"
+  },
+  {
+    "symbol": "AGT.V",
+    "name": "Applied Graphite Technologies Corporation",
+    "currency": "CAD",
+    "exchangeFullName": "Toronto Stock Exchange Ventures",
+    "exchange": "TSXV"
+  },
+  {
+    "symbol": "VSLU",
+    "name": "Applied Finance Valuation Large Cap US ETF",
+    "currency": "USD",
+    "exchangeFullName": "New York Stock Exchange Arca",
+    "exchange": "AMEX"
+  },
+  {
+    "symbol": "AFVLX",
+    "name": "Applied Finance Select Fund Investor Class",
+    "currency": "USD",
+    "exchangeFullName": "NASDAQ",
+    "exchange": "NASDAQ"
+  },
+  {
+    "symbol": "AFDVX",
+    "name": "Applied Finance Explorer fund Investor Class",
+    "currency": "USD",
+    "exchangeFullName": "NASDAQ",
+    "exchange": "NASDAQ"
+  },
+  {
+    "symbol": "AFALX",
+    "name": "Applied Finance Dividend Fund Investor Class",
+    "currency": "USD",
+    "exchangeFullName": "NASDAQ",
+    "exchange": "NASDAQ"
+  },
+  {
+    "symbol": "YPPN",
+    "name": "Yappn Corp.",
+    "currency": "USD",
+    "exchangeFullName": "Other OTC",
+    "exchange": "OTC"
+  },
+  {
+    "symbol": "SAPPUSD",
+    "name": "Sapphire USD",
+    "currency": "USD",
+    "exchangeFullName": "CCC",
+    "exchange": "CRYPTO"
+  },
+  {
+    "symbol": "4168.T",
+    "name": "Yappli, Inc.",
+    "currency": "JPY",
+    "exchangeFullName": "Tokyo Stock Exchange",
+    "exchange": "JPX"
+  },
+  {
+    "symbol": "DAPPXUSD",
+    "name": "dAppstore USD",
+    "currency": "USD",
+    "exchangeFullName": "CCC",
+    "exchange": "CRYPTO"
+  },
+  {
+    "symbol": "SPPJY",
+    "name": "Sappi Limited",
+    "currency": "USD",
+    "exchangeFullName": "Other OTC",
+    "exchange": "OTC"
+  },
+  {
+    "symbol": "SAP.JO",
+    "name": "Sappi Limited",
+    "currency": "ZAc",
+    "exchangeFullName": "Johannesburg Stock Exchange",
+    "exchange": "JNB"
+  },
+  {
+    "symbol": "DAPPTUSD",
+    "name": "Dapp Token USD",
+    "currency": "USD",
+    "exchangeFullName": "CCC",
+    "exchange": "CRYPTO"
+  },
+  {
+    "symbol": "3770.T",
+    "name": "Zappallas, Inc.",
+    "currency": "JPY",
+    "exchangeFullName": "Tokyo Stock Exchange",
+    "exchange": "JPX"
+  },
+  {
+    "symbol": "HAPPY.CO",
+    "name": "Happy Helper A/S",
+    "currency": "DKK",
+    "exchangeFullName": "NASDAQ Copenhagen",
+    "exchange": "CPH"
+  },
+  {
+    "symbol": "7584.TWO",
+    "name": "Happytuk Co., Ltd.",
+    "currency": "TWD",
+    "exchangeFullName": "Taipei Exchange",
+    "exchange": "TWO"
+  },
+  {
+    "symbol": "7552.T",
+    "name": "Happinet Corporation",
+    "currency": "JPY",
+    "exchangeFullName": "Tokyo Stock Exchange",
+    "exchange": "JPX"
+  },
+  {
+    "symbol": "HAPPYFORGE.NS",
+    "name": "Happy Forgings Limited",
+    "currency": "INR",
+    "exchangeFullName": "National Stock Exchange of India",
+    "exchange": "NSE"
+  },
+  {
+    "symbol": "7421.T",
+    "name": "Kappa Create Co., Ltd.",
+    "currency": "JPY",
+    "exchangeFullName": "Tokyo Stock Exchange",
+    "exchange": "JPX"
+  },
+  {
+    "symbol": "SOOBF",
+    "name": "Sapporo Holdings Limited",
+    "currency": "USD",
+    "exchangeFullName": "Other OTC",
+    "exchange": "OTC"
+  },
+  {
+    "symbol": "HPTN",
+    "name": "Happy Town Holdings Inc.",
+    "currency": "USD",
+    "exchangeFullName": "Other OTC",
+    "exchange": "OTC"
+  },
+  {
+    "symbol": "3174.T",
+    "name": "Happiness and D Co.,Ltd.",
+    "currency": "JPY",
+    "exchangeFullName": "Tokyo Stock Exchange",
+    "exchange": "JPX"
+  }
+]

@@ -38,6 +38,8 @@
     <string name="add_stock" translatable="false">+ Aggiungi Titolo</string>
     <string name="remove_stock" tools:ignore="MissingTranslation">- Rimuovi Titolo</string>
     <string name="home_label" tools:ignore="MissingTranslation">Home</string>
+    <string name="error_retrieving_agencies">Error retrieving agencies</string>
+    <string name="no_internet_connection">No internet connection</string>
 
 
     <!-- TODO: Remove or change this placeholder text -->
