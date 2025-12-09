@@ -37,4 +37,6 @@
     <string name="titoli_title">TITOLO</string>
     <string name="check_nickname">Inserisci un Nickname valido</string>
     <string name="invalid_password">La password deve avere almeno 8 caratteri</string>
+    <string name="error_retrieving_agencies">Errore nel recupero delle agenzie</string>
+    <string name="no_internet_connection">Nessuna connessione internet</string>
 </resources>

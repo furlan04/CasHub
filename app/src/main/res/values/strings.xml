@@ -40,6 +40,9 @@
     <string name="check_nickname">Insert a valid Nickname</string>
     <string name="nickname_too_short">The Nickname must have 3 characters</string>
     <string name="invalid_password">The Password must have 8 characters</string>
+    <string name="error_retrieving_agencies">Error retrieving agencies</string>
+    <string name="no_internet_connection">No internet connection</string>
+
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

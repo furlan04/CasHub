@@ -12,6 +12,10 @@ navigationFragment = "2.9.5"
 navigationUi = "2.9.5"
 fragmentTesting = "1.8.9"
 cardview = "1.0.0"
+roomCommonJvm = "2.8.4"
+roomRuntime = "2.8.4"
+roomCompiler = "2.8.4"
+webgpu = "1.0.0-alpha01"
 
 [libraries]
 commons-validator = { module = "commons-validator:commons-validator", version.ref = "commonsValidator" }
@@ -26,6 +30,10 @@ navigation-fragment = { group = "androidx.navigation", name = "navigation-fragme
 navigation-ui = { group = "androidx.navigation", name = "navigation-ui", version.ref = "navigationUi" }
 fragment-testing = { group = "androidx.fragment", name = "fragment-testing", version.ref = "fragmentTesting" }
 cardview = { group = "androidx.cardview", name = "cardview", version.ref = "cardview" }
+room-common-jvm = { group = "androidx.room", name = "room-common-jvm", version.ref = "roomCommonJvm" }
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "roomRuntime" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomCompiler" }
+webgpu = { group = "androidx.webgpu", name = "webgpu", version.ref = "webgpu" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
