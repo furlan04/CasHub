@@ -9,18 +9,18 @@ import it.unimib.CasHub.R;
 import it.unimib.CasHub.model.Agency;
 import it.unimib.CasHub.utils.Constants;
 import it.unimib.CasHub.utils.JSONParserUtils;
-import it.unimib.CasHub.utils.NewsResponseCallBack;
+import it.unimib.CasHub.utils.AgencyResponseCallBack;
 
 public class AgencyMockRepository implements IAgencyRepository{
     private final Application application;
-    private final NewsResponseCallBack responseCallback;
-    public AgencyMockRepository(Application application, NewsResponseCallBack responseCallback) {
+    private final AgencyResponseCallBack responseCallback;
+    public AgencyMockRepository(Application application, AgencyResponseCallBack responseCallback) {
         this.application = application;
         this.responseCallback = responseCallback;
     }
 
     @Override
-    public void getAllAgencies(){
+    public void getAllAgencies(String query){
         List<Agency> agencyApiResponse;
         JSONParserUtils jsonParserUtils = new JSONParserUtils(application.getApplicationContext());
 

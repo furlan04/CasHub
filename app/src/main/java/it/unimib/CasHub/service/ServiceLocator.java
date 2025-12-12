@@ -49,6 +49,15 @@ public class ServiceLocator {
         return retrofit.create(ForexAPIService.class);
     }
 
+    public AgencyAPIService getAgencyAPIService() {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(Constants.AGENCY_BASE_URL)
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        return retrofit.create(AgencyAPIService.class);
+    }
+
     public CurrencyRoomDatabase getCurrencyDB(Application application) {
         return CurrencyRoomDatabase.getDatabase(application);
     }

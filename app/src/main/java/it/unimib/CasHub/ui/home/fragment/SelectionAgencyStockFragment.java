@@ -7,6 +7,8 @@ import androidx.annotation.Nullable;import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +16,7 @@ import android.view.ViewGroup;
 
 import com.google.android.material.loadingindicator.LoadingIndicator;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,10 +28,9 @@ import it.unimib.CasHub.repository.AgencyAPIRepository;
 import it.unimib.CasHub.repository.AgencyMockRepository;
 import it.unimib.CasHub.repository.IAgencyRepository;
 import it.unimib.CasHub.utils.NetworkUtil;
-import it.unimib.CasHub.utils.NewsResponseCallBack;
-import it.unimib.CasHub.utils.SharedPreferencesUtils;
+import it.unimib.CasHub.utils.AgencyResponseCallBack;
 
-public class SelectionAgencyStockFragment extends Fragment implements NewsResponseCallBack {
+public class SelectionAgencyStockFragment extends Fragment implements AgencyResponseCallBack {
 
     public static final String TAG = SelectionAgencyStockFragment.class.getName();
 
@@ -79,24 +81,53 @@ public class SelectionAgencyStockFragment extends Fragment implements NewsRespon
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext())); // Usa requireContext()
         recyclerView.setAdapter(adapter);
 
-        // 4. Mostra lo stato di caricamento iniziale
+        // 4. Setup della searchbar
+        TextInputEditText searchEditText = view.findViewById(R.id.searchEditText);
+
+        // Debounce handler
+        final android.os.Handler handler = new android.os.Handler();
+        final int DEBOUNCE_DELAY = 400;
+
+        searchEditText.addTextChangedListener(new TextWatcher() {
+
+            private Runnable workRunnable;
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Cancella chiamate precedenti
+                if (workRunnable != null)
+                    handler.removeCallbacks(workRunnable);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                workRunnable = () -> performSearch(s.toString());
+                handler.postDelayed(workRunnable, DEBOUNCE_DELAY);
+            }
+        });
+
+
+        // 5. Mostra lo stato di caricamento iniziale
         loadingIndicator.setVisibility(View.VISIBLE);
         recyclerView.setVisibility(View.GONE);
 
-        // 5. Controlla la rete e avvia il caricamento dei dati
+        // 6. Controlla la rete e avvia il caricamento dei dati
         if (!NetworkUtil.isInternetAvailable(requireContext())) {
             noInternetMessage.setVisibility(View.VISIBLE);
             loadingIndicator.setVisibility(View.GONE); // Nascondi il caricamento se non c'è rete
         } else {
             noInternetMessage.setVisibility(View.GONE);
-            agencyRepository.getAllAgencies(); // Avvia la chiamata API
+            agencyRepository.getAllAgencies(""); // Avvia la chiamata API
         }
     }
 
     @Override
-    public void onSuccess(List<Agency> articlesList, long lastUpdate) {
+    public void onSuccess(List<Agency> agenciesList, long lastUpdate) {
         this.agencyList.clear();
-        this.agencyList.addAll(articlesList); // Usa addAll, è più efficiente
+        this.agencyList.addAll(agenciesList); // Usa addAll, è più efficiente
 
         Log.i(TAG, "Arrivati: " + this.agencyList.size());
 
@@ -117,5 +148,24 @@ public class SelectionAgencyStockFragment extends Fragment implements NewsRespon
             loadingIndicator.setVisibility(View.GONE); // Nascondi il caricamento anche in caso di errore
             Snackbar.make(getView(), errorMessage, Snackbar.LENGTH_SHORT).show();
         });
+    }
+
+    private void performSearch(String query) {
+
+        if (query.trim().isEmpty()) {
+            // Svuota lista + aggiorna UI
+            agencyList.clear();
+            adapter.notifyDataSetChanged();
+            return;
+        }
+
+        if (!NetworkUtil.isInternetAvailable(requireContext())) {
+            noInternetMessage.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        loadingIndicator.setVisibility(View.VISIBLE);
+
+        agencyRepository.getAllAgencies(query);
     }
 }
