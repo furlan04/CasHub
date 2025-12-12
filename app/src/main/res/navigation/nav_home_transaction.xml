@@ -9,7 +9,12 @@
         android:id="@+id/homepageTransactionFragment"
         android:name="it.unimib.CasHub.ui.home.fragment.HomepageTransactionFragment"
         android:label="fragment_homepage_transaction"
-        tools:layout="@layout/fragment_homepage_transaction" />
+        tools:layout="@layout/fragment_homepage_transaction">
+
+        <action
+            android:id="@+id/action_homepageTransactionFragment_to_addTransactionFragment"
+            app:destination="@id/TransactionFragment"/>
+    </fragment>
     <fragment
         android:id="@+id/homepageStocksFragment"
         android:name="it.unimib.CasHub.ui.home.fragment.HomepageStocksFragment"
@@ -24,5 +29,11 @@
         android:name="it.unimib.CasHub.ui.home.fragment.SelectionAgencyStockFragment"
         android:label="fragment_selection_agency_stock"
         tools:layout="@layout/fragment_selection_agency_stock" />
+    <fragment
+        android:id="@+id/TransactionFragment"
+        android:name="it.unimib.CasHub.ui.home.fragment.TransactionFragment"
+        android:label="fragment_add_transaction"
+        tools:layout="@layout/fragment_transaction" />
+
 
 </navigation>

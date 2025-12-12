@@ -20,6 +20,8 @@
     <string name="transaction_split_expense">Dividi spesa</string>
     <string name="transaction_confirm">Conferma</string>
     <string name="home_label">Casa</string>
+    <string name="Monthly_expenses">Spese mensili</string>
+    <string name="Graph">Grafico</string>
     <string name="hello_blank_fragment">Ciao Frammento Bianco</string>
     <string name="nickname_too_short">Il nickname deve avere almeno 3 caratteri</string>
     <string name="check_email">Controlla la tua email</string>
@@ -39,4 +41,6 @@
     <string name="invalid_password">La password deve avere almeno 8 caratteri</string>
     <string name="error_retrieving_agencies">Errore nel recupero delle agenzie</string>
     <string name="no_internet_connection">Nessuna connessione internet</string>
+    <string name="add_transaction">Aggiungi Transazione</string>
+    <string name="remove_transaction">Rimuovi Transazione</string>
 </resources>
