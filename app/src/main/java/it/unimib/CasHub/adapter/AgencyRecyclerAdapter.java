@@ -19,6 +19,12 @@ import it.unimib.CasHub.model.Agency;
 public class AgencyRecyclerAdapter extends RecyclerView.Adapter<AgencyRecyclerAdapter.ViewHolder> {
 
     private final List<Agency> agencyList;
+    private OnAgencyClickListener listener;
+
+    // Interfaccia per il click
+    public interface OnAgencyClickListener {
+        void onAgencyClick(Agency agency);
+    }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView companyNameTextView;
@@ -38,8 +44,13 @@ public class AgencyRecyclerAdapter extends RecyclerView.Adapter<AgencyRecyclerAd
             return textExchangeFullTextView;
         }
     }
+
     public AgencyRecyclerAdapter(List<Agency> agencyList) {
         this.agencyList = agencyList;
+    }
+
+    public void setOnAgencyClickListener(OnAgencyClickListener listener) {
+        this.listener = listener;
     }
 
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
@@ -51,9 +62,16 @@ public class AgencyRecyclerAdapter extends RecyclerView.Adapter<AgencyRecyclerAd
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
-        viewHolder.companyNameTextView.setText(agencyList.get(position).getName());
-        viewHolder.textExchangeFullTextView.setText(agencyList.get(position).getExchangeFullName());
+        Agency agency = agencyList.get(position);
+        viewHolder.companyNameTextView.setText(agency.getName());
+        viewHolder.textExchangeFullTextView.setText(agency.getExchangeFullName());
 
+        // Gestisci il click sulla card
+        viewHolder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onAgencyClick(agency);
+            }
+        });
     }
 
     @Override

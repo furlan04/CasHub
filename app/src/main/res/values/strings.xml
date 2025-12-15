@@ -44,6 +44,8 @@
     <string name="no_internet_connection">No internet connection</string>
     <string name="Monthly_expenses">Monthly Expenses</string>
     <string name="Graph">Graphic</string>
+    <string name="Stock_name_id">Stock Name</string>
+    <string name="Quantity">Quantity</string>
 
 
     <!-- TODO: Remove or change this placeholder text -->

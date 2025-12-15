@@ -43,4 +43,6 @@
     <string name="no_internet_connection">Nessuna connessione internet</string>
     <string name="add_transaction">Aggiungi Transazione</string>
     <string name="remove_transaction">Rimuovi Transazione</string>
+    <string name="Stock_name_id">Nome Azione</string>
+    <string name="Quantity">Quantità</string>
 </resources>

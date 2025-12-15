@@ -93,7 +93,7 @@ public class HomepageTransactionFragment extends Fragment {
         btnAddTransaction.setOnClickListener(v -> {
             // Naviga verso AddTransactionFragment
             Navigation.findNavController(v)
-                    .navigate(R.id.action_homepageTransactionFragment_to_addTransactionFragment);
+                    .navigate(R.id.action_homepageTransactionFragment_to_transactionFragment);
         });
 
         return view;

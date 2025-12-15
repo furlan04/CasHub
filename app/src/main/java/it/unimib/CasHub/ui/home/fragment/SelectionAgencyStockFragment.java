@@ -3,7 +3,9 @@ package it.unimib.CasHub.ui.home.fragment;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;import androidx.fragment.app.Fragment;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -76,6 +78,18 @@ public class SelectionAgencyStockFragment extends Fragment implements NewsRespon
 
         // 3. Prepara la RecyclerView e l'Adapter
         adapter = new AgencyRecyclerAdapter(agencyList);
+
+        // Imposta il listener per gestire il click sulle card
+        adapter.setOnAgencyClickListener(agency -> {
+            // Naviga al fragment dei dettagli
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("agency", agency);
+            Navigation.findNavController(view).navigate(
+                    R.id.action_selectionAgencyStockFragment_to_stockDetailsFragment,
+                    bundle
+            );
+        });
+
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext())); // Usa requireContext()
         recyclerView.setAdapter(adapter);
 
