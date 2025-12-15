@@ -1,8 +1,9 @@
 package it.unimib.CasHub.model;
 
 import androidx.room.PrimaryKey;
+import java.io.Serializable;
 
-public class Agency {
+public class Agency implements Serializable {
     @PrimaryKey(autoGenerate = true)
     private int id;
     private String symbol;

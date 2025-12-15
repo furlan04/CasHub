@@ -9,20 +9,50 @@
         android:id="@+id/homepageTransactionFragment"
         android:name="it.unimib.CasHub.ui.home.fragment.HomepageTransactionFragment"
         android:label="fragment_homepage_transaction"
-        tools:layout="@layout/fragment_homepage_transaction" />
+        tools:layout="@layout/fragment_homepage_transaction">
+
+        <action
+            android:id="@+id/action_homepageTransactionFragment_to_transactionFragment"
+            app:destination="@id/transactionFragment"/>
+    </fragment>
+
     <fragment
         android:id="@+id/homepageStocksFragment"
         android:name="it.unimib.CasHub.ui.home.fragment.HomepageStocksFragment"
         android:label="fragment_homepage_stocks"
-        tools:layout="@layout/fragment_homepage_stocks" >
+        tools:layout="@layout/fragment_homepage_stocks">
+
         <action
             android:id="@+id/action_homepageStocksFragment_to_selectionAgencyStockFragment"
-            app:destination="@id/selectionAgencyStockFragment" />
+            app:destination="@id/selectionAgencyStockFragment"/>
     </fragment>
+
     <fragment
         android:id="@+id/selectionAgencyStockFragment"
         android:name="it.unimib.CasHub.ui.home.fragment.SelectionAgencyStockFragment"
         android:label="fragment_selection_agency_stock"
-        tools:layout="@layout/fragment_selection_agency_stock" />
+        tools:layout="@layout/fragment_selection_agency_stock">
+
+        <action
+            android:id="@+id/action_selectionAgencyStockFragment_to_stockDetailsFragment"
+            app:destination="@id/stockDetailsFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/transactionFragment"
+        android:name="it.unimib.CasHub.ui.home.fragment.TransactionFragment"
+        android:label="fragment_add_transaction"
+        tools:layout="@layout/fragment_transaction">
+
+        <action
+            android:id="@+id/action_transactionFragment_to_homepageTransactionFragment"
+            app:destination="@id/homepageTransactionFragment"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/stockDetailsFragment"
+        android:name="it.unimib.CasHub.ui.home.fragment.StockDetailsFragment"
+        android:label="fragment_stock_details"
+        tools:layout="@layout/fragment_stock_details"/>
 
 </navigation>

@@ -23,7 +23,8 @@
         android:layout_height="wrap_content"
         app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:menu="@menu/home_menu"/>
+        app:menu="@menu/home_menu"
+        tools:layout_editor_absoluteX="0dp" />
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
