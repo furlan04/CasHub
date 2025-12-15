@@ -53,6 +53,7 @@ dependencies {
 
     implementation("com.squareup.retrofit2:retrofit:2.12.0")
     implementation("com.squareup.retrofit2:converter-gson:3.0.0")
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     implementation(libs.room.common.jvm)
     implementation(libs.room.runtime)
     implementation(libs.webgpu)
@@ -61,4 +62,6 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     annotationProcessor(libs.room.compiler)
+
+    //
 }

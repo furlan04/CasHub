@@ -42,6 +42,10 @@
     <string name="invalid_password">The Password must have 8 characters</string>
     <string name="error_retrieving_agencies">Error retrieving agencies</string>
     <string name="no_internet_connection">No internet connection</string>
+    <string name="Monthly_expenses">Monthly Expenses</string>
+    <string name="Graph">Graphic</string>
+    <string name="Stock_name_id">Stock Name</string>
+    <string name="Quantity">Quantity</string>
 
 
     <!-- TODO: Remove or change this placeholder text -->
@@ -84,4 +88,6 @@
         vestibulum. Fusce dictum libero quis erat maximus, vitae volutpat diam dignissim.
     </string>
     <string name="confirm_password">Confirm password</string>
+    <string name="add_transaction">Add transaction</string>
+    <string name="remove_transaction">Remove Transaction</string>
 </resources>
