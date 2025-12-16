@@ -1,9 +1,9 @@
 package it.unimib.CasHub.ui.home.fragment;
 
 import android.os.Bundle;
-
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;import androidx.fragment.app.Fragment;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -13,9 +13,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.google.android.material.loadingindicator.LoadingIndicator;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
@@ -38,25 +38,22 @@ public class SelectionAgencyStockFragment extends Fragment implements AgencyResp
     private List<Agency> agencyList = new ArrayList<>();
     private AgencyRecyclerAdapter adapter;
 
-    // Dichiarazione delle viste
     private RecyclerView recyclerView;
+    private TextInputEditText searchEditText;
     private LoadingIndicator loadingIndicator;
-    private View noInternetMessage; // Meglio tenerne un riferimento se lo usi più volte
+    private View noInternetMessage;
+    private TextView noInternetText;
 
-    public SelectionAgencyStockFragment() {
-        // Required empty public constructor
-    }
+    public SelectionAgencyStockFragment() {}
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Qui non si inizializza più il repository per evitare crash
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_selection_agency_stock, container, false);
     }
 
@@ -64,108 +61,109 @@ public class SelectionAgencyStockFragment extends Fragment implements AgencyResp
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // 1. Trova tutte le viste una sola volta, all'inizio
         recyclerView = view.findViewById(R.id.recyclerView);
         loadingIndicator = view.findViewById(R.id.loadingIndicator);
         noInternetMessage = view.findViewById(R.id.noInternetMessage);
+        noInternetText = noInternetMessage.findViewById(R.id.noInternetMessage); // TextView interna
+        searchEditText = view.findViewById(R.id.searchEditText);
 
-        // 2. Inizializza il repository QUI, quando la vista è pronta
+        // Inizializza repository
         if (requireActivity().getResources().getBoolean(R.bool.debug)) {
             agencyRepository = new AgencyMockRepository(requireActivity().getApplication(), this);
         } else {
             agencyRepository = new AgencyAPIRepository(requireActivity().getApplication(), this);
         }
 
-        // 3. Prepara la RecyclerView e l'Adapter
-        adapter = new AgencyRecyclerAdapter(agencyList);
-        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext())); // Usa requireContext()
+        // Adapter RecyclerView
+        adapter = new AgencyRecyclerAdapter(agencyList, agency -> {
+            Bundle bundle = new Bundle();
+            bundle.putString("companyName", agency.getName());
+            if (getView() != null) {
+                androidx.navigation.Navigation.findNavController(getView())
+                        .navigate(R.id.action_selectionAgencyStockFragment_to_stockDetailsFragment, bundle);
+            }
+        });
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setAdapter(adapter);
 
-        // 4. Setup della searchbar
-        TextInputEditText searchEditText = view.findViewById(R.id.searchEditText);
-
-        // Debounce handler
+        // Setup searchbar con debounce
         final android.os.Handler handler = new android.os.Handler();
         final int DEBOUNCE_DELAY = 400;
-
         searchEditText.addTextChangedListener(new TextWatcher() {
-
             private Runnable workRunnable;
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Cancella chiamate precedenti
-                if (workRunnable != null)
-                    handler.removeCallbacks(workRunnable);
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (workRunnable != null) handler.removeCallbacks(workRunnable);
             }
-
-            @Override
-            public void afterTextChanged(Editable s) {
+            @Override public void afterTextChanged(Editable s) {
                 workRunnable = () -> performSearch(s.toString());
                 handler.postDelayed(workRunnable, DEBOUNCE_DELAY);
             }
         });
 
-
-        // 5. Mostra lo stato di caricamento iniziale
+        // Stato iniziale
         loadingIndicator.setVisibility(View.VISIBLE);
         recyclerView.setVisibility(View.GONE);
 
-        // 6. Controlla la rete e avvia il caricamento dei dati
         if (!NetworkUtil.isInternetAvailable(requireContext())) {
             noInternetMessage.setVisibility(View.VISIBLE);
-            loadingIndicator.setVisibility(View.GONE); // Nascondi il caricamento se non c'è rete
+            noInternetText.setText(getString(R.string.no_internet_connection));
+            loadingIndicator.setVisibility(View.GONE);
         } else {
             noInternetMessage.setVisibility(View.GONE);
-            agencyRepository.getAllAgencies(""); // Avvia la chiamata API
+            agencyRepository.getAllAgencies("");
         }
     }
 
     @Override
     public void onSuccess(List<Agency> agenciesList, long lastUpdate) {
         this.agencyList.clear();
-        this.agencyList.addAll(agenciesList); // Usa addAll, è più efficiente
+        this.agencyList.addAll(agenciesList);
 
-        Log.i(TAG, "Arrivati: " + this.agencyList.size());
+        if (getActivity() == null) return;
 
-        if (getActivity() == null) return; // Controllo di sicurezza aggiuntivo
-
-        requireActivity().runOnUiThread(() -> { // Usa una lambda, è più pulito
+        requireActivity().runOnUiThread(() -> {
             adapter.notifyDataSetChanged();
             recyclerView.setVisibility(View.VISIBLE);
             loadingIndicator.setVisibility(View.GONE);
+
+            if (agenciesList.isEmpty() && !searchEditText.getText().toString().isEmpty()) {
+                noInternetMessage.setVisibility(View.VISIBLE);
+                noInternetText.setText(getString(R.string.no_agency_found));
+            } else {
+                noInternetMessage.setVisibility(View.GONE);
+            }
         });
     }
 
     @Override
     public void onFailure(String errorMessage) {
-        if (getView() == null) return; // Controllo di sicurezza
+        if (getView() == null) return;
 
         requireActivity().runOnUiThread(() -> {
-            loadingIndicator.setVisibility(View.GONE); // Nascondi il caricamento anche in caso di errore
-            Snackbar.make(getView(), errorMessage, Snackbar.LENGTH_SHORT).show();
+            loadingIndicator.setVisibility(View.GONE);
+            if (!searchEditText.getText().toString().trim().isEmpty()) {
+                noInternetMessage.setVisibility(View.VISIBLE);
+                noInternetText.setText(errorMessage);
+            }
         });
     }
 
     private void performSearch(String query) {
-
         if (query.trim().isEmpty()) {
-            // Svuota lista + aggiorna UI
             agencyList.clear();
             adapter.notifyDataSetChanged();
+            noInternetMessage.setVisibility(View.GONE); // Nascondi messaggio se campo vuoto
             return;
         }
 
         if (!NetworkUtil.isInternetAvailable(requireContext())) {
             noInternetMessage.setVisibility(View.VISIBLE);
+            noInternetText.setText(getString(R.string.no_internet_connection));
             return;
         }
 
         loadingIndicator.setVisibility(View.VISIBLE);
-
         agencyRepository.getAllAgencies(query);
     }
 }
