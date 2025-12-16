@@ -77,7 +77,7 @@ public class SelectionAgencyStockFragment extends Fragment implements AgencyResp
         // Adapter RecyclerView
         adapter = new AgencyRecyclerAdapter(agencyList, agency -> {
             Bundle bundle = new Bundle();
-            bundle.putString("companyName", agency.getName());
+            bundle.putString("agencyName", agency.getName());
             if (getView() != null) {
                 androidx.navigation.Navigation.findNavController(getView())
                         .navigate(R.id.action_selectionAgencyStockFragment_to_stockDetailsFragment, bundle);
