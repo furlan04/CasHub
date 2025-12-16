@@ -36,6 +36,10 @@
         <action
             android:id="@+id/action_selectionAgencyStockFragment_to_stockDetailsFragment"
             app:destination="@id/stockDetailsFragment"/>
+        <argument
+            android:name="companyName"
+            app:argType="string" />
+
     </fragment>
 
     <fragment

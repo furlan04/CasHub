@@ -45,4 +45,6 @@
     <string name="remove_transaction">Rimuovi Transazione</string>
     <string name="Stock_name_id">Nome Azione</string>
     <string name="Quantity">Quantità</string>
+    <string name="no_agency_found">Nessuna agenzia trovata</string>
+    <string name="search_agency">Cerca agenzia</string>
 </resources>

@@ -45,8 +45,10 @@ public class AgencyRecyclerAdapter extends RecyclerView.Adapter<AgencyRecyclerAd
         }
     }
 
-    public AgencyRecyclerAdapter(List<Agency> agencyList) {
+    public AgencyRecyclerAdapter(List<Agency> agencyList, OnAgencyClickListener listener) {
+
         this.agencyList = agencyList;
+        this.listener = listener;
     }
 
     public void setOnAgencyClickListener(OnAgencyClickListener listener) {

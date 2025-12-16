@@ -9,7 +9,10 @@
     android:layout_marginVertical="4dp"
     android:layout_marginHorizontal="8dp"
     android:drawablePadding="4dp"
-    android:shape="rectangle">
+    android:shape="rectangle"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground">
 
     <TextView
         android:id="@+id/textCompanyName"

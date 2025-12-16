@@ -90,4 +90,6 @@
     <string name="confirm_password">Confirm password</string>
     <string name="add_transaction">Add transaction</string>
     <string name="remove_transaction">Remove Transaction</string>
+    <string name="no_agency_found">No agencies found</string>
+    <string name="search_agency">Search agency</string>
 </resources>
