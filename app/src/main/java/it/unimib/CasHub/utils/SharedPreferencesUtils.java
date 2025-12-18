@@ -40,4 +40,16 @@ public class SharedPreferencesUtils {
                 Context.MODE_PRIVATE);
         return sharedPref.getStringSet(key, null);
     }
+    
+    public void writeLong(String sharedPreferencesFileName, String key, long value) {
+        SharedPreferences sharedPref = context.getSharedPreferences(sharedPreferencesFileName, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putLong(key, value);
+        editor.apply();
+    }
+
+    public long readLong(String sharedPreferencesFileName, String key, long defaultValue) {
+        SharedPreferences sharedPref = context.getSharedPreferences(sharedPreferencesFileName, Context.MODE_PRIVATE);
+        return sharedPref.getLong(key, defaultValue);
+    }
 }

@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Map;
 
 public class JSONParserUtils {
 
@@ -23,7 +24,7 @@ public class JSONParserUtils {
         this.context = context;
     }
 
-    public ForexAPIResponse parseJSONFileWithGSon(String filename) throws IOException {
+    public ForexAPIResponse parseJSONFileWithGSonForexRates(String filename) throws IOException {
         InputStream inputStream = context.getAssets().open(filename);
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
@@ -36,5 +37,13 @@ public class JSONParserUtils {
 
         Type listType = new TypeToken<List<Agency>>() {}.getType();
         return new Gson().fromJson(bufferedReader, listType);
+    }
+
+    public Map<String, String> parseJSONFileWithGSonCurrencies(String filename) throws IOException {
+        InputStream inputStream = context.getAssets().open(filename);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+        Type type = new TypeToken<Map<String, String>>() {}.getType();
+        return new Gson().fromJson(bufferedReader, type);
     }
 }

@@ -1,7 +1,5 @@
 package it.unimib.CasHub.utils;
 
-import retrofit2.http.Query;
-
 public class Constants {
 
     public static final String CURRENCY_BASE_URL = "https://api.frankfurter.app/";
@@ -15,4 +13,11 @@ public class Constants {
     public static final String AGENCY_START_QUERY = "query";
     public static final String AGENCY_STRING_APIKEY = "apikey";
     public static final String TEST_AGENCY_APP = "test_agency_app.json";
+
+    // Sample Data
+    public static final String SAMPLE_CURRENCIES_JSON = "sample_currencies.json";
+    public static final String SAMPLE_RATES_JSON = "sample_rates.json";
+
+    // Timeout for fetching fresh data
+    public static final long FRESH_TIMEOUT = 60000; // 1 minute
 }

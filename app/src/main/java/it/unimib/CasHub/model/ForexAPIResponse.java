@@ -46,4 +46,8 @@ public class ForexAPIResponse {
     public void setCurrencies(Map<String, String> currencies) {
         this.currencies = currencies;
     }
+
+    public void setBase(String base) {
+        this.base = base;
+    }
 }
