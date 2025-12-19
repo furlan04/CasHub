@@ -20,12 +20,12 @@ import java.util.List;
 
 import it.unimib.CasHub.R;
 import it.unimib.CasHub.adapter.CurrencySpinnerAdapter;
-import it.unimib.CasHub.model.Currency;
+import it.unimib.CasHub.model.CurrencyEntity;
 import it.unimib.CasHub.model.Result;
 import it.unimib.CasHub.repository.ForexRepository;
-import it.unimib.CasHub.utils.ServiceLocator;
 import it.unimib.CasHub.ui.home.viewmodel.TransactionViewModel;
 import it.unimib.CasHub.ui.home.viewmodel.TransactionViewModelFactory;
+import it.unimib.CasHub.utils.ServiceLocator;
 
 public class TransactionFragment extends Fragment {
 
@@ -64,7 +64,7 @@ public class TransactionFragment extends Fragment {
         EditText etQuantita = view.findViewById(R.id.etQuantita);
         spinnerValuta = view.findViewById(R.id.spinnerValuta);
 
-        List<Currency> currencyList = new ArrayList<>();
+        List<CurrencyEntity> currencyList = new ArrayList<>();
         currencyAdapter = new CurrencySpinnerAdapter(requireContext(), currencyList);
         spinnerValuta.setAdapter(currencyAdapter);
 
@@ -86,10 +86,9 @@ public class TransactionFragment extends Fragment {
     }
 
     private void observeCurrencies() {
-        // TODO: Get last update time from SharedPreferences
-        viewModel.getCurrencies(0).observe(getViewLifecycleOwner(), result -> {
+        viewModel.getCurrencies().observe(getViewLifecycleOwner(), result -> {
             if (result.isSuccess()) {
-                List<Currency> currencies = ((Result.Success<List<Currency>>) result).getData();
+                List<CurrencyEntity> currencies = ((Result.Success<List<CurrencyEntity>>) result).getData();
                 if (currencies != null && !currencies.isEmpty()) {
                     currencyAdapter.clear();
                     currencyAdapter.addAll(currencies);
@@ -105,16 +104,11 @@ public class TransactionFragment extends Fragment {
 
     private void showError(String message) {
         Toast.makeText(getContext(), "Error: " + message, Toast.LENGTH_SHORT).show();
-        // Fallback with default currencies
-        List<Currency> defaultCurrencies = new ArrayList<>();
-        defaultCurrencies.add(new Currency("EUR", "Euro"));
-        defaultCurrencies.add(new Currency("USD", "United States Dollar"));
         currencyAdapter.clear();
-        currencyAdapter.addAll(defaultCurrencies);
         currencyAdapter.notifyDataSetChanged();
     }
 
-    public Currency getSelectedCurrency() {
+    public CurrencyEntity getSelectedCurrency() {
         if (spinnerValuta != null && currencyAdapter != null) {
             int position = spinnerValuta.getSelectedItemPosition();
             if (position >= 0 && position < currencyAdapter.getCount()) {

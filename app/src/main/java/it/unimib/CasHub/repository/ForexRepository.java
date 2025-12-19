@@ -2,53 +2,39 @@ package it.unimib.CasHub.repository;
 
 import androidx.lifecycle.MutableLiveData;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import it.unimib.CasHub.model.Currency;
+import it.unimib.CasHub.database.CurrencyDao;
+import it.unimib.CasHub.model.CurrencyEntity;
 import it.unimib.CasHub.model.ForexAPIResponse;
 import it.unimib.CasHub.model.Result;
-import it.unimib.CasHub.source.BaseCurrenciesDataSource;
-import it.unimib.CasHub.source.BaseRatesDataSource;
+import it.unimib.CasHub.source.BaseForexDataSource;
 import it.unimib.CasHub.source.ForexCallback;
-import it.unimib.CasHub.utils.Constants;
 
 public class ForexRepository implements ForexCallback {
 
-    private final MutableLiveData<Result<List<Currency>>> currenciesMutableLiveData;
+    private final MutableLiveData<Result<List<CurrencyEntity>>> currenciesMutableLiveData;
     private final MutableLiveData<Result<ForexAPIResponse>> ratesMutableLiveData;
 
-    private final BaseCurrenciesDataSource remoteCurrenciesDataSource;
-    private final BaseCurrenciesDataSource localCurrenciesDataSource;
-    private final BaseRatesDataSource remoteRatesDataSource;
+    private final BaseForexDataSource dataSource;
+    private final CurrencyDao currencyDao;
 
-    public ForexRepository(BaseCurrenciesDataSource remoteCurrenciesDataSource,
-                           BaseCurrenciesDataSource localCurrenciesDataSource,
-                           BaseRatesDataSource remoteRatesDataSource) {
-
+    public ForexRepository(BaseForexDataSource dataSource, CurrencyDao currencyDao) {
         this.currenciesMutableLiveData = new MutableLiveData<>();
         this.ratesMutableLiveData = new MutableLiveData<>();
-
-        this.remoteCurrenciesDataSource = remoteCurrenciesDataSource;
-        this.localCurrenciesDataSource = localCurrenciesDataSource;
-        this.remoteRatesDataSource = remoteRatesDataSource;
-
-        this.remoteCurrenciesDataSource.setCallback(this);
-        this.localCurrenciesDataSource.setCallback(this);
-        this.remoteRatesDataSource.setCallback(this);
+        this.dataSource = dataSource;
+        this.currencyDao = currencyDao;
+        this.dataSource.setCallback(this);
     }
 
-    public MutableLiveData<Result<List<Currency>>> fetchCurrencies(long lastUpdate) {
-        long currentTime = System.currentTimeMillis();
-        if (currentTime - lastUpdate > Constants.FRESH_TIMEOUT) {
-            remoteCurrenciesDataSource.getCurrencies();
-        } else {
-            localCurrenciesDataSource.getCurrencies();
-        }
+    public MutableLiveData<Result<List<CurrencyEntity>>> fetchCurrencies() {
+        dataSource.getCurrencies();
         return currenciesMutableLiveData;
     }
 
     public MutableLiveData<Result<ForexAPIResponse>> fetchRates(String base) {
-        remoteRatesDataSource.getRates(base);
+        dataSource.getRates(base);
         return ratesMutableLiveData;
     }
 
@@ -63,19 +49,32 @@ public class ForexRepository implements ForexCallback {
     }
 
     @Override
-    public void onCurrenciesSuccessFromRemote(List<Currency> currencies, long lastUpdate) {
-        ((it.unimib.CasHub.source.CurrenciesLocalDataSource) localCurrenciesDataSource).saveCurrencies(currencies);
-        // We don't update LiveData here, because saveCurrencies will trigger onCurrenciesSuccessFromLocal
+    public void onCurrenciesSuccessFromRemote(List<CurrencyEntity> currencies, long lastUpdate) {
+        new Thread(() -> {
+            currencyDao.insertAllCurrencies(currencies);
+        }).start();
+        currenciesMutableLiveData.postValue(new Result.Success<>(currencies));
     }
 
     @Override
     public void onCurrenciesFailureFromRemote(Exception exception) {
-        // If remote fails, try to get data from local source
-        localCurrenciesDataSource.getCurrencies();
+        // If remote fails, try local
+        try {
+            new Thread(() -> {
+                List<CurrencyEntity> cached = currencyDao.getAllCurrencies();
+                if (cached != null && !cached.isEmpty()) {
+                    currenciesMutableLiveData.postValue(new Result.Success<>(cached));
+                } else {
+                    currenciesMutableLiveData.postValue(new Result.Error<>(exception.getMessage()));
+                }
+            }).start();
+        } catch (Exception e) {
+            currenciesMutableLiveData.postValue(new Result.Error<>(e.getMessage()));
+        }
     }
 
     @Override
-    public void onCurrenciesSuccessFromLocal(List<Currency> currencies) {
+    public void onCurrenciesSuccessFromLocal(List<CurrencyEntity> currencies) {
         currenciesMutableLiveData.postValue(new Result.Success<>(currencies));
     }
 

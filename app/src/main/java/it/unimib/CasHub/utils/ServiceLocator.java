@@ -2,17 +2,14 @@ package it.unimib.CasHub.utils;
 
 import android.app.Application;
 
+import it.unimib.CasHub.database.CurrencyDao;
 import it.unimib.CasHub.database.CurrencyRoomDatabase;
 import it.unimib.CasHub.repository.ForexRepository;
 import it.unimib.CasHub.service.AgencyAPIService;
 import it.unimib.CasHub.service.ForexAPIService;
-import it.unimib.CasHub.source.BaseCurrenciesDataSource;
-import it.unimib.CasHub.source.BaseRatesDataSource;
-import it.unimib.CasHub.source.CurrenciesLocalDataSource;
-import it.unimib.CasHub.source.CurrenciesRemoteDataSource;
-import it.unimib.CasHub.source.MockCurrenciesDataSource;
-import it.unimib.CasHub.source.MockRatesDataSource;
-import it.unimib.CasHub.source.RatesRemoteDataSource;
+import it.unimib.CasHub.source.BaseForexDataSource;
+import it.unimib.CasHub.source.ForexAPIDataSource;
+import it.unimib.CasHub.source.ForexMockDataSource;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import retrofit2.Retrofit;
@@ -22,8 +19,7 @@ public class ServiceLocator {
 
     private static volatile ServiceLocator INSTANCE = null;
 
-    private ServiceLocator() {
-    }
+    private ServiceLocator() {}
 
     public static ServiceLocator getInstance() {
         if (INSTANCE == null) {
@@ -53,7 +49,6 @@ public class ServiceLocator {
                 .build();
         return retrofit.create(ForexAPIService.class);
     }
-
     public AgencyAPIService getAgencyAPIService() {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(Constants.AGENCY_BASE_URL)
@@ -63,28 +58,23 @@ public class ServiceLocator {
         return retrofit.create(AgencyAPIService.class);
     }
 
-    public CurrencyRoomDatabase getCurrencyDB(Application application) {
+    private CurrencyRoomDatabase getCurrencyDB(Application application) {
         return CurrencyRoomDatabase.getDatabase(application);
     }
 
     public ForexRepository getForexRepository(Application application, boolean debugMode) {
         ForexAPIService apiService = getForexAPIService();
-        CurrencyRoomDatabase currencyDB = getCurrencyDB(application);
         JSONParserUtils jsonParserUtils = new JSONParserUtils(application);
-        SharedPreferencesUtils sharedPreferencesUtils = new SharedPreferencesUtils(application);
+        CurrencyDao currencyDao = getCurrencyDB(application).currencyDao();
 
-        BaseRatesDataSource ratesDataSource;
-        BaseCurrenciesDataSource remoteCurrenciesDataSource;
-        CurrenciesLocalDataSource localCurrenciesDataSource = new CurrenciesLocalDataSource(currencyDB.currencyDao(), sharedPreferencesUtils);
+        BaseForexDataSource dataSource;
 
         if (debugMode) {
-            ratesDataSource = new MockRatesDataSource(jsonParserUtils);
-            remoteCurrenciesDataSource = new MockCurrenciesDataSource(jsonParserUtils);
+            dataSource = new ForexMockDataSource(jsonParserUtils);
         } else {
-            ratesDataSource = new RatesRemoteDataSource(apiService);
-            remoteCurrenciesDataSource = new CurrenciesRemoteDataSource(apiService);
+            dataSource = new ForexAPIDataSource(apiService);
         }
 
-        return new ForexRepository(remoteCurrenciesDataSource, localCurrenciesDataSource, ratesDataSource);
+        return new ForexRepository(dataSource, currencyDao);
     }
 }
