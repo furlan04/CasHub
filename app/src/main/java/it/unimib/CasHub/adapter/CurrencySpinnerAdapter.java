@@ -12,14 +12,13 @@ import androidx.annotation.Nullable;
 
 import java.util.List;
 
-import it.unimib.CasHub.R;
-import it.unimib.CasHub.model.Currency;
+import it.unimib.CasHub.model.CurrencyEntity;
 
-public class CurrencySpinnerAdapter extends ArrayAdapter<Currency> {
+public class CurrencySpinnerAdapter extends ArrayAdapter<CurrencyEntity> {
 
     private final LayoutInflater inflater;
 
-    public CurrencySpinnerAdapter(@NonNull Context context, @NonNull List<Currency> currencies) {
+    public CurrencySpinnerAdapter(@NonNull Context context, @NonNull List<CurrencyEntity> currencies) {
         super(context, android.R.layout.simple_spinner_item, currencies);
         this.inflater = LayoutInflater.from(context);
         setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -34,7 +33,7 @@ public class CurrencySpinnerAdapter extends ArrayAdapter<Currency> {
         }
         
         TextView textView = (TextView) view.findViewById(android.R.id.text1);
-        Currency currency = getItem(position);
+        CurrencyEntity currency = getItem(position);
         if (currency != null) {
             textView.setText(currency.getCode());
         }
@@ -50,10 +49,9 @@ public class CurrencySpinnerAdapter extends ArrayAdapter<Currency> {
         }
         
         TextView textView = (TextView) view.findViewById(android.R.id.text1);
-        Currency currency = getItem(position);
+        CurrencyEntity currency = getItem(position);
         if (currency != null) {
-            // Mostra codice e nome nel dropdown (es: "EUR - Euro")
-            textView.setText(currency.getCode() + " - " + currency.getName());
+            textView.setText(currency.getCode());
         }
         
         return view;

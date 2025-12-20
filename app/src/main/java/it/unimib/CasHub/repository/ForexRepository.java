@@ -1,159 +1,85 @@
 package it.unimib.CasHub.repository;
 
-import androidx.annotation.NonNull;
+import androidx.lifecycle.MutableLiveData;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import it.unimib.CasHub.database.CurrencyRoomDatabase;
+import it.unimib.CasHub.database.CurrencyDao;
 import it.unimib.CasHub.model.CurrencyEntity;
-import it.unimib.CasHub.database.RatesRoomDatabase;
-import it.unimib.CasHub.model.RateEntity;
-import it.unimib.CasHub.model.Currency;
 import it.unimib.CasHub.model.ForexAPIResponse;
-import it.unimib.CasHub.service.ForexAPIService;
-import it.unimib.CasHub.utils.ResponseCallback;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import it.unimib.CasHub.model.Result;
+import it.unimib.CasHub.source.BaseForexDataSource;
+import it.unimib.CasHub.source.ForexCallback;
 
-public class ForexRepository implements ForexRepositoryInterface {
+public class ForexRepository implements ForexCallback {
 
-    private final ForexAPIService apiService;
-    private final CurrencyRoomDatabase currencyDB;
-    private final RatesRoomDatabase ratesDB;
+    private final MutableLiveData<Result<List<CurrencyEntity>>> currenciesMutableLiveData;
+    private final MutableLiveData<Result<ForexAPIResponse>> ratesMutableLiveData;
 
-    public ForexRepository(ForexAPIService apiService,
-                           CurrencyRoomDatabase currencyDB,
-                           RatesRoomDatabase ratesDB) {
-        this.apiService = apiService;
-        this.currencyDB = currencyDB;
-        this.ratesDB = ratesDB;
+    private final BaseForexDataSource dataSource;
+    private final CurrencyDao currencyDao;
+
+    public ForexRepository(BaseForexDataSource dataSource, CurrencyDao currencyDao) {
+        this.currenciesMutableLiveData = new MutableLiveData<>();
+        this.ratesMutableLiveData = new MutableLiveData<>();
+        this.dataSource = dataSource;
+        this.currencyDao = currencyDao;
+        this.dataSource.setCallback(this);
+    }
+
+    public MutableLiveData<Result<List<CurrencyEntity>>> fetchCurrencies() {
+        dataSource.getCurrencies();
+        return currenciesMutableLiveData;
+    }
+
+    public MutableLiveData<Result<ForexAPIResponse>> fetchRates(String base) {
+        dataSource.getRates(base);
+        return ratesMutableLiveData;
     }
 
     @Override
-    public void getRates(String base, ResponseCallback callback) {
-        apiService.getRates(base).enqueue(new Callback<ForexAPIResponse>() {
-            @Override
-            public void onResponse(@NonNull Call<ForexAPIResponse> call,
-                                   @NonNull Response<ForexAPIResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    ForexAPIResponse apiResp = response.body();
-                    long timestamp = System.currentTimeMillis();
-
-                    // salva nel DB dei tassi
-                    new Thread(() -> {
-                        List<RateEntity> entities = new ArrayList<>();
-                        for (Map.Entry<String, Double> entry : apiResp.getRates().entrySet()) {
-                            entities.add(new RateEntity(
-                                    entry.getKey(),
-                                    entry.getValue(),
-                                    apiResp.getAmount(),
-                                    apiResp.getBase(),
-                                    apiResp.getDate()
-                            ));
-                        }
-                        ratesDB.ratesDao().insertAllRates(entities);
-                    }).start();
-
-                    callback.onRatesSuccess(apiResp, timestamp);
-                } else {
-                    fallbackRates(base, callback);
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<ForexAPIResponse> call, @NonNull Throwable t) {
-                fallbackRates(base, callback);
-            }
-        });
-    }
-
-    private void fallbackRates(String base, ResponseCallback callback) {
-        new Thread(() -> {
-            List<RateEntity> allRates = ratesDB.ratesDao().getAllRates();
-            List<RateEntity> cached = new ArrayList<>();
-            for (RateEntity r : allRates) {
-                if (base != null && base.equals(r.base)) {
-                    cached.add(r);
-                }
-            }
-            if (!cached.isEmpty()) {
-                Map<String, Double> rates = new HashMap<>();
-                long timestamp = System.currentTimeMillis();
-                for (RateEntity r : cached) {
-                    rates.put(r.currencyCode, r.rateValue);
-                }
-                ForexAPIResponse resp = new ForexAPIResponse(
-                        cached.get(0).amount,
-                        base,
-                        cached.get(0).date != null ? cached.get(0).date : "",
-                        rates
-                );
-                callback.onRatesSuccess(resp, timestamp);
-            } else {
-                callback.onFailure("Nessuna rete e nessun dato salvato.");
-            }
-        }).start();
+    public void onRatesSuccessFromRemote(ForexAPIResponse rates, long lastUpdate) {
+        ratesMutableLiveData.postValue(new Result.Success<>(rates));
     }
 
     @Override
-    public void getCurrencies(ResponseCallback callback) {
-        apiService.getCurrencies().enqueue(new Callback<Map<String, String>>() {
-            @Override
-            public void onResponse(@NonNull Call<Map<String, String>> call,
-                                   @NonNull Response<Map<String, String>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    Map<String, String> currenciesMap = response.body();
-                    long timestamp = System.currentTimeMillis();
-
-                    List<Currency> list = new ArrayList<>();
-                    List<CurrencyEntity> entities = new ArrayList<>();
-
-                    if (currenciesMap != null && !currenciesMap.isEmpty()) {
-                        for (Map.Entry<String, String> entry : currenciesMap.entrySet()) {
-                            list.add(new Currency(entry.getKey(), entry.getValue()));
-                            entities.add(new CurrencyEntity(entry.getKey(), entry.getValue()));
-                        }
-                        System.out.println("Valute caricate: " + list.size()); // Debug log
-                    } else {
-                        System.out.println("Mappa valute vuota o null"); // Debug log
-                    }
-
-                    // salva nel DB delle valute
-                    new Thread(() -> currencyDB.currencyDao().insertAllCurrencies(entities)).start();
-
-                    callback.onCurrencyListSuccess(list, timestamp);
-                } else {
-                    String errorMsg = response.errorBody() != null ? response.errorBody().toString() : "Risposta non valida";
-                    System.out.println("Errore risposta API: " + errorMsg); // Debug log
-                    fallbackCurrencies(callback);
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<Map<String, String>> call, @NonNull Throwable t) {
-                t.printStackTrace(); // Log dell'errore per debug
-                fallbackCurrencies(callback);
-            }
-        });
+    public void onRatesFailureFromRemote(Exception exception) {
+        ratesMutableLiveData.postValue(new Result.Error<>(exception.getMessage()));
     }
 
-    private void fallbackCurrencies(ResponseCallback callback) {
+    @Override
+    public void onCurrenciesSuccessFromRemote(List<CurrencyEntity> currencies, long lastUpdate) {
         new Thread(() -> {
-            List<CurrencyEntity> cached = currencyDB.currencyDao().getAllCurrencies();
-            if (!cached.isEmpty()) {
-                List<Currency> list = new ArrayList<>();
-                long ts = System.currentTimeMillis();
-                for (CurrencyEntity c : cached) {
-                    list.add(new Currency(c.code, c.name));
-                }
-                callback.onCurrencyListSuccess(list, ts);
-            } else {
-                callback.onFailure("Nessuna rete e nessuna valuta salvata.");
-            }
+            currencyDao.insertAllCurrencies(currencies);
         }).start();
+        currenciesMutableLiveData.postValue(new Result.Success<>(currencies));
+    }
+
+    @Override
+    public void onCurrenciesFailureFromRemote(Exception exception) {
+        // If remote fails, try local
+        try {
+            new Thread(() -> {
+                List<CurrencyEntity> cached = currencyDao.getAllCurrencies();
+                if (cached != null && !cached.isEmpty()) {
+                    currenciesMutableLiveData.postValue(new Result.Success<>(cached));
+                } else {
+                    currenciesMutableLiveData.postValue(new Result.Error<>(exception.getMessage()));
+                }
+            }).start();
+        } catch (Exception e) {
+            currenciesMutableLiveData.postValue(new Result.Error<>(e.getMessage()));
+        }
+    }
+
+    @Override
+    public void onCurrenciesSuccessFromLocal(List<CurrencyEntity> currencies) {
+        currenciesMutableLiveData.postValue(new Result.Success<>(currencies));
+    }
+
+    @Override
+    public void onCurrenciesFailureFromLocal(Exception exception) {
+        currenciesMutableLiveData.postValue(new Result.Error<>(exception.getMessage()));
     }
 }

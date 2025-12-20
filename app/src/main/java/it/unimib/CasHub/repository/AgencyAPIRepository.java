@@ -7,7 +7,7 @@ import java.util.List;
 import it.unimib.CasHub.R;
 import it.unimib.CasHub.model.Agency;
 import it.unimib.CasHub.service.AgencyAPIService;
-import it.unimib.CasHub.service.ServiceLocator;
+import it.unimib.CasHub.utils.ServiceLocator;
 import it.unimib.CasHub.utils.AgencyResponseCallBack;
 import retrofit2.Call;
 import retrofit2.Callback;

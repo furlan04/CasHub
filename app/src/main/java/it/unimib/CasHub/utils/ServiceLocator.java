@@ -1,13 +1,15 @@
-package it.unimib.CasHub.service;
+package it.unimib.CasHub.utils;
 
 import android.app.Application;
 
+import it.unimib.CasHub.database.CurrencyDao;
 import it.unimib.CasHub.database.CurrencyRoomDatabase;
-import it.unimib.CasHub.database.RatesRoomDatabase;
-import it.unimib.CasHub.model.ForexAPIResponse;
 import it.unimib.CasHub.repository.ForexRepository;
-import it.unimib.CasHub.repository.ForexRepositoryInterface;
-import it.unimib.CasHub.utils.Constants;
+import it.unimib.CasHub.service.AgencyAPIService;
+import it.unimib.CasHub.service.ForexAPIService;
+import it.unimib.CasHub.source.BaseForexDataSource;
+import it.unimib.CasHub.source.ForexAPIDataSource;
+import it.unimib.CasHub.source.ForexMockDataSource;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import retrofit2.Retrofit;
@@ -17,8 +19,7 @@ public class ServiceLocator {
 
     private static volatile ServiceLocator INSTANCE = null;
 
-    private ServiceLocator() {
-    }
+    private ServiceLocator() {}
 
     public static ServiceLocator getInstance() {
         if (INSTANCE == null) {
@@ -48,7 +49,6 @@ public class ServiceLocator {
                 .build();
         return retrofit.create(ForexAPIService.class);
     }
-
     public AgencyAPIService getAgencyAPIService() {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(Constants.AGENCY_BASE_URL)
@@ -58,18 +58,23 @@ public class ServiceLocator {
         return retrofit.create(AgencyAPIService.class);
     }
 
-    public CurrencyRoomDatabase getCurrencyDB(Application application) {
+    private CurrencyRoomDatabase getCurrencyDB(Application application) {
         return CurrencyRoomDatabase.getDatabase(application);
     }
 
-    public RatesRoomDatabase getRatesDB(Application application) {
-        return RatesRoomDatabase.getDatabase(application);
-    }
-
-    public ForexRepositoryInterface getForexRepository(android.content.Context context) {
+    public ForexRepository getForexRepository(Application application, boolean debugMode) {
         ForexAPIService apiService = getForexAPIService();
-        CurrencyRoomDatabase currencyDB = CurrencyRoomDatabase.getDatabase(context);
-        RatesRoomDatabase ratesDB = RatesRoomDatabase.getDatabase(context);
-        return new ForexRepository(apiService, currencyDB, ratesDB);
+        JSONParserUtils jsonParserUtils = new JSONParserUtils(application);
+        CurrencyDao currencyDao = getCurrencyDB(application).currencyDao();
+
+        BaseForexDataSource dataSource;
+
+        if (debugMode) {
+            dataSource = new ForexMockDataSource(jsonParserUtils);
+        } else {
+            dataSource = new ForexAPIDataSource(apiService);
+        }
+
+        return new ForexRepository(dataSource, currencyDao);
     }
 }
