@@ -2,6 +2,7 @@ import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 
 plugins {
     alias(libs.plugins.android.application)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -57,6 +58,9 @@ dependencies {
     implementation(libs.room.common.jvm)
     implementation(libs.room.runtime)
     implementation(libs.webgpu)
+
+    implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
+    implementation("com.google.firebase:firebase-analytics")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
