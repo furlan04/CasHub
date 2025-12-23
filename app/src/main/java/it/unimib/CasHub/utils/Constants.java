@@ -18,6 +18,10 @@ public class Constants {
     public static final String SAMPLE_CURRENCIES_JSON = "sample_currencies.json";
     public static final String SAMPLE_RATES_JSON = "sample_rates.json";
 
+
+    // Database
+    public static final String REALTIME_DB_URL = "https://cashub-29595-default-rtdb.europe-west1.firebasedatabase.app/";
+
     // Timeout for fetching fresh data
     public static final long FRESH_TIMEOUT = 60000; // 1 minute
 }

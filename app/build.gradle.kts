@@ -61,6 +61,10 @@ dependencies {
 
     implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation(libs.firebase.auth)
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-database:20.3.0")
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
