@@ -22,6 +22,7 @@ android {
 
         resValue("string", "stocks_api_key", gradleLocalProperties(rootDir, providers).getProperty("stocks_api_key"))
         resValue("bool", "debug", gradleLocalProperties(rootDir, providers).getProperty("debug"))
+        buildConfigField("String", "REALTIME_DB_URL", gradleLocalProperties(rootDir, providers).getProperty("REALTIME_DB_URL"))
     }
 
     buildTypes {
@@ -39,6 +40,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 }
 

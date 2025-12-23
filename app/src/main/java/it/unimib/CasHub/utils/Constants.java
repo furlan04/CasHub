@@ -1,5 +1,7 @@
 package it.unimib.CasHub.utils;
 
+import it.unimib.CasHub.BuildConfig;
+
 public class Constants {
 
     public static final String CURRENCY_BASE_URL = "https://api.frankfurter.app/";
@@ -20,7 +22,7 @@ public class Constants {
 
 
     // Database
-    public static final String REALTIME_DB_URL = "https://cashub-29595-default-rtdb.europe-west1.firebasedatabase.app/";
+    public static final String REALTIME_DB_URL = BuildConfig.REALTIME_DB_URL;
 
     // Timeout for fetching fresh data
     public static final long FRESH_TIMEOUT = 60000; // 1 minute
