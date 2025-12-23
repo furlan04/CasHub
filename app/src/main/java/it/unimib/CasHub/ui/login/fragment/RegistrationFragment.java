@@ -5,36 +5,40 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
+
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import org.apache.commons.validator.routines.EmailValidator;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import it.unimib.CasHub.R;
+import it.unimib.CasHub.utils.Constants;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link RegistrationFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class RegistrationFragment extends Fragment {
+    private FirebaseAuth mAuth;
+    private DatabaseReference realtimeDb;
 
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    public RegistrationFragment(){
 
-    private String mParam1;
-    private String mParam2;
-
-    public RegistrationFragment() {
-        // Required empty public constructor
     }
 
     public static RegistrationFragment newInstance(String param1, String param2) {
         RegistrationFragment fragment = new RegistrationFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+
         fragment.setArguments(args);
         return fragment;
     }
@@ -42,10 +46,6 @@ public class RegistrationFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
@@ -65,6 +65,9 @@ public class RegistrationFragment extends Fragment {
         Button registerButton = view.findViewById(R.id.register_button);
         Button goToLoginButton = view.findViewById(R.id.goToLogin);
         Button registerGoogleButton = view.findViewById(R.id.register_google_button);
+
+        mAuth = FirebaseAuth.getInstance();
+        realtimeDb = FirebaseDatabase.getInstance(Constants.REALTIME_DB_URL).getReference("users");
 
         // Listener per il bottone Registrati
         registerButton.setOnClickListener(new View.OnClickListener() {
@@ -90,9 +93,40 @@ public class RegistrationFragment extends Fragment {
                     return;
                 }
 
-                // TODO: Implementa la logica di registrazione
-                // Se la registrazione ha successo, naviga alla MainActivity
-                // Navigation.findNavController(v).navigate(R.id.action_registrationFragment_to_mainActivity);
+                mAuth.createUserWithEmailAndPassword(email, password)
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+
+                                // UID utente appena creato
+                                String uid = mAuth.getCurrentUser().getUid();
+
+                                // Dati utente da salvare su Firestore
+                                Map<String, Object> user = new HashMap<>();
+                                user.put("name", name);
+                                user.put("email", email);
+                                user.put("createdAt", System.currentTimeMillis());
+
+                                // SALVATAGGIO SU REALTIME DATABASE
+                                realtimeDb.child(uid).setValue(user)
+                                        .addOnSuccessListener(aVoid -> {
+                                            // NAVIGAZIONE SICURA
+                                            NavHostFragment.findNavController(RegistrationFragment.this)
+                                                    .navigate(R.id.action_registrationFragment_to_mainActivity);
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            Toast.makeText(getContext(),
+                                                    "Errore salvataggio Realtime DB: " + e.getMessage(),
+                                                    Toast.LENGTH_LONG).show();
+                                        });
+
+                            } else {
+                                Toast.makeText(
+                                        getContext(),
+                                        "Registrazione fallita: " + task.getException().getMessage(),
+                                        Toast.LENGTH_LONG
+                                ).show();
+                            }
+                        });
             }
         });
 

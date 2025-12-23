@@ -2,6 +2,7 @@ import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 
 plugins {
     alias(libs.plugins.android.application)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -21,6 +22,7 @@ android {
 
         resValue("string", "stocks_api_key", gradleLocalProperties(rootDir, providers).getProperty("stocks_api_key"))
         resValue("bool", "debug", gradleLocalProperties(rootDir, providers).getProperty("debug"))
+        buildConfigField("String", "REALTIME_DB_URL", gradleLocalProperties(rootDir, providers).getProperty("REALTIME_DB_URL"))
     }
 
     buildTypes {
@@ -38,6 +40,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 }
 
@@ -57,6 +60,13 @@ dependencies {
     implementation(libs.room.common.jvm)
     implementation(libs.room.runtime)
     implementation(libs.webgpu)
+
+    implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation(libs.firebase.auth)
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-database:20.3.0")
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
