@@ -7,6 +7,7 @@ import com.google.gson.reflect.TypeToken;
 
 import it.unimib.CasHub.model.Agency;
 import it.unimib.CasHub.model.ForexAPIResponse;
+import it.unimib.CasHub.model.TransactionEntity;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -45,5 +46,17 @@ public class JSONParserUtils {
 
         Type type = new TypeToken<Map<String, String>>() {}.getType();
         return new Gson().fromJson(bufferedReader, type);
+    }
+
+    public List<TransactionEntity> parseTransactions(String filename) {
+        try {
+            InputStream inputStream = context.getAssets().open(filename);
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            Type listType = new TypeToken<List<TransactionEntity>>() {}.getType();
+            return new Gson().fromJson(bufferedReader, listType);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

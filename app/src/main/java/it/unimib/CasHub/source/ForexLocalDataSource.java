@@ -1,6 +1,5 @@
 package it.unimib.CasHub.source;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import it.unimib.CasHub.database.CurrencyDao;

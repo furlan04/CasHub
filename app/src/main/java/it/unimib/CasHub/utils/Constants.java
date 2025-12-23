@@ -19,6 +19,7 @@ public class Constants {
     // Sample Data
     public static final String SAMPLE_CURRENCIES_JSON = "sample_currencies.json";
     public static final String SAMPLE_RATES_JSON = "sample_rates.json";
+    public static final String SAMPLE_TRANSACTIONS_JSON = "sample_transactions.json";
 
 
     // Database

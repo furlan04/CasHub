@@ -1,16 +1,19 @@
 package it.unimib.CasHub.ui.home.fragment;
 
 import android.graphics.Color;
-import android.widget.Button;
-import androidx.navigation.Navigation;
-
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.PieChart;
@@ -21,39 +24,87 @@ import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.PercentFormatter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import it.unimib.CasHub.BuildConfig;
 import it.unimib.CasHub.R;
+import it.unimib.CasHub.adapter.TransactionRecyclerAdapter;
+import it.unimib.CasHub.model.Result;
+import it.unimib.CasHub.model.TransactionEntity;
+import it.unimib.CasHub.model.TransactionType;
+import it.unimib.CasHub.ui.home.viewmodel.HomepageTransactionViewModel;
+import it.unimib.CasHub.ui.home.viewmodel.HomepageTransactionViewModelFactory;
 
 public class HomepageTransactionFragment extends Fragment {
+
+    private PieChart pieChart;
+    private RecyclerView recyclerView;
+    private TransactionRecyclerAdapter adapter;
+    private HomepageTransactionViewModel homepageTransactionViewModel;
 
     public HomepageTransactionFragment() {
         // Required empty public constructor
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_homepage_transaction, container, false);
+    }
 
-        // 1️INFLATE DEL LAYOUT
-        View view = inflater.inflate(R.layout.fragment_homepage_transaction, container, false);
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
-        // PIECHART
-        PieChart pieChart = view.findViewById(R.id.pieChartTransaction);
+        pieChart = view.findViewById(R.id.pieChartTransaction);
+        recyclerView = view.findViewById(R.id.recyclerViewTransactions);
 
-        // DATI DI TEST
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        homepageTransactionViewModel = new ViewModelProvider(this, new HomepageTransactionViewModelFactory(requireActivity().getApplication(), BuildConfig.DEBUG)).get(HomepageTransactionViewModel.class);
+
+        homepageTransactionViewModel.getTransactions().observe(getViewLifecycleOwner(), result -> {
+            if (result.isSuccess()) {
+                List<TransactionEntity> transactions = ((Result.Success<List<TransactionEntity>>) result).getData();
+                setupPieChart(transactions);
+                setupRecyclerView(transactions);
+            } else {
+                // Handle error
+            }
+        });
+
+        Button btnAddTransaction = view.findViewById(R.id.btnAddTransaction);
+        btnAddTransaction.setOnClickListener(v -> {
+            Navigation.findNavController(v)
+                    .navigate(R.id.action_homepageTransactionFragment_to_transactionFragment);
+        });
+    }
+
+    private void setupPieChart(List<TransactionEntity> transactions) {
+        Map<TransactionType, Float> categoryTotals = new HashMap<>();
+        for (TransactionEntity transaction : transactions) {
+            float total = categoryTotals.getOrDefault(transaction.getType(), 0f);
+            categoryTotals.put(transaction.getType(), total + (float) transaction.getAmount());
+        }
+
         ArrayList<PieEntry> entries = new ArrayList<>();
-        entries.add(new PieEntry(45f, "Cibo"));
-        entries.add(new PieEntry(25f, "Affitto"));
-        entries.add(new PieEntry(15f, "Trasporti"));
-        entries.add(new PieEntry(15f, "Altro"));
+        for (Map.Entry<TransactionType, Float> entry : categoryTotals.entrySet()) {
+            entries.add(new PieEntry(entry.getValue(), entry.getKey().toString()));
+        }
 
-        // COLORI PERSONALIZZATI
         ArrayList<Integer> colors = new ArrayList<>();
-        colors.add(Color.parseColor("#4CAF50")); // Verde
-        colors.add(Color.parseColor("#2196F3")); // Blu
-        colors.add(Color.parseColor("#FFC107")); // Giallo
-        colors.add(Color.parseColor("#F44336")); // Rosso
+        colors.add(Color.parseColor("#4CAF50"));
+        colors.add(Color.parseColor("#2196F3"));
+        colors.add(Color.parseColor("#FFC107"));
+        colors.add(Color.parseColor("#F44336"));
+        colors.add(Color.parseColor("#9C27B0"));
+        colors.add(Color.parseColor("#00BCD4"));
+        colors.add(Color.parseColor("#FF5722"));
+        colors.add(Color.parseColor("#8BC34A"));
+        colors.add(Color.parseColor("#607D8B"));
+        colors.add(Color.parseColor("#E91E63"));
 
         PieDataSet dataSet = new PieDataSet(entries, "");
         dataSet.setColors(colors);
@@ -61,7 +112,6 @@ public class HomepageTransactionFragment extends Fragment {
         dataSet.setValueTextSize(12f);
         dataSet.setValueTextColor(Color.WHITE);
 
-        // CONFIGURAZIONE GRAFICO
         PieData data = new PieData(dataSet);
         data.setValueFormatter(new PercentFormatter(pieChart));
         pieChart.setUsePercentValues(true);
@@ -73,7 +123,6 @@ public class HomepageTransactionFragment extends Fragment {
         pieChart.getDescription().setEnabled(false);
         pieChart.setDrawEntryLabels(false);
 
-        // Legenda
         Legend legend = pieChart.getLegend();
         legend.setVerticalAlignment(Legend.LegendVerticalAlignment.CENTER);
         legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.RIGHT);
@@ -81,21 +130,14 @@ public class HomepageTransactionFragment extends Fragment {
         legend.setDrawInside(false);
         legend.setTextSize(12f);
 
-        //Animazione
         pieChart.animateY(1200, Easing.EaseInOutQuad);
 
-        //SET DEI DATI
         pieChart.setData(data);
         pieChart.invalidate();
+    }
 
-        // Bottone per aggiungere transazione
-        Button btnAddTransaction = view.findViewById(R.id.btnAddTransaction);
-        btnAddTransaction.setOnClickListener(v -> {
-            // Naviga verso AddTransactionFragment
-            Navigation.findNavController(v)
-                    .navigate(R.id.action_homepageTransactionFragment_to_transactionFragment);
-        });
-
-        return view;
+    private void setupRecyclerView(List<TransactionEntity> transactions) {
+        adapter = new TransactionRecyclerAdapter(transactions);
+        recyclerView.setAdapter(adapter);
     }
 }

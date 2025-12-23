@@ -2,7 +2,6 @@ package it.unimib.CasHub.repository;
 
 import androidx.lifecycle.MutableLiveData;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import it.unimib.CasHub.database.CurrencyDao;
