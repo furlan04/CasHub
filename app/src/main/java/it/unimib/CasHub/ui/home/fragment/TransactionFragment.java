@@ -29,16 +29,20 @@ import it.unimib.CasHub.model.TransactionType;
 import it.unimib.CasHub.repository.ForexRepository;
 import it.unimib.CasHub.ui.home.viewmodel.HomepageTransactionViewModel;
 import it.unimib.CasHub.ui.home.viewmodel.HomepageTransactionViewModelFactory;
-import it.unimib.CasHub.ui.home.viewmodel.TransactionViewModel;
-import it.unimib.CasHub.ui.home.viewmodel.TransactionViewModelFactory;
+import it.unimib.CasHub.ui.home.viewmodel.CurrencyListViewModel;
+import it.unimib.CasHub.ui.home.viewmodel.CurrencyListViewModelFactory;
 import it.unimib.CasHub.utils.ServiceLocator;
 
 public class TransactionFragment extends Fragment {
+    enum TransactionMode {
+        ENTRATA, USCITA
+    }
 
+    private TransactionMode transactionMode;
     private Spinner spinnerValuta;
     private Spinner spinnerCategoria;
     private CurrencySpinnerAdapter currencyAdapter;
-    private TransactionViewModel viewModel;
+    private CurrencyListViewModel viewModel;
     private HomepageTransactionViewModel homepageTransactionViewModel;
 
     public TransactionFragment() {
@@ -54,13 +58,33 @@ public class TransactionFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         ForexRepository forexRepository = ServiceLocator.getInstance().getForexRepository(requireActivity().getApplication(), getResources().getBoolean(R.bool.debug));
-        viewModel = new ViewModelProvider(this, new TransactionViewModelFactory(forexRepository)).get(TransactionViewModel.class);
+        viewModel = new ViewModelProvider(this, new CurrencyListViewModelFactory(forexRepository)).get(CurrencyListViewModel.class);
         homepageTransactionViewModel = new ViewModelProvider(requireActivity(), new HomepageTransactionViewModelFactory(requireActivity().getApplication(), getResources().getBoolean(R.bool.debug))).get(HomepageTransactionViewModel.class);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_transaction, container, false);
+    }
+
+    private void entryButton (View view) {
+        Button btnEntrata = view.findViewById(R.id.btnEntrata);
+        Button btnUscita = view.findViewById(R.id.btnUscita);
+        btnEntrata.setBackgroundColor(Color.parseColor("#4CAF50")); // Verde
+        btnEntrata.setTextColor(Color.WHITE);
+        btnUscita.setBackgroundColor(Color.parseColor("#DDDDDD"));
+        btnUscita.setTextColor(Color.BLACK);
+        transactionMode = TransactionMode.ENTRATA;
+    }
+
+    private void exitButton (View view) {
+        Button btnEntrata = view.findViewById(R.id.btnEntrata);
+        Button btnUscita = view.findViewById(R.id.btnUscita);
+        btnUscita.setBackgroundColor(Color.parseColor("#F44336")); // Rosso
+        btnUscita.setTextColor(Color.WHITE);
+        btnEntrata.setBackgroundColor(Color.parseColor("#DDDDDD"));
+        btnEntrata.setTextColor(Color.BLACK);
+        transactionMode = TransactionMode.USCITA;
     }
 
     @Override
@@ -84,23 +108,14 @@ public class TransactionFragment extends Fragment {
         spinnerCategoria.setAdapter(categoryAdapter);
 
         observeCurrencies();
+        entryButton(view);
 
-        btnEntrata.setOnClickListener(v -> {
-            btnEntrata.setBackgroundColor(Color.parseColor("#4CAF50")); // Verde
-            btnEntrata.setTextColor(Color.WHITE);
-            btnUscita.setBackgroundColor(Color.parseColor("#DDDDDD"));
-            btnUscita.setTextColor(Color.BLACK);
-        });
+        btnEntrata.setOnClickListener(v -> entryButton(view));
 
-        btnUscita.setOnClickListener(v -> {
-            btnUscita.setBackgroundColor(Color.parseColor("#F44336")); // Rosso
-            btnUscita.setTextColor(Color.WHITE);
-            btnEntrata.setBackgroundColor(Color.parseColor("#DDDDDD"));
-            btnEntrata.setTextColor(Color.BLACK);
-        });
+        btnUscita.setOnClickListener(v -> exitButton(view));
 
         btnConferma.setOnClickListener(v -> {
-            saveTransaction(etQuantita, spinnerValuta, spinnerCategoria);
+            saveTransaction(etNome, etQuantita, spinnerValuta, spinnerCategoria);
         });
     }
 
@@ -121,7 +136,7 @@ public class TransactionFragment extends Fragment {
         });
     }
 
-    private void saveTransaction(EditText etQuantita, Spinner spinnerValuta, Spinner spinnerCategoria) {
+    private void saveTransaction(EditText etNome, EditText etQuantita, Spinner spinnerValuta, Spinner spinnerCategoria) {
         String amountString = etQuantita.getText().toString();
         if (amountString.isEmpty()) {
             Toast.makeText(getContext(), "Please enter an amount", Toast.LENGTH_SHORT).show();
@@ -129,6 +144,13 @@ public class TransactionFragment extends Fragment {
         }
 
         double amount = Double.parseDouble(amountString);
+        if (amount <= 0) {
+            Toast.makeText(getContext(), "Please enter a valid amount", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if(transactionMode == TransactionMode.USCITA){
+            amount = -amount;
+        }
         CurrencyEntity selectedCurrency = (CurrencyEntity) spinnerValuta.getSelectedItem();
         TransactionType selectedType = (TransactionType) spinnerCategoria.getSelectedItem();
 
@@ -137,7 +159,14 @@ public class TransactionFragment extends Fragment {
             return;
         }
 
-        TransactionEntity transaction = new TransactionEntity(amount, selectedType, selectedCurrency.getCode());
+        String name = etNome.getText().toString();
+
+        if(name.isEmpty()) {
+            Toast.makeText(getContext(), "Please enter a name", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        TransactionEntity transaction = new TransactionEntity(name, amount, selectedType, selectedCurrency.getCode());
         homepageTransactionViewModel.insertTransaction(transaction);
 
         Toast.makeText(getContext(), "Transaction saved", Toast.LENGTH_SHORT).show();
@@ -148,15 +177,5 @@ public class TransactionFragment extends Fragment {
         Toast.makeText(getContext(), "Error: " + message, Toast.LENGTH_SHORT).show();
         currencyAdapter.clear();
         currencyAdapter.notifyDataSetChanged();
-    }
-
-    public CurrencyEntity getSelectedCurrency() {
-        if (spinnerValuta != null && currencyAdapter != null) {
-            int position = spinnerValuta.getSelectedItemPosition();
-            if (position >= 0 && position < currencyAdapter.getCount()) {
-                return currencyAdapter.getItem(position);
-            }
-        }
-        return null;
     }
 }

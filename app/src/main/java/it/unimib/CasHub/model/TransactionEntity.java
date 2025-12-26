@@ -12,10 +12,11 @@ public class TransactionEntity {
     @PrimaryKey(autoGenerate = true)
     private int id;
     private double amount;
+    private String name;
     private TransactionType type;
     private String currency;
 
-    public TransactionEntity(double amount, TransactionType type, String currency) {
+    public TransactionEntity(String name, double amount, TransactionType type, String currency) {
         this.amount = amount;
         this.type = type;
         this.currency = currency;
@@ -29,6 +30,13 @@ public class TransactionEntity {
         this.id = id;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
     public double getAmount() {
         return amount;
     }

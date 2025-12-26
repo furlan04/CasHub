@@ -3,6 +3,7 @@ package it.unimib.CasHub.adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -49,18 +50,23 @@ public class TransactionRecyclerAdapter extends RecyclerView.Adapter<Transaction
 
     public static class TransactionViewHolder extends RecyclerView.ViewHolder {
 
+        private final TextView nameTextView;
         private final TextView amountTextView;
         private final TextView typeTextView;
         private final TextView currencyTextView;
+        private final Button deleteButton;
 
         public TransactionViewHolder(@NonNull View itemView) {
             super(itemView);
+            nameTextView = itemView.findViewById(R.id.textViewName);
             amountTextView = itemView.findViewById(R.id.textViewAmount);
             typeTextView = itemView.findViewById(R.id.textViewType);
             currencyTextView = itemView.findViewById(R.id.textViewCurrency);
+            deleteButton = itemView.findViewById(R.id.buttonDelete);
         }
 
         public void bind(TransactionEntity transaction) {
+            nameTextView.setText(transaction.getName());
             amountTextView.setText(String.valueOf(transaction.getAmount()));
             typeTextView.setText(transaction.getType().toString());
             currencyTextView.setText(transaction.getCurrency());
