@@ -34,6 +34,14 @@ public class TransactionRecyclerAdapter extends RecyclerView.Adapter<Transaction
         holder.bind(transaction);
     }
 
+    public void clear() {
+        transactionList.clear();
+    }
+
+    public void addAll(List<TransactionEntity> transactions) {
+        transactionList.addAll(transactions);
+    }
+
     @Override
     public int getItemCount() {
         return transactionList.size();

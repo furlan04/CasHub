@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,9 +29,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import it.unimib.CasHub.BuildConfig;
 import it.unimib.CasHub.R;
 import it.unimib.CasHub.adapter.TransactionRecyclerAdapter;
+import it.unimib.CasHub.model.CurrencyEntity;
 import it.unimib.CasHub.model.Result;
 import it.unimib.CasHub.model.TransactionEntity;
 import it.unimib.CasHub.model.TransactionType;
@@ -63,7 +64,8 @@ public class HomepageTransactionFragment extends Fragment {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        homepageTransactionViewModel = new ViewModelProvider(this, new HomepageTransactionViewModelFactory(requireActivity().getApplication(), BuildConfig.DEBUG)).get(HomepageTransactionViewModel.class);
+        boolean debugMode = getResources().getBoolean(R.bool.debug);
+        homepageTransactionViewModel = new ViewModelProvider(this, new HomepageTransactionViewModelFactory(requireActivity().getApplication(), debugMode)).get(HomepageTransactionViewModel.class);
 
         homepageTransactionViewModel.getTransactions().observe(getViewLifecycleOwner(), result -> {
             if (result.isSuccess()) {
@@ -75,11 +77,36 @@ public class HomepageTransactionFragment extends Fragment {
             }
         });
 
+        observeTransactions();
+
         Button btnAddTransaction = view.findViewById(R.id.btnAddTransaction);
         btnAddTransaction.setOnClickListener(v -> {
             Navigation.findNavController(v)
                     .navigate(R.id.action_homepageTransactionFragment_to_transactionFragment);
         });
+    }
+
+    private void observeTransactions() {
+        homepageTransactionViewModel.getTransactions().observe(getViewLifecycleOwner(), result -> {
+            if (result.isSuccess()) {
+                List<TransactionEntity> transactions = ((Result.Success<List<TransactionEntity>>) result).getData();
+                if (transactions != null && !transactions.isEmpty()) {
+                    adapter.clear();
+                    adapter.addAll(transactions);
+                    adapter.notifyDataSetChanged();
+                } else {
+                    showError("No transactions found");
+                }
+            } else {
+                showError(((Result.Error<?>) result).getMessage());
+            }
+        });
+    }
+
+    private void showError(String message) {
+        Toast.makeText(getContext(), "Error: " + message, Toast.LENGTH_SHORT).show();
+        adapter.clear();
+        adapter.notifyDataSetChanged();
     }
 
     private void setupPieChart(List<TransactionEntity> transactions) {

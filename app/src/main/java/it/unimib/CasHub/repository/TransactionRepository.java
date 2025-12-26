@@ -4,6 +4,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import java.util.List;
 
+import it.unimib.CasHub.adapter.TransactionRecyclerAdapter;
 import it.unimib.CasHub.model.Result;
 import it.unimib.CasHub.model.TransactionEntity;
 import it.unimib.CasHub.source.transaction.BaseTransactionDataSource;
@@ -30,7 +31,9 @@ public class TransactionRepository implements TransactionCallback {
     }
 
     public void insertTransaction(TransactionEntity transaction) {
+        //remoteDataSource.insertTransaction(transaction);
         localDataSource.insertTransaction(transaction);
+        transactionsMutableLiveData.postValue(new Result.Success<>(List.of(transaction)));
     }
 
     @Override
