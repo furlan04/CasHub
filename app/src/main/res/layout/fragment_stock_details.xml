@@ -36,7 +36,9 @@
             android:layout_height="wrap_content"
             android:text="Symbol"
             android:textSize="16sp"
-            android:layout_marginBottom="8dp"/>
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"/>
+
 
         <TextView
             android:id="@+id/textCurrency"
@@ -53,6 +55,15 @@
             android:text="Exchange"
             android:textSize="16sp"
             android:layout_marginBottom="16dp"/>
+
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/weeklyChart"
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"/>
+
+
 
         <!-- Pulsante per aggiungere lo stock al portafoglio -->
         <Button

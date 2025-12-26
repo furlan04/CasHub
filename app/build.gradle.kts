@@ -19,7 +19,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
+        resValue("string", "sma_api_key", gradleLocalProperties(rootDir, providers).getProperty("sma_api_key"))
         resValue("string", "stocks_api_key", gradleLocalProperties(rootDir, providers).getProperty("stocks_api_key"))
         resValue("bool", "debug", gradleLocalProperties(rootDir, providers).getProperty("debug"))
         buildConfigField("String", "REALTIME_DB_URL", gradleLocalProperties(rootDir, providers).getProperty("REALTIME_DB_URL"))
