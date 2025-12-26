@@ -77,12 +77,20 @@ public class SelectionAgencyStockFragment extends Fragment implements AgencyResp
         // Adapter RecyclerView
         adapter = new AgencyRecyclerAdapter(agencyList, agency -> {
             Bundle bundle = new Bundle();
+
+            // Passa tutti i dati dell'agenzia
+            bundle.putString("agencySymbol", agency.getSymbol());
             bundle.putString("agencyName", agency.getName());
+            bundle.putString("agencyCurrency", agency.getCurrency());
+            bundle.putString("agencyExchange", agency.getExchange());
+            bundle.putString("agencyExchangeFull", agency.getExchangeFullName());
+
             if (getView() != null) {
                 androidx.navigation.Navigation.findNavController(getView())
                         .navigate(R.id.action_selectionAgencyStockFragment_to_stockDetailsFragment, bundle);
             }
         });
+
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         recyclerView.setAdapter(adapter);
 
