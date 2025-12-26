@@ -23,6 +23,14 @@ public class TransactionEntity {
         this.currency = currency;
     }
 
+    public TransactionEntity(TransactionEntity other) {
+        this.id = other.id;
+        this.name = other.name;
+        this.amount = other.amount;
+        this.type = other.type;
+        this.currency = other.currency;
+    }
+
     public int getId() {
         return id;
     }
@@ -40,6 +48,9 @@ public class TransactionEntity {
     }
     public double getAmount() {
         return amount;
+    }
+    public void setAmount(double amount) {
+        this.amount = amount;
     }
 
     public TransactionType getType() {

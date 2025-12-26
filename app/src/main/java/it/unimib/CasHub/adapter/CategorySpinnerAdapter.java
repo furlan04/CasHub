@@ -40,6 +40,8 @@ public class CategorySpinnerAdapter extends ArrayAdapter<TransactionType> {
         TransactionType category = getItem(position);
         if (category != null) {
             textView.setText(category.name());
+        } else {
+            textView.setText("Qualunque");
         }
 
         return convertView;
