@@ -17,4 +17,8 @@ public class TransactionAPIDataSource extends BaseTransactionDataSource {
         // so we call the failure callback.
         callback.onTransactionsFailureFromRemote(new Exception("Remote transaction source not implemented yet."));
     }
+    @Override
+    public void deleteTransaction(int transaction) {
+        callback.onTransactionsFailureFromRemote(new Exception("Remote transaction source not implemented yet."));
+    }
 }

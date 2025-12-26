@@ -17,9 +17,15 @@ import it.unimib.CasHub.model.TransactionEntity;
 public class TransactionRecyclerAdapter extends RecyclerView.Adapter<TransactionRecyclerAdapter.TransactionViewHolder> {
 
     private final List<TransactionEntity> transactionList;
+    private final OnDeleteButtonClickListener onDeleteButtonClickListener;
 
-    public TransactionRecyclerAdapter(List<TransactionEntity> transactionList) {
+    public interface OnDeleteButtonClickListener {
+        void onDeleteButtonClicked(TransactionEntity transaction);
+    }
+
+    public TransactionRecyclerAdapter(List<TransactionEntity> transactionList, OnDeleteButtonClickListener onDeleteButtonClickListener) {
         this.transactionList = transactionList;
+        this.onDeleteButtonClickListener = onDeleteButtonClickListener;
     }
 
     @NonNull
@@ -32,7 +38,7 @@ public class TransactionRecyclerAdapter extends RecyclerView.Adapter<Transaction
     @Override
     public void onBindViewHolder(@NonNull TransactionViewHolder holder, int position) {
         TransactionEntity transaction = transactionList.get(position);
-        holder.bind(transaction);
+        holder.bind(transaction, onDeleteButtonClickListener);
     }
 
     public void clear() {
@@ -65,11 +71,12 @@ public class TransactionRecyclerAdapter extends RecyclerView.Adapter<Transaction
             deleteButton = itemView.findViewById(R.id.buttonDelete);
         }
 
-        public void bind(TransactionEntity transaction) {
+        public void bind(TransactionEntity transaction, OnDeleteButtonClickListener listener) {
             nameTextView.setText(transaction.getName());
             amountTextView.setText(String.valueOf(transaction.getAmount()));
             typeTextView.setText(transaction.getType().toString());
             currencyTextView.setText(transaction.getCurrency());
+            deleteButton.setOnClickListener(v -> listener.onDeleteButtonClicked(transaction));
         }
     }
 }

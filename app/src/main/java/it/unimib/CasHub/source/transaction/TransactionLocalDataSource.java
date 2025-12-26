@@ -29,4 +29,11 @@ public class TransactionLocalDataSource extends BaseTransactionDataSource {
             callback.onTransactionInserted();
         });
     }
+    @Override
+    public void deleteTransaction(int transaction) {
+        TransactionRoomDatabase.databaseWriteExecutor.execute(() -> {
+            transactionDao.deleteTransaction(transaction);
+            callback.onTransactionDeleted();
+        });
+    }
 }

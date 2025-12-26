@@ -17,6 +17,7 @@ public class TransactionEntity {
     private String currency;
 
     public TransactionEntity(String name, double amount, TransactionType type, String currency) {
+        this.name = name;
         this.amount = amount;
         this.type = type;
         this.currency = currency;

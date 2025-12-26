@@ -25,6 +25,7 @@ import it.unimib.CasHub.adapter.CurrencySpinnerAdapter;
 import it.unimib.CasHub.model.CurrencyEntity;
 import it.unimib.CasHub.model.Result;
 import it.unimib.CasHub.model.TransactionEntity;
+import it.unimib.CasHub.model.TransactionMode;
 import it.unimib.CasHub.model.TransactionType;
 import it.unimib.CasHub.repository.ForexRepository;
 import it.unimib.CasHub.ui.home.viewmodel.HomepageTransactionViewModel;
@@ -34,10 +35,6 @@ import it.unimib.CasHub.ui.home.viewmodel.CurrencyListViewModelFactory;
 import it.unimib.CasHub.utils.ServiceLocator;
 
 public class TransactionFragment extends Fragment {
-    enum TransactionMode {
-        ENTRATA, USCITA
-    }
-
     private TransactionMode transactionMode;
     private Spinner spinnerValuta;
     private Spinner spinnerCategoria;

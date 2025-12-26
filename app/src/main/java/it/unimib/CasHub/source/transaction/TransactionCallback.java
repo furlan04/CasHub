@@ -9,4 +9,5 @@ public interface TransactionCallback {
     void onTransactionsFailureFromLocal(Exception exception);
     void onTransactionsFailureFromRemote(Exception exception);
     void onTransactionInserted();
+    void onTransactionDeleted();
 }

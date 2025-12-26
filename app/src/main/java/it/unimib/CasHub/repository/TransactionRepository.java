@@ -33,6 +33,9 @@ public class TransactionRepository implements TransactionCallback {
     public void insertTransaction(TransactionEntity transaction) {
         localDataSource.insertTransaction(transaction);
     }
+    public void deleteTransaction(int transaction) {
+        localDataSource.deleteTransaction(transaction);
+    }
 
     @Override
     public void onTransactionsSuccessFromLocal(List<TransactionEntity> transactions) {
@@ -51,6 +54,10 @@ public class TransactionRepository implements TransactionCallback {
 
     @Override
     public void onTransactionInserted() {
+        localDataSource.getTransactions();
+    }
+    @Override
+    public void onTransactionDeleted() {
         localDataSource.getTransactions();
     }
 }

@@ -25,20 +25,16 @@ import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.PercentFormatter;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import it.unimib.CasHub.R;
 import it.unimib.CasHub.adapter.TransactionRecyclerAdapter;
-import it.unimib.CasHub.model.CurrencyEntity;
 import it.unimib.CasHub.model.Result;
 import it.unimib.CasHub.model.TransactionEntity;
-import it.unimib.CasHub.model.TransactionType;
 import it.unimib.CasHub.ui.home.viewmodel.HomepageTransactionViewModel;
 import it.unimib.CasHub.ui.home.viewmodel.HomepageTransactionViewModelFactory;
 
-public class HomepageTransactionFragment extends Fragment {
+public class HomepageTransactionFragment extends Fragment implements TransactionRecyclerAdapter.OnDeleteButtonClickListener {
 
     private PieChart pieChart;
     private RecyclerView recyclerView;
@@ -63,7 +59,7 @@ public class HomepageTransactionFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerViewTransactions);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new TransactionRecyclerAdapter(new ArrayList<>());
+        adapter = new TransactionRecyclerAdapter(new ArrayList<>(), this);
         recyclerView.setAdapter(adapter);
 
         boolean debugMode = getResources().getBoolean(R.bool.debug);
@@ -88,6 +84,12 @@ public class HomepageTransactionFragment extends Fragment {
         });
     }
 
+    @Override
+    public void onDeleteButtonClicked(TransactionEntity transaction) {
+        int id = transaction.getId();
+        homepageTransactionViewModel.deleteTransaction(id);
+    }
+
     private void showError(String message) {
         Toast.makeText(getContext(), "Error: " + message, Toast.LENGTH_SHORT).show();
         adapter.clear();
@@ -95,28 +97,34 @@ public class HomepageTransactionFragment extends Fragment {
     }
 
     private void setupPieChart(List<TransactionEntity> transactions) {
-        Map<TransactionType, Float> categoryTotals = new HashMap<>();
+        float totalIncome = 0f;
+        float totalExpenses = 0f;
+
         for (TransactionEntity transaction : transactions) {
-            float total = categoryTotals.getOrDefault(transaction.getType(), 0f);
-            categoryTotals.put(transaction.getType(), total + (float) transaction.getAmount());
+            if (transaction.getAmount() >= 0) {
+                totalIncome += (float) transaction.getAmount();
+            } else {
+                totalExpenses += (float) Math.abs(transaction.getAmount());
+            }
         }
 
         ArrayList<PieEntry> entries = new ArrayList<>();
-        for (Map.Entry<TransactionType, Float> entry : categoryTotals.entrySet()) {
-            entries.add(new PieEntry(entry.getValue(), entry.getKey().toString()));
+        ArrayList<Integer> colors = new ArrayList<>();
+
+        if (totalIncome > 0) {
+            entries.add(new PieEntry(totalIncome, "Entrate"));
+            colors.add(Color.GREEN);
+        }
+        if (totalExpenses > 0) {
+            entries.add(new PieEntry(totalExpenses, "Uscite"));
+            colors.add(Color.RED);
         }
 
-        ArrayList<Integer> colors = new ArrayList<>();
-        colors.add(Color.parseColor("#4CAF50"));
-        colors.add(Color.parseColor("#2196F3"));
-        colors.add(Color.parseColor("#FFC107"));
-        colors.add(Color.parseColor("#F44336"));
-        colors.add(Color.parseColor("#9C27B0"));
-        colors.add(Color.parseColor("#00BCD4"));
-        colors.add(Color.parseColor("#FF5722"));
-        colors.add(Color.parseColor("#8BC34A"));
-        colors.add(Color.parseColor("#607D8B"));
-        colors.add(Color.parseColor("#E91E63"));
+        if (entries.isEmpty()) {
+            pieChart.clear();
+            pieChart.invalidate();
+            return;
+        }
 
         PieDataSet dataSet = new PieDataSet(entries, "");
         dataSet.setColors(colors);
