@@ -8,4 +8,5 @@ public interface TransactionCallback {
     void onTransactionsSuccessFromLocal(List<TransactionEntity> transactions);
     void onTransactionsFailureFromLocal(Exception exception);
     void onTransactionsFailureFromRemote(Exception exception);
+    void onTransactionInserted();
 }

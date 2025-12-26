@@ -63,43 +63,28 @@ public class HomepageTransactionFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerViewTransactions);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        adapter = new TransactionRecyclerAdapter(new ArrayList<>());
+        recyclerView.setAdapter(adapter);
 
         boolean debugMode = getResources().getBoolean(R.bool.debug);
-        homepageTransactionViewModel = new ViewModelProvider(this, new HomepageTransactionViewModelFactory(requireActivity().getApplication(), debugMode)).get(HomepageTransactionViewModel.class);
+        homepageTransactionViewModel = new ViewModelProvider(requireActivity(), new HomepageTransactionViewModelFactory(requireActivity().getApplication(), debugMode)).get(HomepageTransactionViewModel.class);
 
         homepageTransactionViewModel.getTransactions().observe(getViewLifecycleOwner(), result -> {
             if (result.isSuccess()) {
                 List<TransactionEntity> transactions = ((Result.Success<List<TransactionEntity>>) result).getData();
                 setupPieChart(transactions);
-                setupRecyclerView(transactions);
+                adapter.clear();
+                adapter.addAll(transactions);
+                adapter.notifyDataSetChanged();
             } else {
-                // Handle error
+                showError(((Result.Error<?>) result).getMessage());
             }
         });
-
-        observeTransactions();
 
         Button btnAddTransaction = view.findViewById(R.id.btnAddTransaction);
         btnAddTransaction.setOnClickListener(v -> {
             Navigation.findNavController(v)
                     .navigate(R.id.action_homepageTransactionFragment_to_transactionFragment);
-        });
-    }
-
-    private void observeTransactions() {
-        homepageTransactionViewModel.getTransactions().observe(getViewLifecycleOwner(), result -> {
-            if (result.isSuccess()) {
-                List<TransactionEntity> transactions = ((Result.Success<List<TransactionEntity>>) result).getData();
-                if (transactions != null && !transactions.isEmpty()) {
-                    adapter.clear();
-                    adapter.addAll(transactions);
-                    adapter.notifyDataSetChanged();
-                } else {
-                    showError("No transactions found");
-                }
-            } else {
-                showError(((Result.Error<?>) result).getMessage());
-            }
         });
     }
 
@@ -161,10 +146,5 @@ public class HomepageTransactionFragment extends Fragment {
 
         pieChart.setData(data);
         pieChart.invalidate();
-    }
-
-    private void setupRecyclerView(List<TransactionEntity> transactions) {
-        adapter = new TransactionRecyclerAdapter(transactions);
-        recyclerView.setAdapter(adapter);
     }
 }

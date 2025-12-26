@@ -26,6 +26,7 @@ public class TransactionLocalDataSource extends BaseTransactionDataSource {
     public void insertTransaction(TransactionEntity transaction) {
         TransactionRoomDatabase.databaseWriteExecutor.execute(() -> {
             transactionDao.insertTransaction(transaction);
+            callback.onTransactionInserted();
         });
     }
 }

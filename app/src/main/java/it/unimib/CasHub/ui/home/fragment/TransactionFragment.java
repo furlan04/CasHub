@@ -55,7 +55,7 @@ public class TransactionFragment extends Fragment {
 
         ForexRepository forexRepository = ServiceLocator.getInstance().getForexRepository(requireActivity().getApplication(), getResources().getBoolean(R.bool.debug));
         viewModel = new ViewModelProvider(this, new TransactionViewModelFactory(forexRepository)).get(TransactionViewModel.class);
-        homepageTransactionViewModel = new ViewModelProvider(this, new HomepageTransactionViewModelFactory(requireActivity().getApplication(), getResources().getBoolean(R.bool.debug))).get(HomepageTransactionViewModel.class);
+        homepageTransactionViewModel = new ViewModelProvider(requireActivity(), new HomepageTransactionViewModelFactory(requireActivity().getApplication(), getResources().getBoolean(R.bool.debug))).get(HomepageTransactionViewModel.class);
     }
 
     @Override

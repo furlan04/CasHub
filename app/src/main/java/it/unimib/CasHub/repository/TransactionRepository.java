@@ -26,14 +26,12 @@ public class TransactionRepository implements TransactionCallback {
     }
 
     public MutableLiveData<Result<List<TransactionEntity>>> getTransactions() {
-        remoteDataSource.getTransactions();
+        localDataSource.getTransactions();
         return transactionsMutableLiveData;
     }
 
     public void insertTransaction(TransactionEntity transaction) {
-        //remoteDataSource.insertTransaction(transaction);
         localDataSource.insertTransaction(transaction);
-        transactionsMutableLiveData.postValue(new Result.Success<>(List.of(transaction)));
     }
 
     @Override
@@ -48,6 +46,11 @@ public class TransactionRepository implements TransactionCallback {
 
     @Override
     public void onTransactionsFailureFromRemote(Exception exception) {
+        localDataSource.getTransactions();
+    }
+
+    @Override
+    public void onTransactionInserted() {
         localDataSource.getTransactions();
     }
 }
