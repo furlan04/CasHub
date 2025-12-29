@@ -113,32 +113,12 @@
                     android:textAppearance="@style/FontMainMedium"
                     android:textStyle="bold" />
 
-                <!-- BOTTONI CATEGORIA -->
-                <LinearLayout
+                <!-- SPINNER CATEGORIA -->
+                <Spinner
+                    android:id="@+id/spinnerCategoria"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <Button
-                        android:id="@+id/btnCategoria"
-                        style="@style/Widget.Material3.Button.ElevatedButton"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/transaction_select_category"
-                        android:textAppearance="@style/FontMainMedium" />
-
-                    <ImageButton
-                        android:id="@+id/btnMoreCategoria"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:layout_marginStart="@dimen/margin"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="@string/transaction_more_options"
-                        android:src="@android:drawable/ic_menu_more" />
-                </LinearLayout>
+                    android:layout_marginTop="8dp" />
 
                 <!-- TITOLO DIVIDI SPESA -->
                 <TextView

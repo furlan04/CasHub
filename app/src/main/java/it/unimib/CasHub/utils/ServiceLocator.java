@@ -4,12 +4,19 @@ import android.app.Application;
 
 import it.unimib.CasHub.database.CurrencyDao;
 import it.unimib.CasHub.database.CurrencyRoomDatabase;
+import it.unimib.CasHub.database.TransactionDao;
+import it.unimib.CasHub.database.TransactionRoomDatabase;
 import it.unimib.CasHub.repository.ForexRepository;
+import it.unimib.CasHub.repository.TransactionRepository;
 import it.unimib.CasHub.service.AgencyAPIService;
 import it.unimib.CasHub.service.ForexAPIService;
 import it.unimib.CasHub.source.BaseForexDataSource;
 import it.unimib.CasHub.source.ForexAPIDataSource;
 import it.unimib.CasHub.source.ForexMockDataSource;
+import it.unimib.CasHub.source.transaction.BaseTransactionDataSource;
+import it.unimib.CasHub.source.transaction.TransactionAPIDataSource;
+import it.unimib.CasHub.source.transaction.TransactionLocalDataSource;
+import it.unimib.CasHub.source.transaction.TransactionMockDataSource;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import retrofit2.Retrofit;
@@ -62,6 +69,10 @@ public class ServiceLocator {
         return CurrencyRoomDatabase.getDatabase(application);
     }
 
+    private TransactionRoomDatabase getTransactionDB(Application application) {
+        return TransactionRoomDatabase.getDatabase(application);
+    }
+
     public ForexRepository getForexRepository(Application application, boolean debugMode) {
         ForexAPIService apiService = getForexAPIService();
         JSONParserUtils jsonParserUtils = new JSONParserUtils(application);
@@ -76,5 +87,20 @@ public class ServiceLocator {
         }
 
         return new ForexRepository(dataSource, currencyDao);
+    }
+
+    public TransactionRepository getTransactionRepository(Application application, boolean debugMode) {
+        TransactionDao transactionDao = getTransactionDB(application).transactionDao();
+        JSONParserUtils jsonParserUtils = new JSONParserUtils(application);
+        BaseTransactionDataSource localDataSource;
+        BaseTransactionDataSource remoteDataSource = new TransactionAPIDataSource();
+
+        if (debugMode) {
+            localDataSource = new TransactionMockDataSource(jsonParserUtils);
+        } else {
+            localDataSource = new TransactionLocalDataSource(transactionDao);
+        }
+
+        return new TransactionRepository(localDataSource, remoteDataSource);
     }
 }

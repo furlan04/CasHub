@@ -1,0 +1,22 @@
+[
+  {
+    "amount": 75.0,
+    "type": "CIBO",
+    "currency": "EUR"
+  },
+  {
+    "amount": 25.0,
+    "type": "SVAGO",
+    "currency": "USD"
+  },
+  {
+    "amount": 120.0,
+    "type": "SHOPPING",
+    "currency": "EUR"
+  },
+  {
+    "amount": 45.5,
+    "type": "TRASPORTI",
+    "currency": "GBP"
+  }
+]

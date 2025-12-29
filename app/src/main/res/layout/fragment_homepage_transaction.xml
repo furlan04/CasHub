@@ -1,64 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:app="http://schemas.android.com/apk/res-auto"
-xmlns:tools="http://schemas.android.com/tools"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-tools:context=".ui.home.fragment.HomepageTransactionFragment">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ui.home.fragment.HomepageTransactionFragment">
 
-<!-- TITOLO -->
-<TextView
-    android:id="@+id/textViewTransaction"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="32dp"
-    android:text="@string/Monthly_expenses"
-    android:textSize="34sp"
-    app:layout_constraintTop_toTopOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintEnd_toEndOf="parent" />
+    <com.github.mikephil.charting.charts.PieChart
+        android:id="@+id/pieChartTransaction"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
-    <!-- GRAFICO SPESE -->
     <LinearLayout
-        android:id="@+id/linearLayoutGraficoTransaction"
-        android:layout_width="0dp"
-        android:layout_height="250dp"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:layout_marginTop="24dp"
-        android:layout_marginHorizontal="32dp"
-        app:layout_constraintTop_toBottomOf="@id/textViewTransaction"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
 
-        <com.github.mikephil.charting.charts.PieChart
-            android:id="@+id/pieChartTransaction"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+        <Spinner
+            android:id="@+id/spinnerBaseCurrency"
+            android:layout_width="177dp"
+            android:layout_height="wrap_content"
             android:layout_margin="8dp" />
+
+        <TextView
+            android:id="@+id/balanceTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="Saldo: " />
+
     </LinearLayout>
 
-<!-- BOTTONE PER AGGIUNGER/RIMUOVERE E UNA TRANSAZIOE-->
-<LinearLayout
-    android:id="@+id/linearLayoutBottoni"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:layout_marginTop="32dp"
-    android:layout_marginHorizontal="32dp"
-    app:layout_constraintTop_toBottomOf="@id/linearLayoutGraficoTransaction"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintEnd_toEndOf="parent">
+    <Spinner
+        android:id="@+id/spinnerCategory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewTransactions"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
     <Button
         android:id="@+id/btnAddTransaction"
-        style="@style/Widget.Material3.Button.ElevatedButton"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="@string/add_transaction"
-        android:textAllCaps="false"
-        android:textAppearance="@style/FontMainMedium"/>
+        android:layout_gravity="center_horizontal"
+        android:text="Add Transaction" />
+
 </LinearLayout>
-</androidx.constraintlayout.widget.ConstraintLayout>
