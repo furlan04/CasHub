@@ -39,8 +39,7 @@ import it.unimib.CasHub.utils.Constants;
 import it.unimib.CasHub.utils.ServiceLocator;
 
 public class RegistrationFragment extends Fragment {
-    private FirebaseAuth mAuth;
-    private DatabaseReference realtimeDb;
+
     private UserViewModel userViewModel;
     private TextInputEditText textInputEmail, textInputPassword, textInputName;
 
@@ -57,157 +56,78 @@ public class RegistrationFragment extends Fragment {
         userViewModel.setAuthenticationError(false);
     }
 
-    /*
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_registration, container, false);
-    }
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        // Inizializza le view
-        TextInputEditText inputName = view.findViewById(R.id.textInputName);
-        TextInputEditText inputEmail = view.findViewById(R.id.textInputEmail);
-        TextInputEditText inputPassword = view.findViewById(R.id.textInputPassword);
-        Button registerButton = view.findViewById(R.id.register_button);
-        Button goToLoginButton = view.findViewById(R.id.goToLogin);
-        Button registerGoogleButton = view.findViewById(R.id.register_google_button);
-
-        mAuth = FirebaseAuth.getInstance();
-        realtimeDb = FirebaseDatabase.getInstance(Constants.REALTIME_DB_URL).getReference("users");
-
-        // Listener per il bottone Registrati
-        registerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String name = inputName.getText().toString();
-                String email = inputEmail.getText().toString();
-                String password = inputPassword.getText().toString();
-
-                // Validazione
-                if (name.isEmpty()) {
-                    inputName.setError("Inserisci un nome");
-                    return;
-                }
-
-                if (!isEmailOk(email)) {
-                    inputEmail.setError(getString(R.string.check_email));
-                    return;
-                }
-
-                if (!isPasswordOk(password)) {
-                    inputPassword.setError(getString(R.string.check_password));
-                    return;
-                }
-
-                mAuth.createUserWithEmailAndPassword(email, password)
-                        .addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-
-                                // UID utente appena creato
-                                String uid = mAuth.getCurrentUser().getUid();
-
-                                // Dati utente da salvare su Firestore
-                                Map<String, Object> user = new HashMap<>();
-                                user.put("name", name);
-                                user.put("email", email);
-                                user.put("createdAt", System.currentTimeMillis());
-
-                                // SALVATAGGIO SU REALTIME DATABASE
-                                realtimeDb.child(uid).setValue(user)
-                                        .addOnSuccessListener(aVoid -> {
-                                            // NAVIGAZIONE SICURA
-                                            NavHostFragment.findNavController(RegistrationFragment.this)
-                                                    .navigate(R.id.action_registrationFragment_to_mainActivity);
-                                        })
-                                        .addOnFailureListener(e -> {
-                                            Toast.makeText(getContext(),
-                                                    "Errore salvataggio Realtime DB: " + e.getMessage(),
-                                                    Toast.LENGTH_LONG).show();
-                                        });
-
-                            } else {
-                                Toast.makeText(
-                                        getContext(),
-                                        "Registrazione fallita: " + task.getException().getMessage(),
-                                        Toast.LENGTH_LONG
-                                ).show();
-                            }
-                        });
-            }
-        });
-
-        // Listener per tornare al login
-        goToLoginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Navigation.findNavController(v).navigate(R.id.action_registrationFragment_to_loginFragment);
-            }
-        });
-
-        // Gestisci il bottone Google se presente
-        if (registerGoogleButton != null) {
-            registerGoogleButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // TODO: Implementa registrazione con Google
-                }
-            });
-        }
-    }
-    */
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_registration, container, false);
 
         textInputName = view.findViewById(R.id.textInputName);
         textInputEmail = view.findViewById(R.id.textInputEmail);
         textInputPassword = view.findViewById(R.id.textInputPassword);
 
-        view.findViewById(R.id.register_button).setOnClickListener(v -> {
+        Button registerButton = view.findViewById(R.id.register_button);
+
+        registerButton.setOnClickListener(v -> {
+
             String name = textInputName.getText().toString().trim();
             String email = textInputEmail.getText().toString().trim();
             String password = textInputPassword.getText().toString().trim();
 
-            if (isEmailOk(email) & isPasswordOk(password)) {
-                //binding.progressBar.setVisibility(View.VISIBLE);
-                if (!userViewModel.isAuthenticationError()) {
-                    userViewModel.getUserMutableLiveData(name, email, password, false).observe(
-                            getViewLifecycleOwner(), result -> {
+            if (isEmailOk(email) && isPasswordOk(password)) {
+
+                // 🔹 1. Reset del LiveData per evitare di leggere errori vecchi
+                userViewModel.resetUserMutableLiveData();
+
+                // 🔹 2. Rimuove eventuali observer precedenti
+                userViewModel.getUserMutableLiveDataRegistration(name, email, password)
+                        .removeObservers(getViewLifecycleOwner());
+
+                // 🔹 3. Osserva il nuovo risultato
+                userViewModel.getUserMutableLiveDataRegistration(name, email, password)
+                        .observe(getViewLifecycleOwner(), result -> {
+
+                            if (result != null) {
+
                                 if (result.isSuccess()) {
-                                    User user = (User) ((Result.Success) result).getData();
-                                    //saveLoginData(email, password, user.getIdToken());
+                                    // Registrazione riuscita
                                     userViewModel.setAuthenticationError(false);
+
                                     Navigation.findNavController(view).navigate(
                                             R.id.action_registrationFragment_to_mainActivity);
+
                                 } else {
+                                    // Registrazione fallita
                                     userViewModel.setAuthenticationError(true);
+
+                                    String errorMsg = getErrorMessage(
+                                            ((Result.Error) result).getMessage());
+
                                     Snackbar.make(requireActivity().findViewById(android.R.id.content),
-                                            getErrorMessage(((Result.Error) result).getMessage()),
-                                            Snackbar.LENGTH_SHORT).show();
+                                            errorMsg, Snackbar.LENGTH_SHORT).show();
+
+                                    // 🔹 4. Pulisce il risultato per il prossimo click
+                                    userViewModel.resetUserMutableLiveData();
                                 }
-                            });
-                } else {
-                    userViewModel.getUser(name, email, password, false);
-                }
-                //binding.progressBar.setVisibility(View.GONE);
+                            }
+                        });
+
             } else {
-                userViewModel.setAuthenticationError(true);
                 Snackbar.make(requireActivity().findViewById(android.R.id.content),
                         R.string.error_email_login, Snackbar.LENGTH_SHORT).show();
             }
         });
 
-
         return view;
     }
 
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        view.findViewById(R.id.goToLogin).setOnClickListener(v ->
+                Navigation.findNavController(v).navigate(R.id.action_registrationFragment_to_loginFragment));
+
+    }
     private String getErrorMessage(String message) {
         switch(message) {
             case WEAK_PASSWORD_ERROR:

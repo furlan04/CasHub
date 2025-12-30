@@ -112,16 +112,8 @@
                 android:paddingEnd="16dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Password dimenticata -->
-        <Button
-            android:id="@+id/forgotPasswordButton"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_marginBottom="8dp"
-            android:textAppearance="@style/FontMainSmall"
-            android:text="@string/did_you_forget_your_password" />
+
+
 
         <!-- Accedi -->
         <Button

@@ -49,8 +49,8 @@
 
     <!-- Errors -->
     <string name="error_email_login">Check the email address</string>
+    <string name="error_credentials_login">Check your credentials</string>
     <string name="error_password_login">The password must have at least 8 characters</string>
-    <string name="error_retrieving_news">There was an error retrieving the news</string>
     <string name="error_no_internet">No internet connection</string>
     <string name="error_collision_user">This email is already registered</string>
     <string name="error_unexpected">Unexpected error</string>
