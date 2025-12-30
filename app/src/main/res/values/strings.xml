@@ -47,6 +47,14 @@
     <string name="Stock_name_id">Stock Name</string>
     <string name="Quantity">Quantity</string>
 
+    <!-- Errors -->
+    <string name="error_email_login">Check the email address</string>
+    <string name="error_password_login">The password must have at least 8 characters</string>
+    <string name="error_retrieving_news">There was an error retrieving the news</string>
+    <string name="error_no_internet">No internet connection</string>
+    <string name="error_collision_user">This email is already registered</string>
+    <string name="error_unexpected">Unexpected error</string>
+    <string name="error_invalid_user">Invalid user</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
