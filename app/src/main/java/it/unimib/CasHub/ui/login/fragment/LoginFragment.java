@@ -1,10 +1,15 @@
 package it.unimib.CasHub.ui.login.fragment;
 
+import static it.unimib.CasHub.utils.Constants.INVALID_USER_ERROR;
+import static it.unimib.CasHub.utils.Constants.USER_COLLISION_ERROR;
+import static it.unimib.CasHub.utils.Constants.WEAK_PASSWORD_ERROR;
+
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import android.view.LayoutInflater;
@@ -15,22 +20,24 @@ import android.widget.Toast;
 
 import org.apache.commons.validator.routines.EmailValidator;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import it.unimib.CasHub.R;
+import it.unimib.CasHub.model.Result;
+import it.unimib.CasHub.model.User;
+import it.unimib.CasHub.repository.user.IUserRepository;
+import it.unimib.CasHub.ui.login.viewmodel.UserViewModel;
+import it.unimib.CasHub.ui.login.viewmodel.UserViewModelFactory;
 import it.unimib.CasHub.utils.Constants;
+import it.unimib.CasHub.utils.ServiceLocator;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link LoginFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class LoginFragment extends Fragment {
-    private FirebaseAuth mAuth;
-    private DatabaseReference realtimeDb;
+    private TextInputEditText editTextEmail, editTextPassword;
+    private UserViewModel userViewModel;
     public static LoginFragment newInstance(String param1, String param2) {
         LoginFragment fragment = new LoginFragment();
         return fragment;
@@ -40,9 +47,12 @@ public class LoginFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        mAuth = FirebaseAuth.getInstance();
-        // URL esplicito del tuo Realtime Database
-        realtimeDb = FirebaseDatabase.getInstance(Constants.REALTIME_DB_URL).getReference("users");
+
+        IUserRepository userRepository = ServiceLocator.getInstance()
+                .getUserRepository(requireActivity().getApplication());
+
+        userViewModel = new ViewModelProvider(requireActivity(),
+                new UserViewModelFactory(userRepository)).get(UserViewModel.class);
     }
 
     @Override
@@ -52,6 +62,7 @@ public class LoginFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_login, container, false);
     }
 
+    /*
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -127,11 +138,97 @@ public class LoginFragment extends Fragment {
         });
     }
 
-    boolean isEmailOk(String email) {
-        return EmailValidator.getInstance().isValid(email);
+     */
+
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        editTextEmail = view.findViewById(R.id.textInputEmail);
+        editTextPassword = view.findViewById(R.id.textInputPassword);
+
+        Button loginButton = view.findViewById(R.id.login_button);
+        Button signupButton = view.findViewById(R.id.goToRegistration);
+
+        // 🔐 LOGIN EMAIL / PASSWORD REALE
+        loginButton.setOnClickListener(v -> {
+
+            String name = null;
+            String email = editTextEmail.getText().toString().trim();
+            String password = editTextPassword.getText().toString().trim();
+
+            if (isEmailOk(email) && isPasswordOk(password)) {
+
+                userViewModel.getUserMutableLiveData(name, email, password, true)
+                        .observe(getViewLifecycleOwner(), result -> {
+
+                            if (result.isSuccess()) {
+                                User user = (User) ((Result.Success) result).getData();
+                                //saveLoginData(email, password, user.getIdToken());
+                                userViewModel.setAuthenticationError(false);
+                                Navigation.findNavController(view).navigate(
+                                        R.id.action_loginFragment_to_mainActivity);
+
+                            } else {
+                                userViewModel.setAuthenticationError(true);
+                                Snackbar.make(requireActivity().findViewById(android.R.id.content),
+                                        getErrorMessage(((Result.Error) result).getMessage()),
+                                        Snackbar.LENGTH_SHORT).show();
+                            }
+                        });
+
+            } else {
+                Snackbar.make(requireActivity().findViewById(android.R.id.content),
+                        R.string.error_email_login, Snackbar.LENGTH_SHORT).show();
+            }
+        });
+
+        signupButton.setOnClickListener(v ->
+                Navigation.findNavController(v)
+                        .navigate(R.id.action_loginFragment_to_registrationFragment));
     }
 
-    boolean isPasswordOk(String password) {
-        return password.length() > 7;
+    private String getErrorMessage(String message) {
+        switch(message) {
+            case WEAK_PASSWORD_ERROR:
+                return requireActivity().getString(R.string.error_password_login);
+                case INVALID_USER_ERROR:
+                    return requireActivity().getString(R.string.error_invalid_user);
+            default:
+                return requireActivity().getString(R.string.error_unexpected);
+        }
+    }
+
+    // Funzioni di validazione
+    /**
+     * Checks if the email address has a correct format.
+     * @param email The email address to be validated
+     * @return true if the email address is valid, false otherwise
+     */
+    private boolean isEmailOk(String email) {
+        // Check if the email is valid through the use of this library:
+        // https://commons.apache.org/proper/commons-validator/
+        if (!EmailValidator.getInstance().isValid((email))) {
+            editTextEmail.setError(getString(R.string.error_email_login));
+            return false;
+        } else {
+            editTextEmail.setError(null);
+            return true;
+        }
+    }
+
+    /**
+     * Checks if the password is not empty.
+     * @param password The password to be checked
+     * @return True if the password has at least 6 characters, false otherwise
+     */
+    private boolean isPasswordOk(String password) {
+        // Check if the password length is correct
+        if (password.isEmpty() || password.length() < Constants.MINIMUM_LENGTH_PASSWORD) {
+            editTextPassword.setError(getString(R.string.error_password_login));
+            return false;
+        } else {
+            editTextPassword.setError(null);
+            return true;
+        }
     }
 }

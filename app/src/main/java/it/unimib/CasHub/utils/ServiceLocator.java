@@ -8,6 +8,8 @@ import it.unimib.CasHub.database.TransactionDao;
 import it.unimib.CasHub.database.TransactionRoomDatabase;
 import it.unimib.CasHub.repository.ForexRepository;
 import it.unimib.CasHub.repository.TransactionRepository;
+import it.unimib.CasHub.repository.user.IUserRepository;
+import it.unimib.CasHub.repository.user.UserRepository;
 import it.unimib.CasHub.service.AgencyAPIService;
 import it.unimib.CasHub.service.ForexAPIService;
 import it.unimib.CasHub.source.BaseForexDataSource;
@@ -17,6 +19,10 @@ import it.unimib.CasHub.source.transaction.BaseTransactionDataSource;
 import it.unimib.CasHub.source.transaction.TransactionAPIDataSource;
 import it.unimib.CasHub.source.transaction.TransactionLocalDataSource;
 import it.unimib.CasHub.source.transaction.TransactionMockDataSource;
+import it.unimib.CasHub.source.user.BaseUserAuthenticationRemoteDataSource;
+import it.unimib.CasHub.source.user.BaseUserDataRemoteDataSource;
+import it.unimib.CasHub.source.user.UserAuthenticationFirebaseDataSource;
+import it.unimib.CasHub.source.user.UserFirebaseDataSource;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import retrofit2.Retrofit;
@@ -102,5 +108,19 @@ public class ServiceLocator {
         }
 
         return new TransactionRepository(localDataSource, remoteDataSource);
+    }
+
+    public IUserRepository getUserRepository(Application application) {
+        SharedPreferencesUtils sharedPreferencesUtil = new SharedPreferencesUtils(application);
+
+        BaseUserAuthenticationRemoteDataSource userRemoteAuthenticationDataSource =
+                new UserAuthenticationFirebaseDataSource();
+
+        BaseUserDataRemoteDataSource userDataRemoteDataSource =
+                new UserFirebaseDataSource(sharedPreferencesUtil);
+
+
+        return new UserRepository(userRemoteAuthenticationDataSource,
+                userDataRemoteDataSource);
     }
 }
