@@ -27,13 +27,12 @@ public class UserRepository implements IUserRepository, UserResponseCallback {
     }
 
     @Override
-    public MutableLiveData<Result> getUserLogin(String email, String password) {
-        signIn(email, password);
-        return userMutableLiveData;
-    }
-    @Override
-    public MutableLiveData<Result> getUserRegistration(String name, String email, String password) {
-        signUp(name, email, password);
+    public MutableLiveData<Result> getUser(String name, String email, String password, boolean isUserRegistered) {
+        if (isUserRegistered) {
+            signIn(email, password);
+        } else {
+            signUp(name, email, password);
+        }
         return userMutableLiveData;
     }
 

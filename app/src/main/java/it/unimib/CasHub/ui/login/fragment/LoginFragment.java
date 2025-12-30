@@ -62,6 +62,84 @@ public class LoginFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_login, container, false);
     }
 
+    /*
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+
+        TextInputEditText inputEmail = view.findViewById(R.id.textInputEmail);
+        TextInputEditText inputPassword = view.findViewById(R.id.textInputPassword);
+        Button loginButton = view.findViewById(R.id.login_button);
+        Button goToRegistrationButton = view.findViewById(R.id.goToRegistration);
+
+        // Listener per login
+        loginButton.setOnClickListener(v -> {
+            String email = inputEmail.getText().toString().trim();
+            String password = inputPassword.getText().toString().trim();
+
+            if (!isEmailOk(email)) {
+                inputEmail.setError(getString(R.string.check_email));
+                return;
+            }
+            if (!isPasswordOk(password)) {
+                inputPassword.setError(getString(R.string.check_password));
+                return;
+            }
+
+            // Firebase Authentication login
+            mAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            // Login riuscito, recupera UID
+                            String uid = mAuth.getCurrentUser().getUid();
+
+                            // Recupera dati extra da Realtime Database
+                            realtimeDb.child(uid).get().addOnSuccessListener(snapshot -> {
+                                if (snapshot.exists()) {
+                                    String name = snapshot.child("name").getValue(String.class);
+                                    // Puoi usare altri campi se li hai
+                                    Toast.makeText(getContext(),
+                                            "Benvenuto " + name,
+                                            Toast.LENGTH_SHORT).show();
+
+                                    // Navigazione verso MainActivity
+                                    Navigation.findNavController(view)
+                                            .navigate(R.id.action_loginFragment_to_mainActivity);
+
+                                } else {
+                                    Toast.makeText(getContext(),
+                                            "Dati utente non trovati nel database",
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            }).addOnFailureListener(e -> {
+                                Toast.makeText(getContext(),
+                                        "Errore nel recupero dei dati: " + e.getMessage(),
+                                        Toast.LENGTH_LONG).show();
+                            });
+
+                        } else {
+                            new androidx.appcompat.app.AlertDialog.Builder(getContext())
+                                    .setTitle("Error")
+                                    .setMessage("Failed login: check your login credentials")
+                                    .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                                    .show();
+                        }
+                    });
+        });
+
+
+
+        goToRegistrationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Navigation.findNavController(v).navigate(R.id.action_loginFragment_to_registrationFragment);
+            }
+        });
+    }
+
+     */
+
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
@@ -71,43 +149,30 @@ public class LoginFragment extends Fragment {
         Button loginButton = view.findViewById(R.id.login_button);
         Button signupButton = view.findViewById(R.id.goToRegistration);
 
+        // 🔐 LOGIN EMAIL / PASSWORD REALE
         loginButton.setOnClickListener(v -> {
+
+            String name = null;
             String email = editTextEmail.getText().toString().trim();
             String password = editTextPassword.getText().toString().trim();
 
             if (isEmailOk(email) && isPasswordOk(password)) {
 
-                // 1. Reset dello stato nel ViewModel (fondamentale per non leggere vecchi errori)
-                userViewModel.resetUserMutableLiveData();
-
-                // 2. Recupero il LiveData (che ora nel ViewModel deve forzare una nuova chiamata)
-                // e rimuovo eventuali observer precedenti per sicurezza
-                userViewModel.getUserMutableLiveDataLogin(email, password)
-                        .removeObservers(getViewLifecycleOwner());
-
-                // 3. Aggiungo l'observer
-                userViewModel.getUserMutableLiveDataLogin(email, password)
+                userViewModel.getUserMutableLiveData(name, email, password, true)
                         .observe(getViewLifecycleOwner(), result -> {
-                            if (result != null) {
-                                if (result.isSuccess()) {
-                                    // Login successo
-                                    userViewModel.setAuthenticationError(false);
-                                    Navigation.findNavController(view).navigate(
-                                            R.id.action_loginFragment_to_mainActivity);
-                                } else {
-                                    // Login fallito
-                                    userViewModel.setAuthenticationError(true);
 
-                                    // Recupera il messaggio d'errore specifico dal switch getErrorMessage
-                                    String errorMsg = getErrorMessage(((Result.Error) result).getMessage());
+                            if (result.isSuccess()) {
+                                User user = (User) ((Result.Success) result).getData();
+                                //saveLoginData(email, password, user.getIdToken());
+                                userViewModel.setAuthenticationError(false);
+                                Navigation.findNavController(view).navigate(
+                                        R.id.action_loginFragment_to_mainActivity);
 
-                                    Snackbar.make(requireActivity().findViewById(android.R.id.content),
-                                            errorMsg, Snackbar.LENGTH_SHORT).show();
-
-                                    // Una volta mostrato l'errore, "puliamo" il risultato
-                                    // così al prossimo click l'observer non ri-legge subito questo errore
-                                    userViewModel.resetUserMutableLiveData();
-                                }
+                            } else {
+                                userViewModel.setAuthenticationError(true);
+                                Snackbar.make(requireActivity().findViewById(android.R.id.content),
+                                        getErrorMessage(((Result.Error) result).getMessage()),
+                                        Snackbar.LENGTH_SHORT).show();
                             }
                         });
 
@@ -123,20 +188,13 @@ public class LoginFragment extends Fragment {
     }
 
     private String getErrorMessage(String message) {
-        // Aggiungi INVALID_CREDENTIALS_ERROR per evitare che finisca in "Unexpected error"
         switch(message) {
             case WEAK_PASSWORD_ERROR:
                 return requireActivity().getString(R.string.error_password_login);
-            case INVALID_USER_ERROR:
-                return requireActivity().getString(R.string.error_invalid_user);
-            case Constants.INVALID_CREDENTIALS_ERROR: // <--- Fondamentale aggiungerlo
-                return requireActivity().getString(R.string.error_credentials_login); // "Credenziali non valide"
-            case USER_COLLISION_ERROR:
-                return requireActivity().getString(R.string.error_collision_user);
+                case INVALID_USER_ERROR:
+                    return requireActivity().getString(R.string.error_invalid_user);
             default:
-                // Log per debug: così vedi in console cosa sta arrivando davvero se fallisce
-                android.util.Log.e("LOGIN_DEBUG", "Errore non gestito: " + message);
-                return requireActivity().getString(R.string.error_unexpected) + message;
+                return requireActivity().getString(R.string.error_unexpected);
         }
     }
 

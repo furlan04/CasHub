@@ -3,6 +3,7 @@ package it.unimib.CasHub.ui.login.viewmodel;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import java.util.Set;
 
 import it.unimib.CasHub.model.Result;
 import it.unimib.CasHub.model.User;
@@ -20,22 +21,12 @@ public class UserViewModel extends ViewModel {
         authenticationError = false;
     }
 
-    public MutableLiveData<Result> getUserMutableLiveDataLogin(
-            String email, String password) {
-        getUserDataLogin(email, password);
+    public MutableLiveData<Result> getUserMutableLiveData(
+            String name, String email, String password, boolean isUserRegistered) {
+        //if (userMutableLiveData == null) {
+            getUserData(name, email, password, isUserRegistered);
+        //}
         return userMutableLiveData;
-    }
-    public MutableLiveData<Result> getUserMutableLiveDataRegistration(
-            String name, String email, String password) {
-        getUserDataRegistration(name, email, password);
-        return userMutableLiveData;
-    }
-
-    // Aggiungi questo metodo per "pulire" il risultato nel Fragment dopo aver mostrato l'errore
-    public void resetUserMutableLiveData() {
-        if (userMutableLiveData != null) {
-            userMutableLiveData.setValue(null);
-        }
     }
 
     public MutableLiveData<Result> getGoogleUserMutableLiveData(String token) {
@@ -59,10 +50,9 @@ public class UserViewModel extends ViewModel {
         return userMutableLiveData;
     }
 
-    public void getUserRegistration(String name, String email, String password) {
-        userRepository.getUserRegistration(name, email, password);
+    public void getUser(String name, String email, String password, boolean isUserRegistered) {
+        userRepository.getUser(name, email, password, isUserRegistered);
     }
-
 
     public boolean isAuthenticationError() {
         return authenticationError;
@@ -72,11 +62,8 @@ public class UserViewModel extends ViewModel {
         this.authenticationError = authenticationError;
     }
 
-    private void getUserDataLogin(String email, String password) {
-        userMutableLiveData = userRepository.getUserLogin(email, password);
-    }
-    private void getUserDataRegistration(String name, String email, String password) {
-        userMutableLiveData = userRepository.getUserRegistration(name, email, password);
+    private void getUserData(String name, String email, String password, boolean isUserRegistered) {
+        userMutableLiveData = userRepository.getUser(name, email, password, isUserRegistered);
     }
 
     private void getUserData(String token) {

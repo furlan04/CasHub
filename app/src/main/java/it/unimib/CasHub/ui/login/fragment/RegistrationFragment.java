@@ -39,7 +39,6 @@ import it.unimib.CasHub.utils.Constants;
 import it.unimib.CasHub.utils.ServiceLocator;
 
 public class RegistrationFragment extends Fragment {
-
     private UserViewModel userViewModel;
     private TextInputEditText textInputEmail, textInputPassword, textInputName;
 
@@ -59,75 +58,63 @@ public class RegistrationFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
+        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_registration, container, false);
 
         textInputName = view.findViewById(R.id.textInputName);
         textInputEmail = view.findViewById(R.id.textInputEmail);
         textInputPassword = view.findViewById(R.id.textInputPassword);
 
-        Button registerButton = view.findViewById(R.id.register_button);
-
-        registerButton.setOnClickListener(v -> {
-
+        view.findViewById(R.id.register_button).setOnClickListener(v -> {
             String name = textInputName.getText().toString().trim();
             String email = textInputEmail.getText().toString().trim();
             String password = textInputPassword.getText().toString().trim();
 
+            // 1. Usa && per la validazione
             if (isEmailOk(email) && isPasswordOk(password)) {
 
-                // 🔹 1. Reset del LiveData per evitare di leggere errori vecchi
-                userViewModel.resetUserMutableLiveData();
+                // 2. RIMUOVI il controllo "if (!userViewModel.isAuthenticationError())"
+                // Dobbiamo sempre osservare il risultato della chiamata corrente.
 
-                // 🔹 2. Rimuove eventuali observer precedenti
-                userViewModel.getUserMutableLiveDataRegistration(name, email, password)
-                        .removeObservers(getViewLifecycleOwner());
-
-                // 🔹 3. Osserva il nuovo risultato
-                userViewModel.getUserMutableLiveDataRegistration(name, email, password)
-                        .observe(getViewLifecycleOwner(), result -> {
-
+                userViewModel.getUserMutableLiveData(name, email, password, false).observe(
+                        getViewLifecycleOwner(), result -> {
                             if (result != null) {
-
                                 if (result.isSuccess()) {
-                                    // Registrazione riuscita
+                                    // Reset dell'errore e navigazione
                                     userViewModel.setAuthenticationError(false);
-
                                     Navigation.findNavController(view).navigate(
                                             R.id.action_registrationFragment_to_mainActivity);
-
                                 } else {
-                                    // Registrazione fallita
+                                    // Gestione errore
                                     userViewModel.setAuthenticationError(true);
-
-                                    String errorMsg = getErrorMessage(
-                                            ((Result.Error) result).getMessage());
-
                                     Snackbar.make(requireActivity().findViewById(android.R.id.content),
-                                            errorMsg, Snackbar.LENGTH_SHORT).show();
-
-                                    // 🔹 4. Pulisce il risultato per il prossimo click
-                                    userViewModel.resetUserMutableLiveData();
+                                            getErrorMessage(((Result.Error) result).getMessage()),
+                                            Snackbar.LENGTH_SHORT).show();
                                 }
                             }
                         });
-
             } else {
-                Snackbar.make(requireActivity().findViewById(android.R.id.content),
-                        R.string.error_email_login, Snackbar.LENGTH_SHORT).show();
+                // Errore di validazione locale (input vuoti o malformati)
+                userViewModel.setAuthenticationError(true);
+                // Nota: isEmailOk e isPasswordOk settano già l'error sugli EditText
             }
         });
+
 
         return view;
     }
 
+
+    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        view.findViewById(R.id.goToLogin).setOnClickListener(v ->
-                Navigation.findNavController(v).navigate(R.id.action_registrationFragment_to_loginFragment));
+        Button goToLoginButton = view.findViewById(R.id.goToLogin);
+        goToLoginButton.setOnClickListener(v ->
+                Navigation.findNavController(v)
+                        .navigate(R.id.action_registrationFragment_to_loginFragment));
 
     }
+
     private String getErrorMessage(String message) {
         switch(message) {
             case WEAK_PASSWORD_ERROR:
