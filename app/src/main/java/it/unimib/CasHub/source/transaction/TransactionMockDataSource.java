@@ -18,9 +18,9 @@ public class TransactionMockDataSource extends BaseTransactionDataSource {
     public void getTransactions() {
         List<TransactionEntity> mockTransactions = jsonParserUtils.parseTransactions(Constants.SAMPLE_TRANSACTIONS_JSON);
         if (mockTransactions != null) {
-            callback.onTransactionsSuccessFromLocal(mockTransactions);
+            callback.onTransactionsSuccess(mockTransactions);
         } else {
-            callback.onTransactionsFailureFromLocal(new Exception("Error parsing mock transactions"));
+            callback.onTransactionsFailure(new Exception("Error parsing mock transactions"));
         }
     }
 
@@ -30,7 +30,7 @@ public class TransactionMockDataSource extends BaseTransactionDataSource {
         // or you could add the transaction to an in-memory list.
     }
     @Override
-    public void deleteTransaction(int transaction) {
+    public void deleteTransaction(String transactionId) {
         // In a mock data source, you might not need to implement this
     }
 }

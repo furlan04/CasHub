@@ -26,38 +26,33 @@ public class TransactionRepository implements TransactionCallback {
     }
 
     public MutableLiveData<Result<List<TransactionEntity>>> getTransactions() {
-        localDataSource.getTransactions();
+        remoteDataSource.getTransactions();
         return transactionsMutableLiveData;
     }
 
     public void insertTransaction(TransactionEntity transaction) {
-        localDataSource.insertTransaction(transaction);
+        remoteDataSource.insertTransaction(transaction);
     }
-    public void deleteTransaction(int transaction) {
-        localDataSource.deleteTransaction(transaction);
+    public void deleteTransaction(String transactionId) {
+        remoteDataSource.deleteTransaction(transactionId);
     }
 
     @Override
-    public void onTransactionsSuccessFromLocal(List<TransactionEntity> transactions) {
+    public void onTransactionsSuccess(List<TransactionEntity> transactions) {
         transactionsMutableLiveData.postValue(new Result.Success<>(transactions));
     }
 
     @Override
-    public void onTransactionsFailureFromLocal(Exception exception) {
+    public void onTransactionsFailure(Exception exception) {
         transactionsMutableLiveData.postValue(new Result.Error<>(exception.getMessage()));
     }
 
     @Override
-    public void onTransactionsFailureFromRemote(Exception exception) {
-        localDataSource.getTransactions();
-    }
-
-    @Override
     public void onTransactionInserted() {
-        localDataSource.getTransactions();
+        remoteDataSource.getTransactions();
     }
     @Override
     public void onTransactionDeleted() {
-        localDataSource.getTransactions();
+        remoteDataSource.getTransactions();
     }
 }

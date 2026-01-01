@@ -18,7 +18,7 @@ public class TransactionLocalDataSource extends BaseTransactionDataSource {
     public void getTransactions() {
         TransactionRoomDatabase.databaseWriteExecutor.execute(() -> {
             List<TransactionEntity> transactions = transactionDao.getAllTransactions();
-            callback.onTransactionsSuccessFromLocal(transactions);
+            callback.onTransactionsSuccess(transactions);
         });
     }
 
@@ -30,9 +30,9 @@ public class TransactionLocalDataSource extends BaseTransactionDataSource {
         });
     }
     @Override
-    public void deleteTransaction(int transaction) {
+    public void deleteTransaction(String transactionId) {
         TransactionRoomDatabase.databaseWriteExecutor.execute(() -> {
-            transactionDao.deleteTransaction(transaction);
+            transactionDao.deleteTransaction(transactionId);
             callback.onTransactionDeleted();
         });
     }

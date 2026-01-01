@@ -15,6 +15,6 @@ public interface TransactionDao {
 
     @Query("SELECT * FROM transactions")
     List<TransactionEntity> getAllTransactions();
-    @Query("DELETE FROM transactions WHERE id = :transactionId")
-    void deleteTransaction(int transactionId);
+    @Query("DELETE FROM transactions WHERE firebaseId = :transactionId")
+    void deleteTransaction(String transactionId);
 }

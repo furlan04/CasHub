@@ -16,7 +16,7 @@ import it.unimib.CasHub.source.BaseForexDataSource;
 import it.unimib.CasHub.source.ForexAPIDataSource;
 import it.unimib.CasHub.source.ForexMockDataSource;
 import it.unimib.CasHub.source.transaction.BaseTransactionDataSource;
-import it.unimib.CasHub.source.transaction.TransactionAPIDataSource;
+import it.unimib.CasHub.source.transaction.TransactionFirebaseDataSource;
 import it.unimib.CasHub.source.transaction.TransactionLocalDataSource;
 import it.unimib.CasHub.source.transaction.TransactionMockDataSource;
 import it.unimib.CasHub.source.user.BaseUserAuthenticationRemoteDataSource;
@@ -99,7 +99,7 @@ public class ServiceLocator {
         TransactionDao transactionDao = getTransactionDB(application).transactionDao();
         JSONParserUtils jsonParserUtils = new JSONParserUtils(application);
         BaseTransactionDataSource localDataSource;
-        BaseTransactionDataSource remoteDataSource = new TransactionAPIDataSource();
+        BaseTransactionDataSource remoteDataSource = new TransactionFirebaseDataSource();
 
         if (debugMode) {
             localDataSource = new TransactionMockDataSource(jsonParserUtils);

@@ -5,9 +5,8 @@ import java.util.List;
 import it.unimib.CasHub.model.TransactionEntity;
 
 public interface TransactionCallback {
-    void onTransactionsSuccessFromLocal(List<TransactionEntity> transactions);
-    void onTransactionsFailureFromLocal(Exception exception);
-    void onTransactionsFailureFromRemote(Exception exception);
+    void onTransactionsSuccess(List<TransactionEntity> transactions);
+    void onTransactionsFailure(Exception exception);
     void onTransactionInserted();
     void onTransactionDeleted();
 }

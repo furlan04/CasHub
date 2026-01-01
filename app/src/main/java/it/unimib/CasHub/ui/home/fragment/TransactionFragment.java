@@ -163,7 +163,7 @@ public class TransactionFragment extends Fragment {
             return;
         }
 
-        TransactionEntity transaction = new TransactionEntity(name, amount, selectedType, selectedCurrency.getCode());
+        TransactionEntity transaction = new TransactionEntity(name, amount, selectedType.name(), selectedCurrency.getCode());
         homepageTransactionViewModel.insertTransaction(transaction);
 
         Toast.makeText(getContext(), "Transaction saved", Toast.LENGTH_SHORT).show();

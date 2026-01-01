@@ -28,7 +28,7 @@ public class HomepageTransactionViewModel extends ViewModel {
     public void insertTransaction(TransactionEntity transaction) {
         transactionRepository.insertTransaction(transaction);
     }
-    public void deleteTransaction(int transaction) {
+    public void deleteTransaction(String transaction) {
         transactionRepository.deleteTransaction(transaction);
     }
 }

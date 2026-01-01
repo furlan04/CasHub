@@ -13,5 +13,5 @@ public abstract class BaseTransactionDataSource {
     public abstract void getTransactions();
 
     public abstract void insertTransaction(TransactionEntity transaction);
-    public abstract void deleteTransaction(int transaction);
+    public abstract void deleteTransaction(String transactionId);
 }
