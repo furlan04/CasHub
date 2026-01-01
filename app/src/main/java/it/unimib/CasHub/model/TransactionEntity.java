@@ -1,30 +1,20 @@
 package it.unimib.CasHub.model;
 
-import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
-import com.google.firebase.firestore.Exclude;
-import com.google.firebase.firestore.IgnoreExtraProperties;
-
 import it.unimib.CasHub.database.TransactionTypeConverter;
 
-@IgnoreExtraProperties
 @Entity(tableName = "transactions")
 @TypeConverters(TransactionTypeConverter.class)
 public class TransactionEntity {
-    @PrimaryKey
-    @NonNull
-    private String id = "";
+    @PrimaryKey(autoGenerate = true)
+    private int id;
     private double amount;
     private String name;
     private TransactionType type;
     private String currency;
-
-    public TransactionEntity() {
-        // Required for Firestore deserialization
-    }
 
     public TransactionEntity(String name, double amount, TransactionType type, String currency) {
         this.name = name;
@@ -41,13 +31,11 @@ public class TransactionEntity {
         this.currency = other.currency;
     }
 
-    @Exclude // This will exclude the id field from Firestore serialization/deserialization
-    @NonNull
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(@NonNull String id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -64,16 +52,9 @@ public class TransactionEntity {
     public void setAmount(double amount) {
         this.amount = amount;
     }
-    public void setType(TransactionType type) {
-        this.type = type;
-    }
-
 
     public TransactionType getType() {
         return type;
-    }
-    public void setCurrency(String currency) {
-        this.currency = currency;
     }
 
     public String getCurrency() {
