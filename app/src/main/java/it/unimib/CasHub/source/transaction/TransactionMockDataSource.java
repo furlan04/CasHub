@@ -30,7 +30,12 @@ public class TransactionMockDataSource extends BaseTransactionDataSource {
         // or you could add the transaction to an in-memory list.
     }
     @Override
-    public void deleteTransaction(int transaction) {
+    public void deleteTransaction(String transaction) {
+        // In a mock data source, you might not need to implement this
+    }
+
+    @Override
+    public void deleteAll() {
         // In a mock data source, you might not need to implement this
     }
 }

@@ -4,7 +4,6 @@ import androidx.lifecycle.MutableLiveData;
 
 import java.util.List;
 
-import it.unimib.CasHub.adapter.TransactionRecyclerAdapter;
 import it.unimib.CasHub.model.Result;
 import it.unimib.CasHub.model.TransactionEntity;
 import it.unimib.CasHub.source.transaction.BaseTransactionDataSource;
@@ -26,15 +25,15 @@ public class TransactionRepository implements TransactionCallback {
     }
 
     public MutableLiveData<Result<List<TransactionEntity>>> getTransactions() {
-        localDataSource.getTransactions();
+        remoteDataSource.getTransactions();
         return transactionsMutableLiveData;
     }
 
     public void insertTransaction(TransactionEntity transaction) {
-        localDataSource.insertTransaction(transaction);
+        remoteDataSource.insertTransaction(transaction);
     }
-    public void deleteTransaction(int transaction) {
-        localDataSource.deleteTransaction(transaction);
+    public void deleteTransaction(String transactionId) {
+        remoteDataSource.deleteTransaction(transactionId);
     }
 
     @Override
@@ -48,16 +47,39 @@ public class TransactionRepository implements TransactionCallback {
     }
 
     @Override
+    public void onTransactionsSuccessFromRemote(List<TransactionEntity> transactions) {
+        localDataSource.deleteAll();
+        for (TransactionEntity transaction : transactions) {
+            localDataSource.insertTransaction(transaction);
+        }
+        transactionsMutableLiveData.postValue(new Result.Success<>(transactions));
+    }
+
+    @Override
     public void onTransactionsFailureFromRemote(Exception exception) {
+        // If remote fails, get data from local cache
         localDataSource.getTransactions();
     }
 
     @Override
-    public void onTransactionInserted() {
-        localDataSource.getTransactions();
+    public void onTransactionInsertedFromLocal() {
+        // Do nothing, to prevent loops
     }
+
     @Override
-    public void onTransactionDeleted() {
-        localDataSource.getTransactions();
+    public void onTransactionDeletedFromLocal() {
+        // Do nothing, to prevent loops
+    }
+
+    @Override
+    public void onTransactionInsertedFromRemote() {
+        // After a remote insert, refresh the data from remote
+        remoteDataSource.getTransactions();
+    }
+
+    @Override
+    public void onTransactionDeletedFromRemote() {
+        // After a remote delete, refresh the data from remote
+        remoteDataSource.getTransactions();
     }
 }
