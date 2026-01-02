@@ -6,11 +6,11 @@ import it.unimib.CasHub.model.TransactionEntity;
 import it.unimib.CasHub.utils.Constants;
 import it.unimib.CasHub.utils.JSONParserUtils;
 
-public class TransactionMockDataSource extends BaseTransactionDataSource {
+public class LocalTransactionMockDataSource extends BaseLocalTransactionDataSource {
 
     private final JSONParserUtils jsonParserUtils;
 
-    public TransactionMockDataSource(JSONParserUtils jsonParserUtils) {
+    public LocalTransactionMockDataSource(JSONParserUtils jsonParserUtils) {
         this.jsonParserUtils = jsonParserUtils;
     }
 
@@ -18,9 +18,9 @@ public class TransactionMockDataSource extends BaseTransactionDataSource {
     public void getTransactions() {
         List<TransactionEntity> mockTransactions = jsonParserUtils.parseTransactions(Constants.SAMPLE_TRANSACTIONS_JSON);
         if (mockTransactions != null) {
-            callback.onTransactionsSuccessFromLocal(mockTransactions);
+            callback.onTransactionsSuccess(mockTransactions);
         } else {
-            callback.onTransactionsFailureFromLocal(new Exception("Error parsing mock transactions"));
+            callback.onTransactionsFailure(new Exception("Error parsing mock transactions"));
         }
     }
 
@@ -30,7 +30,7 @@ public class TransactionMockDataSource extends BaseTransactionDataSource {
         // or you could add the transaction to an in-memory list.
     }
     @Override
-    public void deleteTransaction(int transaction) {
+    public void deleteTransaction(int transactionId) {
         // In a mock data source, you might not need to implement this
     }
 }

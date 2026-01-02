@@ -6,7 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import it.unimib.CasHub.repository.TransactionRepository;
+import it.unimib.CasHub.repository.transaction.TransactionRepository;
 import it.unimib.CasHub.utils.ServiceLocator;
 
 public class HomepageTransactionViewModelFactory implements ViewModelProvider.Factory {

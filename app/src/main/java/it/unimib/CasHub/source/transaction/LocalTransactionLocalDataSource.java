@@ -6,11 +6,11 @@ import it.unimib.CasHub.database.TransactionDao;
 import it.unimib.CasHub.database.TransactionRoomDatabase;
 import it.unimib.CasHub.model.TransactionEntity;
 
-public class TransactionLocalDataSource extends BaseTransactionDataSource {
+public class LocalTransactionLocalDataSource extends BaseLocalTransactionDataSource {
 
     private final TransactionDao transactionDao;
 
-    public TransactionLocalDataSource(TransactionDao transactionDao) {
+    public LocalTransactionLocalDataSource(TransactionDao transactionDao) {
         this.transactionDao = transactionDao;
     }
 
@@ -18,7 +18,7 @@ public class TransactionLocalDataSource extends BaseTransactionDataSource {
     public void getTransactions() {
         TransactionRoomDatabase.databaseWriteExecutor.execute(() -> {
             List<TransactionEntity> transactions = transactionDao.getAllTransactions();
-            callback.onTransactionsSuccessFromLocal(transactions);
+            callback.onTransactionsSuccess(transactions);
         });
     }
 
@@ -30,10 +30,11 @@ public class TransactionLocalDataSource extends BaseTransactionDataSource {
         });
     }
     @Override
-    public void deleteTransaction(int transaction) {
+    public void deleteTransaction(int transactionId) {
         TransactionRoomDatabase.databaseWriteExecutor.execute(() -> {
-            transactionDao.deleteTransaction(transaction);
+            transactionDao.deleteTransaction(transactionId);
             callback.onTransactionDeleted();
         });
     }
+
 }

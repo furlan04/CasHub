@@ -3,21 +3,23 @@ package it.unimib.CasHub.ui.login.viewmodel;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import java.util.Set;
-
 import it.unimib.CasHub.model.Result;
 import it.unimib.CasHub.model.User;
+import it.unimib.CasHub.repository.transaction.ITransactionRepository;
+import it.unimib.CasHub.repository.transaction.TransactionRepository;
 import it.unimib.CasHub.repository.user.IUserRepository;
 
 public class UserViewModel extends ViewModel {
 
     private final IUserRepository userRepository;
+    private final ITransactionRepository transactionRepository;
     private MutableLiveData<Result> userMutableLiveData;
 
     private boolean authenticationError;
 
-    public UserViewModel(IUserRepository userRepository) {
+    public UserViewModel(IUserRepository userRepository, ITransactionRepository transactionRepository) {
         this.userRepository = userRepository;
+        this.transactionRepository = transactionRepository;
         authenticationError = false;
     }
 

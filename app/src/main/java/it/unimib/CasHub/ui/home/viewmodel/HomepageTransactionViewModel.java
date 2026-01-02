@@ -7,7 +7,7 @@ import java.util.List;
 
 import it.unimib.CasHub.model.Result;
 import it.unimib.CasHub.model.TransactionEntity;
-import it.unimib.CasHub.repository.TransactionRepository;
+import it.unimib.CasHub.repository.transaction.TransactionRepository;
 
 public class HomepageTransactionViewModel extends ViewModel {
 

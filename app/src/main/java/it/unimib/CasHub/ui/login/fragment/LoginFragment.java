@@ -29,6 +29,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import it.unimib.CasHub.R;
 import it.unimib.CasHub.model.Result;
 import it.unimib.CasHub.model.User;
+import it.unimib.CasHub.repository.transaction.ITransactionRepository;
 import it.unimib.CasHub.repository.user.IUserRepository;
 import it.unimib.CasHub.ui.login.viewmodel.UserViewModel;
 import it.unimib.CasHub.ui.login.viewmodel.UserViewModelFactory;
@@ -51,8 +52,10 @@ public class LoginFragment extends Fragment {
         IUserRepository userRepository = ServiceLocator.getInstance()
                 .getUserRepository(requireActivity().getApplication());
 
+        ITransactionRepository transactionRepository = null;
+
         userViewModel = new ViewModelProvider(requireActivity(),
-                new UserViewModelFactory(userRepository)).get(UserViewModel.class);
+                new UserViewModelFactory(userRepository, transactionRepository)).get(UserViewModel.class);
     }
 
     @Override

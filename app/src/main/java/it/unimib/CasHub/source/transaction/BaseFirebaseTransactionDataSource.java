@@ -1,8 +1,10 @@
 package it.unimib.CasHub.source.transaction;
 
+import java.util.List;
+
 import it.unimib.CasHub.model.TransactionEntity;
 
-public abstract class BaseTransactionDataSource {
+public abstract class BaseFirebaseTransactionDataSource {
 
     protected TransactionCallback callback;
 
@@ -12,6 +14,5 @@ public abstract class BaseTransactionDataSource {
 
     public abstract void getTransactions();
 
-    public abstract void insertTransaction(TransactionEntity transaction);
-    public abstract void deleteTransaction(int transaction);
+    public abstract void saveTransactions(List<TransactionEntity> transaction);
 }

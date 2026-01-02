@@ -163,7 +163,7 @@ public class HomepageTransactionFragment extends Fragment implements Transaction
         }
 
         List<TransactionEntity> filteredTransactions = allTransactions.stream()
-                .filter(t -> selectedCategory == null || t.getType() == selectedCategory)
+                .filter(t -> selectedCategory == null || t.getType() == selectedCategory.toString())
                 .collect(Collectors.toList());
 
         // Mostra subito le transazioni originali
@@ -205,8 +205,6 @@ public class HomepageTransactionFragment extends Fragment implements Transaction
 
     private void showError(String message) {
         Toast.makeText(getContext(), "Error: " + message, Toast.LENGTH_SHORT).show();
-        adapter.clear();
-        adapter.notifyDataSetChanged();
     }
 
     private void setupPieChart(List<TransactionEntity> transactions) {
