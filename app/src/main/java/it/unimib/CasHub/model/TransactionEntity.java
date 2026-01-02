@@ -13,11 +13,10 @@ import it.unimib.CasHub.database.TransactionTypeConverter;
 @TypeConverters(TransactionTypeConverter.class)
 public class TransactionEntity {
     @PrimaryKey(autoGenerate = true)
-    @Exclude  // ✅ Metti @Exclude sul campo, non sul getter
+    @Exclude  // Metti @Exclude sul campo, non sul getter
     private int id;
 
-    @Exclude  // ✅ Metti @Exclude sul campo, non sul getter
-    private String firebaseId;
+    private String userId;
 
     private double amount;
     private String name;
@@ -26,11 +25,12 @@ public class TransactionEntity {
 
     public TransactionEntity() { }
 
-    public TransactionEntity(String name, double amount, String type, String currency) {
+    public TransactionEntity(String name, double amount, String type, String currency, String userId) {
         this.name = name;
         this.amount = amount;
         this.type = type;
         this.currency = currency;
+        this.userId = userId;
     }
 
     public TransactionEntity(TransactionEntity other) {
@@ -38,10 +38,10 @@ public class TransactionEntity {
         this.name = other.name;
         this.amount = other.amount;
         this.type = other.type;
+        this.userId = other.userId;
         this.currency = other.currency;
     }
 
-    // ✅ Rimuovi @Exclude dal getter
     public int getId() {
         return id;
     }
@@ -50,13 +50,12 @@ public class TransactionEntity {
         this.id = id;
     }
 
-    // ✅ Rimuovi @Exclude dal getter
-    public String getFirebaseId() {
-        return firebaseId;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setFirebaseId(String firebaseId) {
-        this.firebaseId = firebaseId;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getName() {

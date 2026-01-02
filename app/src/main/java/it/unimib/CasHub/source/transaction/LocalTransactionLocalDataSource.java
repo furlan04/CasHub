@@ -37,11 +37,4 @@ public class LocalTransactionLocalDataSource extends BaseLocalTransactionDataSou
         });
     }
 
-    @Override
-    public void deleteAllTransactions() {
-        TransactionRoomDatabase.databaseWriteExecutor.execute(() -> {
-            transactionDao.deleteAllTransactions();
-            callback.onTransactionDeleted();
-        });
-    }
 }

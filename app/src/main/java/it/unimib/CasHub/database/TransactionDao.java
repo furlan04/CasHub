@@ -17,7 +17,4 @@ public interface TransactionDao {
     List<TransactionEntity> getAllTransactions();
     @Query("DELETE FROM transactions WHERE id = :transactionId")
     void deleteTransaction(int transactionId);
-
-    @Query("DELETE FROM transactions")
-    void deleteAllTransactions();
 }

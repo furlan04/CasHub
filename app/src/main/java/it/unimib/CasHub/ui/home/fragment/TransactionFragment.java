@@ -17,6 +17,8 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -163,7 +165,9 @@ public class TransactionFragment extends Fragment {
             return;
         }
 
-        TransactionEntity transaction = new TransactionEntity(name, amount, selectedType.name(), selectedCurrency.getCode());
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        TransactionEntity transaction = new TransactionEntity(name, amount, selectedType.name(), selectedCurrency.getCode(), userId);
         homepageTransactionViewModel.insertTransaction(transaction);
 
         Toast.makeText(getContext(), "Transaction saved", Toast.LENGTH_SHORT).show();

@@ -10,6 +10,5 @@ import it.unimib.CasHub.model.TransactionEntity;
 public interface ITransactionRepository {
     MutableLiveData<Result<List<TransactionEntity>>> getTransactions();
     void insertTransaction(TransactionEntity transaction);
-    void deleteAll();
     void deleteTransaction(int transactionId);
 }

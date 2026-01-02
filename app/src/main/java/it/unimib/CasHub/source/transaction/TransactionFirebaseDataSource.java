@@ -42,7 +42,6 @@ public class TransactionFirebaseDataSource extends BaseFirebaseTransactionDataSo
                         List<TransactionEntity> transactions = new ArrayList<>();
                         for (DataSnapshot ds : task.getResult().getChildren()) {
                             TransactionEntity transaction = ds.getValue(TransactionEntity.class);
-                            transaction.setFirebaseId(ds.getKey());
                             transactions.add(transaction);
                         }
                         callback.onTransactionsSuccess(transactions);

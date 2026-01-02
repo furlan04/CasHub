@@ -49,8 +49,6 @@ public class UserViewModel extends ViewModel {
             userRepository.logout();
         }
 
-        transactionRepository.deleteAll();
-
         return userMutableLiveData;
     }
 

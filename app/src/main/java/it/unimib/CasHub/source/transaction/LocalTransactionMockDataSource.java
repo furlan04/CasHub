@@ -33,9 +33,4 @@ public class LocalTransactionMockDataSource extends BaseLocalTransactionDataSour
     public void deleteTransaction(int transactionId) {
         // In a mock data source, you might not need to implement this
     }
-
-    @Override
-    public void deleteAllTransactions() {
-
-    }
 }

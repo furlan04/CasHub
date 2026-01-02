@@ -2,6 +2,8 @@ package it.unimib.CasHub.repository.transaction;
 
 import androidx.lifecycle.MutableLiveData;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -28,13 +30,16 @@ public class TransactionRepository implements TransactionCallback, ITransactionR
 
     private State state = State.FETCH_REMOTE;
     private List<TransactionEntity> remoteCache = new ArrayList<>();
+    private List<TransactionEntity> currentUserCache = new ArrayList<>();
     private boolean isSyncing = false;
+    private String userId;
 
     public TransactionRepository(BaseLocalTransactionDataSource localDataSource,
                                  BaseFirebaseTransactionDataSource remoteDataSource) {
         this.transactionsLiveData = new MutableLiveData<>();
         this.localDataSource = localDataSource;
         this.remoteDataSource = remoteDataSource;
+        userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         if (localDataSource != null) {
             localDataSource.setCallback(this);
@@ -65,6 +70,7 @@ public class TransactionRepository implements TransactionCallback, ITransactionR
 
         return transactionsLiveData;
     }
+
     @Override
     public void insertTransaction(TransactionEntity transaction) {
         if (transaction == null) {
@@ -75,16 +81,12 @@ public class TransactionRepository implements TransactionCallback, ITransactionR
 
         try {
             if (localDataSource != null) {
+                transaction.setUserId(userId);
                 localDataSource.insertTransaction(transaction);
             }
         } catch (Exception e) {
             onTransactionsFailure(e);
         }
-    }
-    @Override
-    public void deleteAll(){
-        localDataSource.deleteAllTransactions();
-        onAllTransactionsDeleted();
     }
     @Override
     public void deleteTransaction(int transactionId) {
@@ -141,7 +143,13 @@ public class TransactionRepository implements TransactionCallback, ITransactionR
 
     private void handleLocalFetch(List<TransactionEntity> localTransactions) {
         state = State.SYNCING;
-        syncRemoteToLocal(localTransactions);
+        List<TransactionEntity> currentUserTransactions = new ArrayList<>();
+        for (TransactionEntity t : localTransactions) {
+            if (t != null && t.getUserId().equals(userId)) {
+                currentUserTransactions.add(t);
+            }
+        }
+        syncRemoteToLocal(currentUserTransactions);
     }
 
     private void handleLocalChange(List<TransactionEntity> transactions) {
@@ -149,81 +157,84 @@ public class TransactionRepository implements TransactionCallback, ITransactionR
                 ? new ArrayList<>(transactions)
                 : new ArrayList<>();
 
+        List<TransactionEntity> localListForUser = new ArrayList<>();
+
+        for (TransactionEntity t : localList) {
+            if (t != null && t.getUserId().equals(userId)) {
+                localListForUser.add(t);
+            }
+        }
+
         if (remoteDataSource != null) {
             try {
-                remoteDataSource.saveTransactions(localList);
+                remoteDataSource.saveTransactions(localListForUser);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
-        transactionsLiveData.postValue(new Result.Success<>(localList));
+        transactionsLiveData.postValue(new Result.Success<>(localListForUser));
     }
 
     private void syncRemoteToLocal(List<TransactionEntity> localTransactions) {
-        deleteAll();
-
-        List<TransactionEntity> remote = new ArrayList<>(remoteCache);
-
-        for (TransactionEntity t : remote) {
-            if (t != null) {
-                insertTransaction(t);
+        // Filtra le transazioni locali dell'utente corrente
+        currentUserCache = new ArrayList<>();
+        for (TransactionEntity t : localTransactions) {
+            if (t != null && t.getUserId().equals(userId)) {
+                currentUserCache.add(t);
             }
         }
 
-//        List<TransactionEntity> localList = localTransactions != null
-//                ? new ArrayList<>(localTransactions)
-//                : new ArrayList<>();
-//
-//        Set<Integer> localIds = new HashSet<>();
-//        for (TransactionEntity t : localList) {
-//            if (t != null) {
-//                localIds.add(t.getId());
-//            }
-//        }
-//
-//        Set<Integer> remoteIds = new HashSet<>();
-//        for (TransactionEntity t : remoteCache) {
-//            if (t != null) {
-//                remoteIds.add(t.getId());
-//            }
-//        }
-//
-//
-//        boolean hasChanges = false;
-//        if (!remoteCache.isEmpty()) {
-//            for (TransactionEntity remote : remoteCache) {
-//                if (remote != null
-//                        && !localIds.contains(remote.getId())) {
-//                    try {
-//                        localDataSource.insertTransaction(remote);
-//                        localList.add(remote);
-//                        hasChanges = true;
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }
-//            for (TransactionEntity local : localList) {
-//                if (local != null
-//                        && !remoteIds.contains(local.getId())) {
-//                    hasChanges = true;
-//                }
-//            }
-//        } else {
-//            hasChanges = true;
-//        }
-//
-//        if (hasChanges && remoteDataSource != null) {
-//            try {
-//                remoteDataSource.saveTransactions(localList);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
+        Set<Integer> localIds = new HashSet<>();
+        for (TransactionEntity t : currentUserCache) {
+            localIds.add(t.getId());
+        }
+
+        Set<Integer> remoteIds = new HashSet<>();
+        for (TransactionEntity t : remoteCache) {
+            if (t != null) {
+                remoteIds.add(t.getId());
+            }
+        }
+
+        boolean hasChanges = false;
+
+        if (!remoteCache.isEmpty()) {
+            // Aggiungi le transazioni remote che non sono presenti localmente
+            for (TransactionEntity remote : remoteCache) {
+                if (remote != null && !localIds.contains(remote.getId())) {
+                    try {
+                        remote.setUserId(userId);
+                        localDataSource.insertTransaction(remote);
+                        currentUserCache.add(remote);
+                        hasChanges = true;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            // Controlla se ci sono transazioni locali non presenti in remoto
+            for (TransactionEntity local : currentUserCache) {
+                if (local != null && !remoteIds.contains(local.getId())) {
+                    hasChanges = true;
+                }
+            }
+        } else {
+            hasChanges = true;
+        }
+
+        if (hasChanges && remoteDataSource != null) {
+            try {
+                remoteDataSource.saveTransactions(currentUserCache);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
         isSyncing = false;
-        transactionsLiveData.postValue(new Result.Success<>(remote));
+        // Ora currentUserCache contiene SOLO le transazioni dell'utente corrente
+        transactionsLiveData.postValue(new Result.Success<>(currentUserCache));
     }
 
     @Override
@@ -246,11 +257,6 @@ public class TransactionRepository implements TransactionCallback, ITransactionR
                 onTransactionsFailure(e);
             }
         }
-    }
-
-    @Override
-    public void onAllTransactionsDeleted() {
-        transactionsLiveData.postValue(new Result.Success<>(new ArrayList<>()));
     }
 
     @Override
