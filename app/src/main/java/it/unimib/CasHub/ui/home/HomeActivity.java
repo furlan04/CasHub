@@ -22,6 +22,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import it.unimib.CasHub.R;
 import it.unimib.CasHub.model.User;
+import it.unimib.CasHub.repository.transaction.TransactionRepository;
 import it.unimib.CasHub.repository.user.IUserRepository;
 import it.unimib.CasHub.ui.login.NavLoginHomeActivity;
 import it.unimib.CasHub.ui.login.viewmodel.UserViewModel;
@@ -53,8 +54,8 @@ public class HomeActivity extends AppCompatActivity {
         TextView toolbarTitle = findViewById(R.id.toolbarTitle);
 
         IUserRepository userRepository = ServiceLocator.getInstance().getUserRepository(this.getApplication());
-
-        UserViewModel userViewModel = new ViewModelProvider(this, new UserViewModelFactory(userRepository)).get(UserViewModel.class);
+        TransactionRepository transactionRepository = ServiceLocator.getInstance().getTransactionRepository(this.getApplication(), false);
+        UserViewModel userViewModel = new ViewModelProvider(this, new UserViewModelFactory(userRepository, transactionRepository)).get(UserViewModel.class);
         userViewModel.setAuthenticationError(false);
 
         User loggedUser = userViewModel.getLoggedUser();

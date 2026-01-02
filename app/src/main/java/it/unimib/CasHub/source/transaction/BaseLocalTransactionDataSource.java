@@ -14,4 +14,5 @@ public abstract class BaseLocalTransactionDataSource {
 
     public abstract void insertTransaction(TransactionEntity transaction);
     public abstract void deleteTransaction(int transactionId);
+    public abstract void deleteAllTransactions();
 }

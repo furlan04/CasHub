@@ -32,6 +32,7 @@ import java.util.Map;
 import it.unimib.CasHub.R;
 import it.unimib.CasHub.model.Result;
 import it.unimib.CasHub.model.User;
+import it.unimib.CasHub.repository.transaction.ITransactionRepository;
 import it.unimib.CasHub.repository.user.IUserRepository;
 import it.unimib.CasHub.ui.login.viewmodel.UserViewModel;
 import it.unimib.CasHub.ui.login.viewmodel.UserViewModelFactory;
@@ -51,7 +52,10 @@ public class RegistrationFragment extends Fragment {
         super.onCreate(savedInstanceState);
         IUserRepository userRepository = ServiceLocator.getInstance().getUserRepository(requireActivity().getApplication());
 
-        userViewModel = new ViewModelProvider(requireActivity(), new UserViewModelFactory(userRepository)).get(UserViewModel.class);
+        ITransactionRepository transactionRepository = ServiceLocator.getInstance().getTransactionRepository(this.getActivity().getApplication(), false);
+
+
+        userViewModel = new ViewModelProvider(requireActivity(), new UserViewModelFactory(userRepository, transactionRepository)).get(UserViewModel.class);
         userViewModel.setAuthenticationError(false);
     }
 

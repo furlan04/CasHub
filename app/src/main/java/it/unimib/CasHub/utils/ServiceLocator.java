@@ -7,7 +7,7 @@ import it.unimib.CasHub.database.CurrencyRoomDatabase;
 import it.unimib.CasHub.database.TransactionDao;
 import it.unimib.CasHub.database.TransactionRoomDatabase;
 import it.unimib.CasHub.repository.ForexRepository;
-import it.unimib.CasHub.repository.TransactionRepository;
+import it.unimib.CasHub.repository.transaction.TransactionRepository;
 import it.unimib.CasHub.repository.user.IUserRepository;
 import it.unimib.CasHub.repository.user.UserRepository;
 import it.unimib.CasHub.service.AgencyAPIService;

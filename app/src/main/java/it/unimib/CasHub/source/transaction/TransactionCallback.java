@@ -9,4 +9,5 @@ public interface TransactionCallback {
     void onTransactionsFailure(Exception exception);
     void onTransactionInserted();
     void onTransactionDeleted();
+    void onAllTransactionsDeleted();
 }
