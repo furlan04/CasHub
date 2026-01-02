@@ -261,6 +261,21 @@ public class TransactionRepository implements TransactionCallback, ITransactionR
 
     @Override
     public void onTransactionsFailure(Exception exception) {
+        // Se stavo cercando di scaricare dal server (FETCH_REMOTE) e fallisco...
+        if (state == State.FETCH_REMOTE) {
+            // ... NON dare errore subito. Passa al piano B: leggi i dati locali.
+            state = State.FETCH_LOCAL;
+
+            if (localDataSource != null) {
+                // Logghiamo l'errore per debug, ma procediamo
+                System.out.println("Remote fetch failed (" + exception.getMessage() + "), falling back to local data.");
+                localDataSource.getTransactions();
+                return; // Esci, non mandare ancora l'errore al Fragment!
+            }
+        }
+
+        // Se arrivo qui, significa che è fallito anche il locale o ero in un altro stato.
+        // Allora sì, fermo tutto e avviso il Fragment dell'errore.
         isSyncing = false;
         String errorMessage = exception != null
                 ? exception.getMessage()

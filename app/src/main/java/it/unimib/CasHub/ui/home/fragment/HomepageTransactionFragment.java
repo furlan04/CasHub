@@ -205,8 +205,6 @@ public class HomepageTransactionFragment extends Fragment implements Transaction
 
     private void showError(String message) {
         Toast.makeText(getContext(), "Error: " + message, Toast.LENGTH_SHORT).show();
-        adapter.clear();
-        adapter.notifyDataSetChanged();
     }
 
     private void setupPieChart(List<TransactionEntity> transactions) {
