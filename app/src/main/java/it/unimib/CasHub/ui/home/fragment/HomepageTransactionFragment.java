@@ -199,7 +199,7 @@ public class HomepageTransactionFragment extends Fragment implements Transaction
 
     @Override
     public void onDeleteButtonClicked(TransactionEntity transaction) {
-        String id = transaction.getFirebaseId();
+        int id = transaction.getId();
         homepageTransactionViewModel.deleteTransaction(id);
     }
 

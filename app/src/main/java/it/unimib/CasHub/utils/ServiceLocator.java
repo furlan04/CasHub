@@ -15,10 +15,11 @@ import it.unimib.CasHub.service.ForexAPIService;
 import it.unimib.CasHub.source.BaseForexDataSource;
 import it.unimib.CasHub.source.ForexAPIDataSource;
 import it.unimib.CasHub.source.ForexMockDataSource;
-import it.unimib.CasHub.source.transaction.BaseTransactionDataSource;
+import it.unimib.CasHub.source.transaction.BaseFirebaseTransactionDataSource;
+import it.unimib.CasHub.source.transaction.BaseLocalTransactionDataSource;
 import it.unimib.CasHub.source.transaction.TransactionFirebaseDataSource;
-import it.unimib.CasHub.source.transaction.TransactionLocalDataSource;
-import it.unimib.CasHub.source.transaction.TransactionMockDataSource;
+import it.unimib.CasHub.source.transaction.LocalTransactionLocalDataSource;
+import it.unimib.CasHub.source.transaction.LocalTransactionMockDataSource;
 import it.unimib.CasHub.source.user.BaseUserAuthenticationRemoteDataSource;
 import it.unimib.CasHub.source.user.BaseUserDataRemoteDataSource;
 import it.unimib.CasHub.source.user.UserAuthenticationFirebaseDataSource;
@@ -98,13 +99,13 @@ public class ServiceLocator {
     public TransactionRepository getTransactionRepository(Application application, boolean debugMode) {
         TransactionDao transactionDao = getTransactionDB(application).transactionDao();
         JSONParserUtils jsonParserUtils = new JSONParserUtils(application);
-        BaseTransactionDataSource localDataSource;
-        BaseTransactionDataSource remoteDataSource = new TransactionFirebaseDataSource();
+        BaseLocalTransactionDataSource localDataSource;
+        BaseFirebaseTransactionDataSource remoteDataSource = new TransactionFirebaseDataSource();
 
         if (debugMode) {
-            localDataSource = new TransactionMockDataSource(jsonParserUtils);
+            localDataSource = new LocalTransactionMockDataSource(jsonParserUtils);
         } else {
-            localDataSource = new TransactionLocalDataSource(transactionDao);
+            localDataSource = new LocalTransactionLocalDataSource(transactionDao);
         }
 
         return new TransactionRepository(localDataSource, remoteDataSource);

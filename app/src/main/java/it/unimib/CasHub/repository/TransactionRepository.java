@@ -2,57 +2,243 @@ package it.unimib.CasHub.repository;
 
 import androidx.lifecycle.MutableLiveData;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-import it.unimib.CasHub.adapter.TransactionRecyclerAdapter;
 import it.unimib.CasHub.model.Result;
 import it.unimib.CasHub.model.TransactionEntity;
-import it.unimib.CasHub.source.transaction.BaseTransactionDataSource;
+import it.unimib.CasHub.source.transaction.BaseFirebaseTransactionDataSource;
+import it.unimib.CasHub.source.transaction.BaseLocalTransactionDataSource;
 import it.unimib.CasHub.source.transaction.TransactionCallback;
 
 public class TransactionRepository implements TransactionCallback {
 
-    private final MutableLiveData<Result<List<TransactionEntity>>> transactionsMutableLiveData;
+    private final MutableLiveData<Result<List<TransactionEntity>>> transactionsLiveData;
+    private final BaseLocalTransactionDataSource localDataSource;
+    private final BaseFirebaseTransactionDataSource remoteDataSource;
 
-    private final BaseTransactionDataSource localDataSource;
-    private final BaseTransactionDataSource remoteDataSource;
-
-    public TransactionRepository(BaseTransactionDataSource localDataSource, BaseTransactionDataSource remoteDataSource) {
-        this.transactionsMutableLiveData = new MutableLiveData<>();
-        this.localDataSource = localDataSource;
-        this.remoteDataSource = remoteDataSource;
-        this.localDataSource.setCallback(this);
-        this.remoteDataSource.setCallback(this);
+    private enum State {
+        FETCH_REMOTE,
+        FETCH_LOCAL,
+        LOCAL_CHANGE,
+        SYNCING
     }
 
+    private State state = State.FETCH_REMOTE;
+    private List<TransactionEntity> remoteCache = new ArrayList<>();
+    private boolean isSyncing = false;
+
+    public TransactionRepository(BaseLocalTransactionDataSource localDataSource,
+                                 BaseFirebaseTransactionDataSource remoteDataSource) {
+        this.transactionsLiveData = new MutableLiveData<>();
+        this.localDataSource = localDataSource;
+        this.remoteDataSource = remoteDataSource;
+
+        if (localDataSource != null) {
+            localDataSource.setCallback(this);
+        }
+        if (remoteDataSource != null) {
+            remoteDataSource.setCallback(this);
+        }
+    }
+
+
     public MutableLiveData<Result<List<TransactionEntity>>> getTransactions() {
-        remoteDataSource.getTransactions();
-        return transactionsMutableLiveData;
+        if (isSyncing) {
+            return transactionsLiveData;
+        }
+
+        isSyncing = true;
+        state = State.FETCH_REMOTE;
+
+        try {
+            if (remoteDataSource != null) {
+                remoteDataSource.getTransactions();
+            } else {
+                onTransactionsFailure(new Exception("Remote data source is null"));
+            }
+        } catch (Exception e) {
+            onTransactionsFailure(e);
+        }
+
+        return transactionsLiveData;
     }
 
     public void insertTransaction(TransactionEntity transaction) {
-        remoteDataSource.insertTransaction(transaction);
+        if (transaction == null) {
+            return;
+        }
+
+        state = State.LOCAL_CHANGE;
+
+        try {
+            if (localDataSource != null) {
+                localDataSource.insertTransaction(transaction);
+            }
+        } catch (Exception e) {
+            onTransactionsFailure(e);
+        }
     }
-    public void deleteTransaction(String transactionId) {
-        remoteDataSource.deleteTransaction(transactionId);
+
+    public void deleteTransaction(int transactionId) {
+        if (transactionId < 0) {
+            return;
+        }
+
+        state = State.LOCAL_CHANGE;
+
+        try {
+            if (localDataSource != null) {
+                localDataSource.deleteTransaction(transactionId);
+            }
+        } catch (Exception e) {
+            onTransactionsFailure(e);
+        }
     }
 
     @Override
     public void onTransactionsSuccess(List<TransactionEntity> transactions) {
-        transactionsMutableLiveData.postValue(new Result.Success<>(transactions));
+        try {
+            switch (state) {
+                case FETCH_REMOTE:
+                    handleRemoteFetch(transactions);
+                    break;
+
+                case FETCH_LOCAL:
+                    handleLocalFetch(transactions);
+                    break;
+
+                case LOCAL_CHANGE:
+                    handleLocalChange(transactions);
+                    break;
+
+                case SYNCING:
+                    break;
+            }
+        } catch (Exception e) {
+            onTransactionsFailure(e);
+        }
     }
 
-    @Override
-    public void onTransactionsFailure(Exception exception) {
-        transactionsMutableLiveData.postValue(new Result.Error<>(exception.getMessage()));
+    private void handleRemoteFetch(List<TransactionEntity> transactions) {
+        remoteCache = transactions != null ? new ArrayList<>(transactions) : new ArrayList<>();
+        state = State.FETCH_LOCAL;
+
+        if (localDataSource != null) {
+            localDataSource.getTransactions();
+        } else {
+            isSyncing = false;
+            transactionsLiveData.postValue(new Result.Success<>(remoteCache));
+        }
+    }
+
+    private void handleLocalFetch(List<TransactionEntity> localTransactions) {
+        state = State.SYNCING;
+        syncRemoteToLocal(localTransactions);
+    }
+
+    private void handleLocalChange(List<TransactionEntity> transactions) {
+        List<TransactionEntity> localList = transactions != null
+                ? new ArrayList<>(transactions)
+                : new ArrayList<>();
+
+        if (remoteDataSource != null) {
+            try {
+                remoteDataSource.saveTransactions(localList);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        transactionsLiveData.postValue(new Result.Success<>(localList));
+    }
+
+    private void syncRemoteToLocal(List<TransactionEntity> localTransactions) {
+        List<TransactionEntity> localList = localTransactions != null
+                ? new ArrayList<>(localTransactions)
+                : new ArrayList<>();
+
+        Set<Integer> localIds = new HashSet<>();
+        for (TransactionEntity t : localList) {
+            if (t != null) {
+                localIds.add(t.getId());
+            }
+        }
+
+        Set<Integer> remoteIds = new HashSet<>();
+        for (TransactionEntity t : remoteCache) {
+            if (t != null) {
+                remoteIds.add(t.getId());
+            }
+        }
+
+
+        boolean hasChanges = false;
+        if (!remoteCache.isEmpty()) {
+            for (TransactionEntity remote : remoteCache) {
+                if (remote != null
+                        && !localIds.contains(remote.getId())) {
+                    try {
+                        localDataSource.insertTransaction(remote);
+                        localList.add(remote);
+                        hasChanges = true;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            for (TransactionEntity local : localList) {
+                if (local != null
+                        && !remoteIds.contains(local.getId())) {
+                    hasChanges = true;
+                }
+            }
+        } else {
+            hasChanges = true;
+        }
+
+        if (hasChanges && remoteDataSource != null) {
+            try {
+                remoteDataSource.saveTransactions(localList);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        isSyncing = false;
+        transactionsLiveData.postValue(new Result.Success<>(localList));
     }
 
     @Override
     public void onTransactionInserted() {
-        remoteDataSource.getTransactions();
+        if (localDataSource != null) {
+            try {
+                localDataSource.getTransactions();
+            } catch (Exception e) {
+                onTransactionsFailure(e);
+            }
+        }
     }
+
     @Override
     public void onTransactionDeleted() {
-        remoteDataSource.getTransactions();
+        if (localDataSource != null) {
+            try {
+                localDataSource.getTransactions();
+            } catch (Exception e) {
+                onTransactionsFailure(e);
+            }
+        }
+    }
+
+    @Override
+    public void onTransactionsFailure(Exception exception) {
+        isSyncing = false;
+        String errorMessage = exception != null
+                ? exception.getMessage()
+                : "Unknown error occurred";
+        transactionsLiveData.postValue(new Result.Error<>(errorMessage));
     }
 }
