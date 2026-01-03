@@ -9,6 +9,14 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.EditText;
+import androidx.appcompat.app.AlertDialog;
+import android.widget.LinearLayout;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,7 +29,6 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
@@ -31,11 +38,10 @@ import it.unimib.CasHub.R;
 import it.unimib.CasHub.model.ChartData;
 import it.unimib.CasHub.model.PortfolioStock;
 import it.unimib.CasHub.model.StockQuote;
-import it.unimib.CasHub.repository.IStockRepository;
 import it.unimib.CasHub.repository.PortfolioFirebaseRepository;
 import it.unimib.CasHub.repository.StockAPIRepository;
-import it.unimib.CasHub.repository.StockMockRepository;
 import it.unimib.CasHub.utils.NetworkUtil;
+import it.unimib.CasHub.utils.StockCache;
 import it.unimib.CasHub.utils.StockResponseCallback;
 
 public class StockDetailsFragment extends Fragment implements StockResponseCallback {
@@ -305,59 +311,212 @@ public class StockDetailsFragment extends Fragment implements StockResponseCallb
             return;
         }
 
-        // DEBUG: Verifica autenticazione
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser == null) {
             Toast.makeText(requireContext(), "ERRORE: Non sei loggato!", Toast.LENGTH_LONG).show();
-            Log.e(TAG, "addToPortfolio: Utente non autenticato!");
             return;
         }
 
-        Log.d(TAG, "addToPortfolio: User ID = " + currentUser.getUid());
-        Log.d(TAG, "addToPortfolio: User Email = " + currentUser.getEmail());
 
-        // Crea l'oggetto PortfolioStock con i dati dell'Agency
-        PortfolioStock portfolioStock = new PortfolioStock(
-                symbol,
-                companyName != null ? companyName : symbol,
-                currency != null ? currency : "USD",
-                exchange != null ? exchange : "N/A",
-                exchangeFull != null ? exchangeFull : "N/A"
-        );
+        showBuyStockDialog();
+    }
 
-        addToPortfolioButton.setEnabled(false);
-        addToPortfolioButton.setText("Aggiungendo...");
+    private void showBuyStockDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Compra " + companyName);
 
-        portfolioRepository.addStockToPortfolio(portfolioStock, new PortfolioFirebaseRepository.PortfolioCallback() {
-            @Override
-            public void onSuccess(String message) {
-                Log.d(TAG, "onSuccess: " + message);
-                if (getActivity() != null) {
-                    requireActivity().runOnUiThread(() -> {
-                        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
-                        addToPortfolioButton.setText("Aggiunto ✓");
-                        addToPortfolioButton.setEnabled(false);
-                    });
-                }
+        LinearLayout layout = new LinearLayout(requireContext());
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(50, 40, 50, 10);
+
+        TextView priceInfo = new TextView(requireContext());
+        priceInfo.setText("Prezzo attuale: " + getCurrencySymbol(currency) + currentStockQuote.getPrice());
+        priceInfo.setTextSize(16);
+        priceInfo.setPadding(0, 0, 0, 20);
+        layout.addView(priceInfo);
+
+        final EditText quantityInput = new EditText(requireContext());
+        quantityInput.setHint("Quantità");
+        quantityInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        layout.addView(quantityInput);
+
+        builder.setView(layout);
+
+
+        builder.setPositiveButton("CONFERMA", null);
+        builder.setNegativeButton("ANNULLA", (dialog, which) -> dialog.cancel());
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String quantityStr = quantityInput.getText().toString();
+
+            Log.d(TAG, "=== CONFERMA CLICKED ===");
+            Log.d(TAG, "Quantity input: " + quantityStr);
+
+            if (quantityStr.isEmpty()) {
+                Toast.makeText(requireContext(), "Inserisci una quantità", Toast.LENGTH_SHORT).show();
+                return;
             }
 
-            @Override
-            public void onFailure(String errorMessage) {
-                Log.e(TAG, "onFailure: " + errorMessage);
-                if (getActivity() != null) {
-                    requireActivity().runOnUiThread(() -> {
-                        Toast.makeText(requireContext(), "ERRORE: " + errorMessage, Toast.LENGTH_LONG).show();
-                        addToPortfolioButton.setText("Aggiungi al portafoglio");
-                        addToPortfolioButton.setEnabled(true);
-                    });
+            try {
+                double quantity = Double.parseDouble(quantityStr);
+                Log.d(TAG, "Quantity parsed: " + quantity);
+
+                if (quantity <= 0) {
+                    Toast.makeText(requireContext(), "Quantità deve essere > 0", Toast.LENGTH_SHORT).show();
+                    return;
                 }
+
+                dialog.dismiss();
+                savePurchase(quantity);
+
+            } catch (NumberFormatException e) {
+                Log.e(TAG, "Parse error: " + e.getMessage());
+                Toast.makeText(requireContext(), "Quantità non valida", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    /**
-     * Restituisce il simbolo della valuta in base al codice
-     */
+
+
+    private void savePurchase(double quantity) {
+        if (currentStockQuote == null) {
+            Toast.makeText(requireContext(), "Errore: dati prezzo mancanti", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        double currentPrice;
+        try {
+            currentPrice = Double.parseDouble(currentStockQuote.getPrice());
+        } catch (Exception e) {
+            Toast.makeText(requireContext(), "Errore parsing prezzo", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        if (auth.getCurrentUser() == null) {
+            Toast.makeText(requireContext(), "Non sei loggato!", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        String safeSymbol = symbol.replace(".", "_")
+                .replace("#", "_")
+                .replace("$", "_")
+                .replace("[", "_")
+                .replace("]", "_");
+
+        addToPortfolioButton.setEnabled(false);
+        addToPortfolioButton.setText("Aggiungendo...");
+
+        String databaseUrl = "https://cashub-29595-default-rtdb.europe-west1.firebasedatabase.app";
+        DatabaseReference portfolioRef = FirebaseDatabase.getInstance(databaseUrl)
+                .getReference()
+                .child("users")
+                .child(auth.getCurrentUser().getUid())
+                .child("portfolio")
+                .child(safeSymbol);
+
+        portfolioRef.addListenerForSingleValueEvent(new com.google.firebase.database.ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull com.google.firebase.database.DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    // ✅ AZIONE GIÀ ESISTENTE → SOMMA QUANTITÀ
+                    PortfolioStock existingStock = snapshot.getValue(PortfolioStock.class);
+
+                    if (existingStock != null) {
+                        double oldQuantity = existingStock.getQuantity();
+                        double oldAvgPrice = existingStock.getAveragePrice();
+
+                        double newQuantity = oldQuantity + quantity;
+                        double newAvgPrice = ((oldQuantity * oldAvgPrice) + (quantity * currentPrice)) / newQuantity;
+
+                        existingStock.setQuantity(newQuantity);
+                        existingStock.setAveragePrice(newAvgPrice);
+
+                        portfolioRef.setValue(existingStock)
+                                .addOnSuccessListener(aVoid -> {
+                                    Log.d(TAG, "✅ QUANTITÀ AGGIORNATA! Vecchia: " + oldQuantity + " → Nuova: " + newQuantity);
+
+                                    // 🎯 SALVA IN CACHE
+                                    StockCache.saveStock(
+                                            requireContext(),
+                                            symbol,
+                                            companyName != null ? companyName : symbol,
+                                            currency != null ? currency : "USD",
+                                            exchange != null ? exchange : "N/A",
+                                            exchangeFull != null ? exchangeFull : "N/A",
+                                            currentPrice
+                                    );
+
+                                    Toast.makeText(requireContext(),
+                                            "Ora possiedi " + newQuantity + " azioni di " + companyName,
+                                            Toast.LENGTH_LONG).show();
+                                    addToPortfolioButton.setText("Aggiunto ✓");
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e(TAG, "❌ ERRORE UPDATE: " + e.getMessage());
+                                    Toast.makeText(requireContext(), "Errore: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                    addToPortfolioButton.setText("Aggiungi al portafoglio");
+                                    addToPortfolioButton.setEnabled(true);
+                                });
+                    } else {
+                        Toast.makeText(requireContext(), "Errore lettura dati esistenti", Toast.LENGTH_SHORT).show();
+                        addToPortfolioButton.setText("Aggiungi al portafoglio");
+                        addToPortfolioButton.setEnabled(true);
+                    }
+
+                } else {
+                    // ✅ AZIONE NUOVA → SALVA NORMALMENTE
+                    PortfolioStock portfolioStock = new PortfolioStock(
+                            symbol,
+                            companyName != null ? companyName : symbol,
+                            currency != null ? currency : "USD",
+                            exchange != null ? exchange : "N/A",
+                            exchangeFull != null ? exchangeFull : "N/A"
+                    );
+                    portfolioStock.setQuantity(quantity);
+                    portfolioStock.setAveragePrice(currentPrice);
+
+                    portfolioRef.setValue(portfolioStock)
+                            .addOnSuccessListener(aVoid -> {
+                                Log.d(TAG, "✅ NUOVA AZIONE SALVATA!");
+
+                                // 🎯 SALVA IN CACHE
+                                StockCache.saveStock(
+                                        requireContext(),
+                                        symbol,
+                                        companyName != null ? companyName : symbol,
+                                        currency != null ? currency : "USD",
+                                        exchange != null ? exchange : "N/A",
+                                        exchangeFull != null ? exchangeFull : "N/A",
+                                        currentPrice
+                                );
+
+                                Toast.makeText(requireContext(), "Acquistate " + quantity + " azioni di " + symbol + "!", Toast.LENGTH_SHORT).show();
+                                addToPortfolioButton.setText("Aggiunto ✓");
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e(TAG, "❌ ERRORE: " + e.getMessage());
+                                Toast.makeText(requireContext(), "Errore: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                addToPortfolioButton.setText("Aggiungi al portafoglio");
+                                addToPortfolioButton.setEnabled(true);
+                            });
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull com.google.firebase.database.DatabaseError error) {
+                Log.e(TAG, "ERRORE DB: " + error.getMessage());
+                Toast.makeText(requireContext(), "Errore database: " + error.getMessage(), Toast.LENGTH_LONG).show();
+                addToPortfolioButton.setText("Aggiungi al portafoglio");
+                addToPortfolioButton.setEnabled(true);
+            }
+        });
+    }
+
     private String getCurrencySymbol(String currencyCode) {
         if (currencyCode == null) {
             return "$"; // Default USD
@@ -383,7 +542,7 @@ public class StockDetailsFragment extends Fragment implements StockResponseCallb
             case "INR":
                 return "₹";
             default:
-                return currencyCode + " "; // Se non riconosciuto, mostra il codice
+                return currencyCode + " ";
         }
     }
 }

@@ -12,6 +12,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import it.unimib.CasHub.model.PortfolioStock;
 
 public class PortfolioFirebaseRepository {
@@ -20,10 +23,18 @@ public class PortfolioFirebaseRepository {
     private final DatabaseReference databaseReference;
     private final FirebaseAuth firebaseAuth;
 
+
+    public interface PortfolioListCallback {
+        void onPortfolioListSuccess(List<PortfolioStock> portfolio);
+        void onPortfolioListFailure(String errorMessage);
+    }
+
     public interface PortfolioCallback {
         void onSuccess(String message);
         void onFailure(String errorMessage);
     }
+
+
 
     public PortfolioFirebaseRepository() {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -31,91 +42,142 @@ public class PortfolioFirebaseRepository {
         this.firebaseAuth = FirebaseAuth.getInstance();
     }
 
-    /**
-     * Aggiunge un titolo al portafoglio dell'utente corrente
-     */
+    public void testMethod() {
+        Log.e(TAG, "🔥🔥🔥 TEST METHOD CHIAMATO 🔥🔥🔥");
+    }
     public void addStockToPortfolio(PortfolioStock stock, PortfolioCallback callback) {
-        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        Log.d(TAG, "🟢 REPO: Entrato in addStockToPortfolio");
 
-        if (currentUser == null) {
-            callback.onFailure("Utente non autenticato");
-            return;
-        }
+        try {
+            Log.d(TAG, "🟢 firebaseAuth: " + (firebaseAuth != null ? "OK" : "NULL"));
 
-        String userId = currentUser.getUid();
-        String stockSymbol = stock.getSymbol();
+            FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+            Log.d(TAG, "🟢 currentUser: " + (currentUser != null ? "OK" : "NULL"));
 
-        // Verifica se il titolo esiste già
-        checkIfStockExists(userId, stockSymbol, exists -> {
-            if (exists) {
-                callback.onFailure("Questo titolo è già nel tuo portafoglio");
-            } else {
-                // Salva il titolo: users/{userId}/portfolio/{symbol}
-                databaseReference.child("users")
-                        .child(userId)
-                        .child("portfolio")
-                        .child(stockSymbol)
-                        .setValue(stock)
-                        .addOnSuccessListener(aVoid -> {
-                            Log.d(TAG, "Titolo aggiunto al portafoglio: " + stockSymbol);
-                            callback.onSuccess("Titolo aggiunto al portafoglio!");
-                        })
-                        .addOnFailureListener(e -> {
-                            Log.e(TAG, "Errore aggiunta titolo: " + e.getMessage());
-                            callback.onFailure("Errore nel salvataggio: " + e.getMessage());
-                        });
+            if (currentUser == null) {
+                Log.e(TAG, "🔴 User NULL!");
+                callback.onFailure("Utente non autenticato");
+                return;
             }
-        });
+
+            String userId = currentUser.getUid();
+            String stockSymbol = stock.getSymbol();
+
+            Log.d(TAG, "🟢 userId: " + userId);
+            Log.d(TAG, "🟢 stockSymbol: " + stockSymbol);
+
+            String safeSymbol = stockSymbol.replace(".", "_")
+                    .replace("#", "_")
+                    .replace("$", "_")
+                    .replace("[", "_")
+                    .replace("]", "_");
+
+            Log.d(TAG, "Symbol originale: " + stockSymbol);
+            Log.d(TAG, "Symbol safe: " + safeSymbol);
+
+            Log.d(TAG, "🟢 databaseReference: " + (databaseReference != null ? "OK" : "NULL"));
+
+            databaseReference.child("users")
+                    .child(userId)
+                    .child("portfolio")
+                    .child(safeSymbol)
+                    .setValue(stock)
+                    .addOnSuccessListener(aVoid -> {
+                        Log.d(TAG, "✅ Stock salvato su Firebase!");
+                        callback.onSuccess("Titolo aggiunto al portafoglio!");
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "❌ Firebase Errore: " + e.getMessage());
+                        e.printStackTrace();
+                        callback.onFailure("Errore: " + e.getMessage());
+                    });
+
+            Log.d(TAG, "🟢 setValue chiamato (asincrono)");
+
+        } catch (Exception e) {
+            Log.e(TAG, "💥 EXCEPTION in addStockToPortfolio: " + e.getMessage());
+            e.printStackTrace();
+            callback.onFailure("Errore: " + e.getMessage());
+        }
     }
 
-    /**
-     * Verifica se un titolo esiste già nel portafoglio
-     */
-    private void checkIfStockExists(String userId, String symbol, ExistsCallback callback) {
+
+
+
+
+    private void updateStockQuantity(String userId, String symbol, PortfolioStock newStock, PortfolioCallback callback) {
         databaseReference.child("users")
                 .child(userId)
                 .child("portfolio")
                 .child(symbol)
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    PortfolioStock existingStock = snapshot.getValue(PortfolioStock.class);
+                    if (existingStock != null) {
+                        // Somma quantità
+                        double newQty = existingStock.getQuantity() + newStock.getQuantity();
+                        existingStock.setQuantity(newQty);
+
+                        // Ricalcola prezzo medio
+                        double totalValue = (existingStock.getAveragePrice() * existingStock.getQuantity())
+                                + (newStock.getAveragePrice() * newStock.getQuantity());
+                        existingStock.setAveragePrice(totalValue / newQty);
+
+                        // Salva
+                        databaseReference.child("users")
+                                .child(userId)
+                                .child("portfolio")
+                                .child(symbol)
+                                .setValue(existingStock)
+                                .addOnSuccessListener(v -> callback.onSuccess("Quantità aggiornata!"))
+                                .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
+                    }
+                });
+    }
+
+
+
+    public void getPortfolioList(PortfolioListCallback callback) {
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        if (currentUser == null) {
+            callback.onPortfolioListFailure("Utente non autenticato");
+            return;
+        }
+
+        String userId = currentUser.getUid();
+
+        databaseReference.child("users")
+                .child(userId)
+                .child("portfolio")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        callback.onResult(snapshot.exists());
+                        List<PortfolioStock> portfolio = new ArrayList<>();
+                        for (DataSnapshot stockSnapshot : snapshot.getChildren()) {
+                            PortfolioStock stock = stockSnapshot.getValue(PortfolioStock.class);
+                            if (stock != null) {
+                                portfolio.add(stock);
+                            }
+                        }
+                        callback.onPortfolioListSuccess(portfolio);
                     }
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        Log.e(TAG, "Errore verifica esistenza: " + error.getMessage());
-                        callback.onResult(false);
+                        Log.e(TAG, "Errore get portfolio: " + error.getMessage());
+                        callback.onPortfolioListFailure(error.getMessage());
                     }
                 });
     }
 
-    /**
-     * Rimuove un titolo dal portafoglio
-     */
+
     public void removeStockFromPortfolio(String symbol, PortfolioCallback callback) {
-        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
 
-        if (currentUser == null) {
-            callback.onFailure("Utente non autenticato");
-            return;
-        }
+    }
 
-        String userId = currentUser.getUid();
 
-        databaseReference.child("users")
-                .child(userId)
-                .child("portfolio")
-                .child(symbol)
-                .removeValue()
-                .addOnSuccessListener(aVoid -> {
-                    Log.d(TAG, "Titolo rimosso dal portafoglio: " + symbol);
-                    callback.onSuccess("Titolo rimosso dal portafoglio");
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Errore rimozione titolo: " + e.getMessage());
-                    callback.onFailure("Errore nella rimozione: " + e.getMessage());
-                });
+    private void checkIfStockExists(String userId, String symbol, ExistsCallback callback) {
+
     }
 
     private interface ExistsCallback {
