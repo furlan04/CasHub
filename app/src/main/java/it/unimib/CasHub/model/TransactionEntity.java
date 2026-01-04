@@ -13,11 +13,11 @@ import it.unimib.CasHub.database.TransactionTypeConverter;
 @TypeConverters(TransactionTypeConverter.class)
 public class TransactionEntity {
     @PrimaryKey(autoGenerate = true)
-    @Exclude  // Metti @Exclude sul campo, non sul getter
+    @Exclude
     private int id;
 
+    private String firebaseKey;
     private String userId;
-
     private double amount;
     private String name;
     private String type;
@@ -35,6 +35,7 @@ public class TransactionEntity {
 
     public TransactionEntity(TransactionEntity other) {
         this.id = other.id;
+        this.firebaseKey = other.firebaseKey;
         this.name = other.name;
         this.amount = other.amount;
         this.type = other.type;
@@ -42,12 +43,21 @@ public class TransactionEntity {
         this.currency = other.currency;
     }
 
+    @Exclude
     public int getId() {
         return id;
     }
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getFirebaseKey() {
+        return firebaseKey;
+    }
+
+    public void setFirebaseKey(String firebaseKey) {
+        this.firebaseKey = firebaseKey;
     }
 
     public String getUserId() {

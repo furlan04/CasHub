@@ -15,4 +15,8 @@ public abstract class BaseFirebaseTransactionDataSource {
     public abstract void getTransactions();
 
     public abstract void saveTransactions(List<TransactionEntity> transaction);
+
+    public abstract void insertTransaction(TransactionEntity transaction);
+
+    public abstract void deleteTransaction(String transactionId);
 }
