@@ -55,7 +55,7 @@ public class HomeActivity extends AppCompatActivity {
 
         IUserRepository userRepository = ServiceLocator.getInstance().getUserRepository(this.getApplication());
         TransactionRepository transactionRepository = ServiceLocator.getInstance().getTransactionRepository(this.getApplication(), false);
-        UserViewModel userViewModel = new ViewModelProvider(this, new UserViewModelFactory(userRepository, transactionRepository)).get(UserViewModel.class);
+        UserViewModel userViewModel = new ViewModelProvider(this, new UserViewModelFactory(userRepository)).get(UserViewModel.class);
         userViewModel.setAuthenticationError(false);
 
         User loggedUser = userViewModel.getLoggedUser();

@@ -52,10 +52,8 @@ public class LoginFragment extends Fragment {
         IUserRepository userRepository = ServiceLocator.getInstance()
                 .getUserRepository(requireActivity().getApplication());
 
-        ITransactionRepository transactionRepository = null;
-
         userViewModel = new ViewModelProvider(requireActivity(),
-                new UserViewModelFactory(userRepository, transactionRepository)).get(UserViewModel.class);
+                new UserViewModelFactory(userRepository)).get(UserViewModel.class);
     }
 
     @Override

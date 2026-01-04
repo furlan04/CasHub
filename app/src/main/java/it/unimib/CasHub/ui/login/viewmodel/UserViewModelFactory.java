@@ -15,17 +15,14 @@ import it.unimib.CasHub.repository.user.IUserRepository;
 public class UserViewModelFactory implements ViewModelProvider.Factory {
 
     private final IUserRepository userRepository;
-    private final ITransactionRepository transactionRepository;
 
-
-    public UserViewModelFactory(IUserRepository userRepository, ITransactionRepository transactionRepository) {
+    public UserViewModelFactory(IUserRepository userRepository) {
         this.userRepository = userRepository;
-        this.transactionRepository = transactionRepository;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new UserViewModel(userRepository, transactionRepository);
+        return (T) new UserViewModel(userRepository);
     }
 }
