@@ -1,49 +1,48 @@
 package it.unimib.CasHub.ui.home.fragment;
 
+import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
-import it.unimib.CasHub.utils.StockCache;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import java.util.Date;
-import java.util.Calendar;
 import android.widget.TextView;
-import android.graphics.Color;
 import android.widget.Toast;
-import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import android.widget.LinearLayout;
-import android.widget.EditText;
-import com.github.mikephil.charting.charts.LineChart;
 import androidx.appcompat.app.AlertDialog;
-import com.google.firebase.database.DatabaseReference;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import com.google.firebase.database.ValueEventListener;
-import androidx.navigation.Navigation;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.FirebaseDatabase;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
 import it.unimib.CasHub.R;
 import it.unimib.CasHub.adapter.PortfolioAdapter;
 import it.unimib.CasHub.model.PortfolioStock;
-
+import it.unimib.CasHub.model.Result;
+import it.unimib.CasHub.ui.home.viewmodel.HomepageStocksViewModel;
+import it.unimib.CasHub.ui.home.viewmodel.HomepageStocksViewModelFactory;
 
 public class HomepageStocksFragment extends Fragment {
 
@@ -59,9 +58,8 @@ public class HomepageStocksFragment extends Fragment {
     private TextView textViewRendimentoPortafoglio;
     private LineChart portfolioChart;
     private static final String TAG = "HomepageStocksFragment";
-
-
-
+    private HomepageStocksViewModel viewModel;
+    private double lastPortfolioValue = 0.0;
 
     @Nullable
     @Override
@@ -75,7 +73,6 @@ public class HomepageStocksFragment extends Fragment {
         textViewRendimentoPortafoglio = view.findViewById(R.id.textViewRendimentoPortafoglio);
         progressBar = view.findViewById(R.id.progressBar);
         portfolioChart = view.findViewById(R.id.portfolioChart);
-
 
         // FAB
         fabMain = view.findViewById(R.id.fabMain);
@@ -92,15 +89,25 @@ public class HomepageStocksFragment extends Fragment {
         });
         recyclerViewPortfolio.setAdapter(adapter);
 
-        // Setup FAB
         setupFab();
-
-        // Carica portfolio
-        loadPortfolio();
-
         setupPortfolioChart();
 
+        HomepageStocksViewModelFactory factory = new HomepageStocksViewModelFactory(requireActivity().getApplication());
+        viewModel = new ViewModelProvider(this, factory).get(HomepageStocksViewModel.class);
+
+        observePortfolio();
+        observePortfolioHistory();
+        observeSnackbar();
+
         return view;
+    }
+
+    private void observeSnackbar() {
+        viewModel.getSnackbarMessage().observe(getViewLifecycleOwner(), message -> {
+            if (message != null && !message.isEmpty()) {
+                Snackbar.make(requireView(), message, Snackbar.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void setupPortfolioChart() {
@@ -129,98 +136,166 @@ public class HomepageStocksFragment extends Fragment {
         portfolioChart.getLegend().setEnabled(false);
         portfolioChart.setExtraBottomOffset(10f);
     }
-    private void loadPortfolioHistoryChart() {
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        if (auth.getCurrentUser() == null) return;
 
-        String databaseUrl = "https://cashub-29595-default-rtdb.europe-west1.firebasedatabase.app";
+    private void observePortfolio() {
+        progressBar.setVisibility(View.VISIBLE);
+        recyclerViewPortfolio.setVisibility(View.GONE);
+        tvEmpty.setVisibility(View.GONE);
 
-        FirebaseDatabase.getInstance(databaseUrl)
-                .getReference()
-                .child("users")
-                .child(auth.getCurrentUser().getUid())
-                .child("portfolioHistory")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (!isAdded() || getContext() == null) return;
+        viewModel.getPortfolio().observe(getViewLifecycleOwner(), result -> {
+            if (result instanceof Result.Success) {
+                DataSnapshot snapshot = ((Result.Success<DataSnapshot>) result).getData();
+                if (viewModel.shouldUpdatePortfolio()) {
+                    viewModel.refreshPortfolioStocks(snapshot);
+                }
+                handlePortfolioSnapshot(snapshot);
+            } else if (result instanceof Result.Error) {
+                progressBar.setVisibility(View.GONE);
+                String errorMessage = ((Result.Error) result).getMessage();
+                Toast.makeText(requireContext(), "Error: " + errorMessage, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
 
-                        Log.e("CHART_DEBUG", "Snapshot exists: " + snapshot.exists());
-                        Log.e("CHART_DEBUG", "Children count: " + snapshot.getChildrenCount());
+    private void handlePortfolioSnapshot(DataSnapshot snapshot) {
+        List<PortfolioStock> stocks = new ArrayList<>();
+        double totalCurrentValue = 0.0;
 
-                        if (!snapshot.exists() || snapshot.getChildrenCount() == 0) {
-                            portfolioChart.setNoDataText("Dati storici non disponibili");
-                            portfolioChart.clear();
-                            portfolioChart.invalidate();
-                            return;
-                        }
+        for (DataSnapshot child : snapshot.getChildren()) {
+            PortfolioStock stock = child.getValue(PortfolioStock.class);
+            if (stock != null) {
+                totalCurrentValue += stock.getQuantity() * stock.getCurrentPrice();
+                stocks.add(stock);
+            }
+        }
 
-                        List<Entry> entries = new ArrayList<>();
-                        List<String> labels = new ArrayList<>();
+        progressBar.setVisibility(View.GONE);
 
-                        int index = 0;
-                        for (DataSnapshot child : snapshot.getChildren()) {
-                            String timeKey = child.getKey();
-                            Double value = child.getValue(Double.class);
+        if (stocks.isEmpty()) {
+            tvEmpty.setText("Nessuna azione in portafoglio");
+            tvEmpty.setVisibility(View.VISIBLE);
+            recyclerViewPortfolio.setVisibility(View.GONE);
+            textViewTitoli.setText("€0.00");
+            textViewRendimentoPortafoglio.setText("€0.00 (0.00%)");
+        } else {
+            tvEmpty.setVisibility(View.GONE);
+            recyclerViewPortfolio.setVisibility(View.VISIBLE);
+            adapter.setStocks(stocks);
 
-                            if (value != null && timeKey != null) {
-                                entries.add(new Entry(index, value.floatValue()));
+            textViewTitoli.setText(String.format("€%.2f", totalCurrentValue));
 
-                                // Estrae solo HH:mm per label
-                                String[] parts = timeKey.split(" ");
-                                if (parts.length > 1) {
-                                    labels.add(parts[1]); // HH:mm
-                                } else {
-                                    labels.add(timeKey);
-                                }
+            double change = 0.0;
+            double changePercent = 0.0;
+            if (lastPortfolioValue > 0) {
+                change = totalCurrentValue - lastPortfolioValue;
+                changePercent = (change / lastPortfolioValue) * 100;
+            }
 
-                                index++;
-                            }
-                        }
+            String changeText = String.format("€%.2f (%.2f%%)", change, changePercent);
+            textViewRendimentoPortafoglio.setText(changeText);
 
-                        if (entries.isEmpty()) {
-                            portfolioChart.setNoDataText("Nessun dato disponibile");
-                            portfolioChart.clear();
-                            portfolioChart.invalidate();
-                            return;
-                        }
+            if (change >= 0) {
+                textViewRendimentoPortafoglio.setTextColor(Color.parseColor("#4CAF50"));
+            } else {
+                textViewRendimentoPortafoglio.setTextColor(Color.parseColor("#F44336"));
+            }
 
-                        // Crea dataset
-                        LineDataSet dataSet = new LineDataSet(entries, "Valore Portafoglio");
-                        dataSet.setColor(Color.parseColor("#4CAF50"));
-                        dataSet.setValueTextColor(Color.WHITE);
-                        dataSet.setLineWidth(2f);
-                        dataSet.setCircleColor(Color.parseColor("#4CAF50"));
-                        dataSet.setCircleRadius(4f);
-                        dataSet.setDrawCircleHole(false);
-                        dataSet.setDrawValues(false);
+            viewModel.savePortfolioSnapshot(totalCurrentValue);
+        }
+    }
 
-                        LineData lineData = new LineData(dataSet);
-                        portfolioChart.setData(lineData);
+    private void observePortfolioHistory() {
+        viewModel.getPortfolioHistory().observe(getViewLifecycleOwner(), result -> {
+            if (result instanceof Result.Success) {
+                DataSnapshot snapshot = ((Result.Success<DataSnapshot>) result).getData();
+                handlePortfolioHistorySnapshot(snapshot);
+            } else if (result instanceof Result.Error) {
+                Log.e(TAG, "Error loading chart: " + ((Result.Error) result).getMessage());
+            }
+        });
+    }
 
-                        // Configura asse X con label temporali
-                        XAxis xAxis = portfolioChart.getXAxis();
-                        xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
-                        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-                        xAxis.setGranularity(1f);
-                        xAxis.setTextColor(Color.WHITE);
+    private void handlePortfolioHistorySnapshot(DataSnapshot snapshot) {
+        if (!isAdded() || getContext() == null) return;
 
-                        // Configura asse Y
-                        YAxis leftAxis = portfolioChart.getAxisLeft();
-                        leftAxis.setTextColor(Color.WHITE);
-                        portfolioChart.getAxisRight().setEnabled(false);
+        if (!snapshot.exists() || snapshot.getChildrenCount() == 0) {
+            portfolioChart.setNoDataText("Dati storici non disponibili");
+            portfolioChart.clear();
+            portfolioChart.invalidate();
+            return;
+        }
 
-                        portfolioChart.getDescription().setEnabled(false);
-                        portfolioChart.getLegend().setTextColor(Color.WHITE);
-                        portfolioChart.invalidate();
-                    }
+        List<Entry> entries = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+        List<DataSnapshot> historyChildren = new ArrayList<>();
+        for (DataSnapshot child : snapshot.getChildren()) {
+            historyChildren.add(child);
+        }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        if (!isAdded() || getContext() == null) return;
-                        Log.e(TAG, "Errore caricamento grafico: " + error.getMessage());
-                    }
-                });
+        if (historyChildren.size() > 1) {
+            DataSnapshot previousSnapshot = historyChildren.get(historyChildren.size() - 2);
+            Double previousValue = previousSnapshot.getValue(Double.class);
+            if (previousValue != null) {
+                lastPortfolioValue = previousValue;
+            }
+        } else if (historyChildren.size() == 1) {
+            DataSnapshot firstSnapshot = historyChildren.get(0);
+            Double firstValue = firstSnapshot.getValue(Double.class);
+            if (firstValue != null) {
+                lastPortfolioValue = firstValue;
+            }
+        }
+
+        int index = 0;
+        for (DataSnapshot child : historyChildren) {
+            String timeKey = child.getKey();
+            Double value = child.getValue(Double.class);
+
+            if (value != null && timeKey != null) {
+                entries.add(new Entry(index, value.floatValue()));
+
+                String[] parts = timeKey.split("-");
+                if (parts.length == 3) {
+                    labels.add(parts[2] + "/" + parts[1]);
+                } else {
+                    labels.add(timeKey);
+                }
+                index++;
+            }
+        }
+
+        if (entries.isEmpty()) {
+            portfolioChart.setNoDataText("Nessun dato disponibile");
+            portfolioChart.clear();
+            portfolioChart.invalidate();
+            return;
+        }
+
+        LineDataSet dataSet = new LineDataSet(entries, "Valore Portafoglio");
+        dataSet.setColor(Color.parseColor("#4CAF50"));
+        dataSet.setValueTextColor(Color.WHITE);
+        dataSet.setLineWidth(2f);
+        dataSet.setCircleColor(Color.parseColor("#4CAF50"));
+        dataSet.setCircleRadius(4f);
+        dataSet.setDrawCircleHole(false);
+        dataSet.setDrawValues(false);
+
+        LineData lineData = new LineData(dataSet);
+        portfolioChart.setData(lineData);
+
+        XAxis xAxis = portfolioChart.getXAxis();
+        xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setGranularity(1f);
+        xAxis.setTextColor(Color.WHITE);
+
+        YAxis leftAxis = portfolioChart.getAxisLeft();
+        leftAxis.setTextColor(Color.WHITE);
+        portfolioChart.getAxisRight().setEnabled(false);
+
+        portfolioChart.getDescription().setEnabled(false);
+        portfolioChart.getLegend().setTextColor(Color.WHITE);
+        portfolioChart.invalidate();
     }
 
 
@@ -240,14 +315,10 @@ public class HomepageStocksFragment extends Fragment {
             Navigation.findNavController(v).navigate(R.id.selectionAgencyStockFragment);
         });
 
-
-
-
         fabRemove.setOnClickListener(v -> {
-            closeFabMenu();  // Chiude il menu FAB
-            showRemoveStockDialog();  // Mostra dialog rimozione
+            closeFabMenu();
+            showRemoveStockDialog();
         });
-
 
         tvAdd.setOnClickListener(v -> fabAdd.performClick());
         tvRemove.setOnClickListener(v -> fabRemove.performClick());
@@ -262,10 +333,8 @@ public class HomepageStocksFragment extends Fragment {
         tvAdd.setVisibility(View.VISIBLE);
         tvRemove.setVisibility(View.VISIBLE);
 
-        // Animazione rotazione FAB principale
         fabMain.animate().rotation(45f).setDuration(200).start();
 
-        // Animazione entrata mini FAB
         fabAdd.setAlpha(0f);
         fabAdd.setTranslationY(100f);
         fabAdd.animate().alpha(1f).translationY(0f).setDuration(200).start();
@@ -285,10 +354,8 @@ public class HomepageStocksFragment extends Fragment {
         isFabOpen = false;
         fabOverlay.setVisibility(View.GONE);
 
-        // Animazione rotazione FAB principale
         fabMain.animate().rotation(0f).setDuration(200).start();
 
-        // Animazione uscita mini FAB
         fabAdd.animate().alpha(0f).translationY(100f).setDuration(200).withEndAction(() -> {
             fabAdd.setVisibility(View.GONE);
         }).start();
@@ -306,124 +373,39 @@ public class HomepageStocksFragment extends Fragment {
         }).start();
     }
 
-    private void loadPortfolio() {
-        progressBar.setVisibility(View.VISIBLE);
-        recyclerViewPortfolio.setVisibility(View.GONE);
-        tvEmpty.setVisibility(View.GONE);
-
-        String databaseUrl = "https://cashub-29595-default-rtdb.europe-west1.firebasedatabase.app";
-
+    private void showRemoveStockDialog() {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         if (auth.getCurrentUser() == null) {
-            progressBar.setVisibility(View.GONE);
-            tvEmpty.setText("Effettua il login per vedere il portfolio");
-            tvEmpty.setVisibility(View.VISIBLE);
-            textViewTitoli.setText("€0.00");
+            Toast.makeText(requireContext(), "Non sei loggato!", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        FirebaseDatabase.getInstance(databaseUrl)
-                .getReference()
-                .child("users")
-                .child(auth.getCurrentUser().getUid())
-                .child("portfolio")
-                .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        List<PortfolioStock> stocks = new ArrayList<>();
-                        double totalInvested = 0.0;  // Valore investito
-                        double totalCurrent = 0.0;   // Valore attuale
+        viewModel.getPortfolio().observe(getViewLifecycleOwner(), result -> {
+            if (result instanceof Result.Success) {
+                DataSnapshot snapshot = ((Result.Success<DataSnapshot>) result).getData();
+                if (!snapshot.exists() || snapshot.getChildrenCount() == 0) {
+                    Toast.makeText(requireContext(), "Nessun titolo da vendere", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
-                        for (DataSnapshot child : snapshot.getChildren()) {
-                            PortfolioStock stock = child.getValue(PortfolioStock.class);
-                            if (stock != null) {
-                                // Carica dalla cache
-                                StockCache.CachedStock cached = StockCache.getStock(requireContext(), stock.getSymbol());
-                                if (cached != null) {
-                                    stock.setName(cached.companyName);
-                                    stock.setCurrency(cached.currency);
-                                    stock.setExchange(cached.exchange);
-                                    stock.setExchangeFullName(cached.exchangeFull);
-                                    stock.setCurrentPrice(cached.currentPrice); // Prezzo attuale dalla cache
-                                }
-
-                                // Calcola valori
-                                double invested = stock.getQuantity() * stock.getAveragePrice();
-                                double current = stock.getQuantity() * stock.getCurrentPrice();
-
-                                totalInvested += invested;
-                                totalCurrent += current;
-
-                                stocks.add(stock);
-                            }
-                        }
-
-                        progressBar.setVisibility(View.GONE);
-
-                        if (stocks.isEmpty()) {
-                            tvEmpty.setText("Nessuna azione in portafoglio");
-                            tvEmpty.setVisibility(View.VISIBLE);
-                            recyclerViewPortfolio.setVisibility(View.GONE);
-                            textViewTitoli.setText("€0.00");
-                            textViewRendimentoPortafoglio.setText("€0.00 (0.00%)");
-                        } else {
-                            tvEmpty.setVisibility(View.GONE);
-                            recyclerViewPortfolio.setVisibility(View.VISIBLE);
-                            adapter.setStocks(stocks);
-
-                            textViewTitoli.setText(String.format("€%.2f", totalCurrent));
-
-                            double change = totalCurrent - totalInvested;
-                            double changePercent = (totalInvested > 0) ? (change / totalInvested) * 100 : 0;
-
-                            String changeText = String.format("€%.2f (%.2f%%)", change, changePercent);
-                            textViewRendimentoPortafoglio.setText(changeText);
-
-                            if (change >= 0) {
-                                textViewRendimentoPortafoglio.setTextColor(Color.parseColor("#4CAF50"));
-                            } else {
-                                textViewRendimentoPortafoglio.setTextColor(Color.parseColor("#F44336"));
-                            }
-
-                            // 🎯 SALVA SNAPSHOT GIORNALIERO
-                            savePortfolioSnapshot(totalCurrent);
-
-                            // 🎯 CARICA IL GRAFICO STORICO
-                            loadPortfolioHistoryChart();
-                        }
-
+                List<PortfolioStock> stocks = new ArrayList<>();
+                for (DataSnapshot child : snapshot.getChildren()) {
+                    PortfolioStock stock = child.getValue(PortfolioStock.class);
+                    if (stock != null) {
+                        stocks.add(stock);
                     }
+                }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        progressBar.setVisibility(View.GONE);
-                        Toast.makeText(requireContext(), "Errore: " + error.getMessage(), Toast.LENGTH_LONG).show();
-                    }
-                });
-    }
+                if (stocks.isEmpty()) {
+                    Toast.makeText(requireContext(), "Nessun titolo da vendere", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
-    private void savePortfolioSnapshot(double totalValue) {
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        if (auth.getCurrentUser() == null) return;
-
-        String databaseUrl = "https://cashub-29595-default-rtdb.europe-west1.firebasedatabase.app";
-        DatabaseReference historyRef = FirebaseDatabase.getInstance(databaseUrl)
-                .getReference()
-                .child("users")
-                .child(auth.getCurrentUser().getUid())
-                .child("portfolioHistory");
-
-        // 🎯 TEST: Usa TIMESTAMP invece di data
-        SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
-        String timeKey = timeFormat.format(new Date());
-
-        historyRef.child(timeKey).setValue(totalValue)
-                .addOnSuccessListener(aVoid -> {
-                    Log.d(TAG, "Snapshot salvato: " + timeKey + " = " + totalValue);
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Errore salvataggio snapshot: " + e.getMessage());
-                });
+                showStockSelectionDialog(stocks);
+            } else if (result instanceof Result.Error) {
+                Toast.makeText(requireContext(), "Error: " + ((Result.Error) result).getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void showStockSelectionDialog(List<PortfolioStock> stocks) {
@@ -454,6 +436,7 @@ public class HomepageStocksFragment extends Fragment {
             dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.parseColor("#757575"));
         }
     }
+
     private void showQuantityInputDialog(PortfolioStock stock) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext(), R.style.RoundedDialogStyle);
         builder.setTitle("Quantità da vendere");
@@ -462,7 +445,6 @@ public class HomepageStocksFragment extends Fragment {
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(60, 40, 60, 20);
 
-        // Info titolo
         TextView info = new TextView(requireContext());
         String currencySymbol = getCurrencySymbol(stock.getCurrency());
         info.setText("" + stock.getName() + "\n" +
@@ -473,11 +455,10 @@ public class HomepageStocksFragment extends Fragment {
         info.setPadding(0, 0, 0, 30);
         layout.addView(info);
 
-        // Input quantità
         final EditText quantityInput = new EditText(requireContext());
         quantityInput.setHint("Quantità da vendere");
         quantityInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        quantityInput.setText(String.valueOf(stock.getQuantity())); // Default: tutte
+        quantityInput.setText(String.valueOf(stock.getQuantity()));
         quantityInput.setSelectAllOnFocus(true);
         layout.addView(quantityInput);
 
@@ -489,7 +470,6 @@ public class HomepageStocksFragment extends Fragment {
         AlertDialog dialog = builder.create();
         dialog.show();
 
-        // Personalizza pulsanti
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             String quantityStr = quantityInput.getText().toString();
 
@@ -529,54 +509,6 @@ public class HomepageStocksFragment extends Fragment {
         }
     }
 
-    private void showRemoveStockDialog() {
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        if (auth.getCurrentUser() == null) {
-            Toast.makeText(requireContext(), "Non sei loggato!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        String databaseUrl = "https://cashub-29595-default-rtdb.europe-west1.firebasedatabase.app";
-
-        // 🎯 CARICA DATI DIRETTAMENTE DA FIREBASE (non dall'adapter!)
-        FirebaseDatabase.getInstance(databaseUrl)
-                .getReference()
-                .child("users")
-                .child(auth.getCurrentUser().getUid())
-                .child("portfolio")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (!snapshot.exists() || snapshot.getChildrenCount() == 0) {
-                            Toast.makeText(requireContext(), "Nessun titolo da vendere", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-
-                        List<PortfolioStock> stocks = new ArrayList<>();
-                        for (DataSnapshot child : snapshot.getChildren()) {
-                            PortfolioStock stock = child.getValue(PortfolioStock.class);
-                            if (stock != null) {
-                                stocks.add(stock);
-                            }
-                        }
-
-                        if (stocks.isEmpty()) {
-                            Toast.makeText(requireContext(), "Nessun titolo da vendere", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-
-                        // Mostra il dialog con i dati aggiornati
-                        showStockSelectionDialog(stocks);
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        Toast.makeText(requireContext(), "Errore: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
-    }
-
-
     private void confirmRemoveStock(PortfolioStock stock, double quantityToRemove) {
         String currencySymbol = getCurrencySymbol(stock.getCurrency());
         double valueToRemove = quantityToRemove * stock.getAveragePrice();
@@ -602,7 +534,7 @@ public class HomepageStocksFragment extends Fragment {
         builder.setMessage(message);
 
         builder.setPositiveButton(removeAll ? "VENDI" : "VENDI", (dialog, which) -> {
-            removeStockFromPortfolio(stock, quantityToRemove);
+            viewModel.removeStockFromPortfolio(stock, quantityToRemove);
         });
 
         builder.setNegativeButton("ANNULLA", null);
@@ -617,64 +549,6 @@ public class HomepageStocksFragment extends Fragment {
             dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.parseColor("#757575"));
         }
     }
-
-
-
-    private void removeStockFromPortfolio(PortfolioStock stock, double quantityToRemove) {
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        if (auth.getCurrentUser() == null) return;
-
-        String databaseUrl = "https://cashub-29595-default-rtdb.europe-west1.firebasedatabase.app";
-
-        String safeSymbol = stock.getSymbol().replace(".", "_")
-                .replace("#", "_")
-                .replace("$", "_")
-                .replace("[", "_")
-                .replace("]", "_");
-
-        DatabaseReference stockRef = FirebaseDatabase.getInstance(databaseUrl)
-                .getReference()
-                .child("users")
-                .child(auth.getCurrentUser().getUid())
-                .child("portfolio")
-                .child(safeSymbol);
-
-        double newQuantity = stock.getQuantity() - quantityToRemove;
-
-        if (newQuantity <= 0) {
-            // 🗑️ ELIMINA COMPLETAMENTE
-            stockRef.removeValue()
-                    .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(requireContext(),
-                                stock.getName() + " venduto dal portafoglio",
-                                Toast.LENGTH_SHORT).show();
-                        loadPortfolio();
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(requireContext(),
-                                "Errore: " + e.getMessage(),
-                                Toast.LENGTH_LONG).show();
-                        Log.e(TAG, "Errore vendita titolo: " + e.getMessage());
-                    });
-        } else {
-            // 📉 AGGIORNA QUANTITÀ
-            stock.setQuantity(newQuantity);
-            stockRef.setValue(stock)
-                    .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(requireContext(),
-                                "Vendute " + quantityToRemove + " azioni. Possiedi: " + newQuantity,
-                                Toast.LENGTH_SHORT).show();
-                        loadPortfolio();
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(requireContext(),
-                                "Errore: " + e.getMessage(),
-                                Toast.LENGTH_LONG).show();
-                        Log.e(TAG, "Errore aggiornamento quantità: " + e.getMessage());
-                    });
-        }
-    }
-
 
     private String getCurrencySymbol(String currencyCode) {
         if (currencyCode == null) return "$";
@@ -692,9 +566,4 @@ public class HomepageStocksFragment extends Fragment {
             default: return currencyCode + " ";
         }
     }
-
-
-
-
-
 }

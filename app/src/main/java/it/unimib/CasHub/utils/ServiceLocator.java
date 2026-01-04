@@ -7,6 +7,7 @@ import it.unimib.CasHub.database.CurrencyRoomDatabase;
 import it.unimib.CasHub.database.TransactionDao;
 import it.unimib.CasHub.database.TransactionRoomDatabase;
 import it.unimib.CasHub.repository.ForexRepository;
+import it.unimib.CasHub.repository.portfolio.PortfolioRepository;
 import it.unimib.CasHub.repository.transaction.TransactionRepository;
 import it.unimib.CasHub.repository.user.IUserRepository;
 import it.unimib.CasHub.repository.user.UserRepository;
@@ -15,6 +16,7 @@ import it.unimib.CasHub.service.ForexAPIService;
 import it.unimib.CasHub.source.BaseForexDataSource;
 import it.unimib.CasHub.source.ForexAPIDataSource;
 import it.unimib.CasHub.source.ForexMockDataSource;
+import it.unimib.CasHub.source.portfolio.PortfolioFirebaseDataSource;
 import it.unimib.CasHub.source.transaction.BaseFirebaseTransactionDataSource;
 import it.unimib.CasHub.source.transaction.BaseLocalTransactionDataSource;
 import it.unimib.CasHub.source.transaction.TransactionFirebaseDataSource;
@@ -109,6 +111,11 @@ public class ServiceLocator {
         }
 
         return new TransactionRepository(localDataSource, remoteDataSource);
+    }
+
+    public PortfolioRepository getPortfolioRepository() {
+        PortfolioFirebaseDataSource remoteDataSource = new PortfolioFirebaseDataSource();
+        return new PortfolioRepository(remoteDataSource);
     }
 
     public IUserRepository getUserRepository(Application application) {

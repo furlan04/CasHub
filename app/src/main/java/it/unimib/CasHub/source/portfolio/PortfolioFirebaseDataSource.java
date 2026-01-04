@@ -1,89 +1,204 @@
 package it.unimib.CasHub.source.portfolio;
 
-import static it.unimib.CasHub.utils.Constants.*;
-
 import android.util.Log;
-
-import com.google.android.gms.tasks.OnSuccessListener;
+import androidx.annotation.NonNull;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.firebase.database.ValueEventListener;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import it.unimib.CasHub.model.PortfolioStock;
 
-public class PortfolioFirebaseDataSource {
-    private final DatabaseReference databaseReference;
-    private final String TAG = PortfolioFirebaseDataSource.class.getSimpleName();
-    private final FirebaseAuth firebaseAuth;
-    private IPortfolioCallback callback;
+public class PortfolioFirebaseDataSource extends BasePortfolioDataSource {
 
-    public PortfolioFirebaseDataSource(IPortfolioCallback callback) {
+    private static final String TAG = PortfolioFirebaseDataSource.class.getSimpleName();
+    private final DatabaseReference databaseReference;
+    private final FirebaseAuth firebaseAuth;
+    public PortfolioFirebaseDataSource() {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         this.databaseReference = database.getReference();
         this.firebaseAuth = FirebaseAuth.getInstance();
-        this.callback = callback;
     }
 
-    public void getPortfolio() {
-        String userId = firebaseAuth.getCurrentUser().getUid();
-        Log.d(TAG, "userId: " + userId);
+    @Override
+    public void getPortfolio(PortfolioResponseCallback<DataSnapshot> callback) {
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        if (currentUser == null) {
+            callback.onError("User not authenticated");
+            return;
+        }
 
-        databaseReference.child(FIREBASE_USERS_COLLECTION)
-                .child(userId)
-                .child("portfolio")  // 👈 NUOVO path
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        DataSnapshot dataSnapshot = task.getResult();
-                        List<PortfolioStock> portfolio = new ArrayList<>();
-                        for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                            PortfolioStock stock = ds.getValue(PortfolioStock.class);
-                            portfolio.add(stock);
-                        }
-                        callback.onPortfolioSuccess(portfolio);
-                    } else {
-                        Log.e(TAG, "Errore nel recupero del portfolio.", task.getException());
-                        callback.onPortfolioFailure(task.getException());
+        databaseReference.child("users")
+                .child(currentUser.getUid())
+                .child("portfolio")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        callback.onSuccess(snapshot);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        callback.onError(error.getMessage());
                     }
                 });
     }
 
-    public void addStock(PortfolioStock stock) {
-        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-        if (currentUser == null) {
-            callback.onPortfolioFailure(new Exception("User not authenticated"));
-            return;
-        }
-
-        String userId = currentUser.getUid();
-        String stockId = stock.getSymbol();
-        String stockName = stock.getName();
-
-        databaseReference
-                .child(FIREBASE_USERS_COLLECTION)
-                .child(userId)
-                .child("portfolio")
-                .child(stockId)
-                .setValue(stock)
-                .addOnSuccessListener(unused -> Log.i(TAG, "Stock aggiunto: " + stockName))
-                .addOnFailureListener(e -> callback.onPortfolioFailure(e));
-    }
-
-    public void removeStock(String symbol) {
+    @Override
+    public void savePortfolioSnapshot(double totalValue) {
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
         if (currentUser == null) return;
 
-        String userId = currentUser.getUid();
-        databaseReference
-                .child(FIREBASE_USERS_COLLECTION)
-                .child(userId)
+        DatabaseReference historyRef = databaseReference
+                .child("users")
+                .child(currentUser.getUid())
+                .child("portfolioHistory");
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String dateKey = dateFormat.format(new Date());
+
+        historyRef.child(dateKey).setValue(totalValue)
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "Snapshot saved: " + dateKey + " = " + totalValue))
+                .addOnFailureListener(e -> Log.e(TAG, "Error saving snapshot: " + e.getMessage()));
+    }
+
+    @Override
+    public void removeStockFromPortfolio(PortfolioStock stock, double quantityToRemove, PortfolioResponseCallback<Void> callback) {
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        if (currentUser == null) {
+            callback.onError("User not authenticated");
+            return;
+        }
+
+        String safeSymbol = getSafeSymbol(stock.getSymbol());
+
+        DatabaseReference stockRef = databaseReference
+                .child("users")
+                .child(currentUser.getUid())
                 .child("portfolio")
-                .child(symbol)
-                .removeValue();
+                .child(safeSymbol);
+
+        double newQuantity = stock.getQuantity() - quantityToRemove;
+
+        if (newQuantity <= 0) {
+            stockRef.removeValue()
+                    .addOnSuccessListener(aVoid -> callback.onSuccess(null))
+                    .addOnFailureListener(e -> callback.onError(e.getMessage()));
+        } else {
+            stock.setQuantity(newQuantity);
+            stockRef.setValue(stock)
+                    .addOnSuccessListener(aVoid -> callback.onSuccess(null))
+                    .addOnFailureListener(e -> callback.onError(e.getMessage()));
+        }
+    }
+
+    @Override
+    public void getPortfolioHistory(PortfolioResponseCallback<DataSnapshot> callback) {
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        if (currentUser == null) {
+            callback.onError("User not authenticated");
+            return;
+        }
+
+        databaseReference.child("users")
+                .child(currentUser.getUid())
+                .child("portfolioHistory")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        callback.onSuccess(snapshot);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        callback.onError(error.getMessage());
+                    }
+                });
+    }
+
+    @Override
+    public void addStockToPortfolio(PortfolioStock newPurchase, PortfolioResponseCallback<Void> callback) {
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        if (currentUser == null) {
+            callback.onError("User not authenticated");
+            return;
+        }
+
+        String safeSymbol = getSafeSymbol(newPurchase.getSymbol());
+
+        DatabaseReference stockRef = databaseReference
+                .child("users")
+                .child(currentUser.getUid())
+                .child("portfolio")
+                .child(safeSymbol);
+
+        stockRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    PortfolioStock existingStock = snapshot.getValue(PortfolioStock.class);
+                    if (existingStock != null) {
+                        double newQuantityToAdd = newPurchase.getQuantity();
+                        double priceOfNewPurchase = newPurchase.getAveragePrice();
+
+                        double oldQuantity = existingStock.getQuantity();
+                        double oldAvgPrice = existingStock.getAveragePrice();
+
+                        double totalQuantity = oldQuantity + newQuantityToAdd;
+                        double newAvgPrice = ((oldAvgPrice * oldQuantity) + (priceOfNewPurchase * newQuantityToAdd)) / totalQuantity;
+
+                        existingStock.setQuantity(totalQuantity);
+                        existingStock.setAveragePrice(newAvgPrice);
+                        existingStock.setCurrentPrice(priceOfNewPurchase);
+
+                        stockRef.setValue(existingStock)
+                                .addOnSuccessListener(aVoid -> callback.onSuccess(null))
+                                .addOnFailureListener(e -> callback.onError(e.getMessage()));
+                    } else {
+                        stockRef.setValue(newPurchase)
+                                .addOnSuccessListener(aVoid -> callback.onSuccess(null))
+                                .addOnFailureListener(e -> callback.onError(e.getMessage()));
+                    }
+                } else {
+                    stockRef.setValue(newPurchase)
+                            .addOnSuccessListener(aVoid -> callback.onSuccess(null))
+                            .addOnFailureListener(e -> callback.onError(e.getMessage()));
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onError(error.getMessage());
+            }
+        });
+    }
+
+    @Override
+    public void updateStockInPortfolio(PortfolioStock stock) {
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        if (currentUser == null) return;
+
+        String safeSymbol = getSafeSymbol(stock.getSymbol());
+
+        databaseReference
+                .child("users")
+                .child(currentUser.getUid())
+                .child("portfolio")
+                .child(safeSymbol)
+                .setValue(stock)
+                .addOnFailureListener(e -> Log.e(TAG, "Failed to update stock: " + e.getMessage()));
+    }
+
+    private String getSafeSymbol(String symbol) {
+        return symbol.replace(".", "_")
+                .replace("#", "_")
+                .replace("$", "_")
+                .replace("[", "_")
+                .replace("]", "_");
     }
 }
