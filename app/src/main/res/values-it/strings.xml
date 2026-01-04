@@ -34,8 +34,8 @@
     <string name="stock_name1">Nome1</string>
     <string name="stock_name2">Nome2</string>
     <string name="stock_name3">Nome3</string>
-    <string name="add_stock">Aggiungi Titolo</string>
-    <string name="remove_stock">Rimuovi Titolo</string>
+    <string name="add_stock">Compra Titolo</string>
+    <string name="remove_stock">Vendi Titolo</string>
     <string name="titoli_title">TITOLO</string>
     <string name="check_nickname">Inserisci un Nickname valido</string>
     <string name="invalid_password">La password deve avere almeno 8 caratteri</string>

@@ -1,6 +1,7 @@
 package it.unimib.CasHub.repository;
 
 import android.app.Application;
+import android.util.Log;
 
 import java.util.List;
 
@@ -33,17 +34,26 @@ public class AgencyAPIRepository implements IAgencyRepository {
         // Creo la chiamata API con il parametro query (e l'API key)
         Call<List<Agency>> call = apiService.getAgencies(query, apiKey);
 
+        Log.e("API_DEBUG", "URL: " + call.request().url());
+
         // Chiamata async
         call.enqueue(new Callback<List<Agency>>() {
             @Override
             public void onResponse(Call<List<Agency>> call, Response<List<Agency>> response) {
+                Log.e("API_DEBUG", "Response code: " + response.code());
+                Log.e("API_DEBUG", "Body: " + response.body());
 
                 if (response.isSuccessful() && response.body() != null) {
-                    // ⭐ Restituisce esattamente come la mock
-                    responseCallback.onSuccess(response.body(), System.currentTimeMillis());
+                    List<Agency> agencies = response.body();
+                    if (agencies != null && !agencies.isEmpty()) {
+                        responseCallback.onSuccess(agencies, System.currentTimeMillis());
+                    } else {
+                        responseCallback.onFailure("Nessun risultato");
+                    }
                 } else {
-                    responseCallback.onFailure("Errore: risposta vuota o non valida");
+                    responseCallback.onFailure("Errore HTTP: " + response.code() + " - " + response.message());
                 }
+
             }
 
             @Override

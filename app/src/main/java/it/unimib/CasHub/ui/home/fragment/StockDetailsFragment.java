@@ -7,12 +7,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -30,15 +34,14 @@ import java.util.List;
 import it.unimib.CasHub.R;
 import it.unimib.CasHub.model.ChartData;
 import it.unimib.CasHub.model.PortfolioStock;
+import it.unimib.CasHub.model.Result;
 import it.unimib.CasHub.model.StockQuote;
-import it.unimib.CasHub.repository.IStockRepository;
-import it.unimib.CasHub.repository.PortfolioFirebaseRepository;
-import it.unimib.CasHub.repository.StockAPIRepository;
-import it.unimib.CasHub.repository.StockMockRepository;
+import it.unimib.CasHub.ui.home.viewmodel.StockDetailsViewModel;
+import it.unimib.CasHub.ui.home.viewmodel.StockDetailsViewModelFactory;
 import it.unimib.CasHub.utils.NetworkUtil;
-import it.unimib.CasHub.utils.StockResponseCallback;
+import it.unimib.CasHub.utils.StockCache;
 
-public class StockDetailsFragment extends Fragment implements StockResponseCallback {
+public class StockDetailsFragment extends Fragment {
 
     private static final String TAG = StockDetailsFragment.class.getSimpleName();
 
@@ -50,8 +53,7 @@ public class StockDetailsFragment extends Fragment implements StockResponseCallb
     private Button addToPortfolioButton;
     private LineChart weeklyChart;
 
-    private StockAPIRepository stockRepository;
-    private PortfolioFirebaseRepository portfolioRepository;
+    private StockDetailsViewModel viewModel;
 
     // Dati ricevuti dal Bundle
     private String symbol;
@@ -68,7 +70,6 @@ public class StockDetailsFragment extends Fragment implements StockResponseCallb
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Ottieni tutti i dati dal Bundle
         if (getArguments() != null) {
             symbol = getArguments().getString("agencySymbol");
             companyName = getArguments().getString("agencyName");
@@ -76,6 +77,9 @@ public class StockDetailsFragment extends Fragment implements StockResponseCallb
             exchange = getArguments().getString("agencyExchange");
             exchangeFull = getArguments().getString("agencyExchangeFull");
         }
+
+        StockDetailsViewModelFactory factory = new StockDetailsViewModelFactory(requireActivity().getApplication());
+        viewModel = new ViewModelProvider(this, factory).get(StockDetailsViewModel.class);
     }
 
     @Override
@@ -88,7 +92,6 @@ public class StockDetailsFragment extends Fragment implements StockResponseCallb
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Inizializza le view
         stockNameTextView = view.findViewById(R.id.StockName);
         exchangeFullTextView = view.findViewById(R.id.textExchangeFull);
         symbolTextView = view.findViewById(R.id.textSymbol);
@@ -97,7 +100,6 @@ public class StockDetailsFragment extends Fragment implements StockResponseCallb
         addToPortfolioButton = view.findViewById(R.id.btnAddToPortfolio);
         weeklyChart = view.findViewById(R.id.weeklyChart);
 
-        // Mostra subito le info base dell'Agency
         if (companyName != null) {
             stockNameTextView.setText(companyName);
         }
@@ -111,32 +113,19 @@ public class StockDetailsFragment extends Fragment implements StockResponseCallb
             exchangeTextView.setText("\nExchange: " + exchange);
         }
 
-        // Inizializza repository
-        if (requireActivity().getResources().getBoolean(R.bool.debug)) {
-            stockRepository = StockAPIRepository.getInstance(requireActivity().getApplication());
-        } else {
-            stockRepository = StockAPIRepository.getInstance(requireActivity().getApplication());
-        }
-
-        portfolioRepository = new PortfolioFirebaseRepository();
-
-        // Setup button
         addToPortfolioButton.setOnClickListener(v -> addToPortfolio());
 
-        // Configura il grafico
         setupChart();
 
-        // Carica i dati del prezzo e del grafico
         if (symbol != null && !symbol.isEmpty()) {
-            loadStockData();
-            loadChartData();
+            observeStockQuote();
+            observeChartData();
         } else {
             Toast.makeText(requireContext(), "Simbolo non valido", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void setupChart() {
-        // Configurazione estetica del grafico
         weeklyChart.getDescription().setEnabled(false);
         weeklyChart.setTouchEnabled(true);
         weeklyChart.setDragEnabled(true);
@@ -145,8 +134,6 @@ public class StockDetailsFragment extends Fragment implements StockResponseCallb
         weeklyChart.setDrawGridBackground(false);
         weeklyChart.setBackgroundColor(Color.parseColor("#1E1E1E"));
 
-
-        // Asse X (date)
         XAxis xAxis = weeklyChart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setDrawGridLines(false);
@@ -154,57 +141,45 @@ public class StockDetailsFragment extends Fragment implements StockResponseCallb
         xAxis.setTextColor(Color.parseColor("#B0B0B0"));
         xAxis.setTextSize(10f);
 
-        // Asse Y sinistro
         YAxis leftAxis = weeklyChart.getAxisLeft();
         leftAxis.setDrawGridLines(true);
         leftAxis.setGridColor(Color.parseColor("#2E2E2E"));
         leftAxis.setTextColor(Color.parseColor("#B0B0B0"));
         leftAxis.setTextSize(10f);
 
-        // Asse Y destro (disabilitato)
         weeklyChart.getAxisRight().setEnabled(false);
-
-        // Legend
         weeklyChart.getLegend().setEnabled(false);
-
-        // Extra padding
         weeklyChart.setExtraBottomOffset(10f);
     }
 
-
-    private void loadStockData() {
+    private void observeStockQuote() {
         if (!NetworkUtil.isInternetAvailable(requireContext())) {
             Toast.makeText(requireContext(), "Nessuna connessione internet", Toast.LENGTH_SHORT).show();
             return;
         }
 
         addToPortfolioButton.setEnabled(false);
-        stockRepository.getStockQuote(symbol, this); // Passa "this" come callback
+        viewModel.getStockQuote(symbol).observe(getViewLifecycleOwner(), result -> {
+            if (result instanceof Result.Success) {
+                currentStockQuote = ((Result.Success<StockQuote>) result).getData();
+                handleStockQuoteSuccess(currentStockQuote);
+            } else {
+                handleStockQuoteFailure(((Result.Error) result).getMessage());
+            }
+        });
     }
 
-    private void loadChartData() {
+    private void observeChartData() {
         if (!NetworkUtil.isInternetAvailable(requireContext())) {
             return;
         }
 
-        stockRepository.getWeeklyChart(symbol, new StockAPIRepository.ChartCallback() {
-            @Override
-            public void onSuccess(ChartData chartData) {
-                if (getActivity() != null) {
-                    requireActivity().runOnUiThread(() -> {
-                        populateChart(chartData);
-                    });
-                }
-            }
-
-            @Override
-            public void onFailure(String errorMessage) {
-                if (getActivity() != null) {
-                    requireActivity().runOnUiThread(() -> {
-                        Log.e(TAG, "Errore caricamento grafico: " + errorMessage);
-                        Toast.makeText(requireContext(), "Impossibile caricare il grafico", Toast.LENGTH_SHORT).show();
-                    });
-                }
+        viewModel.getChartData(symbol).observe(getViewLifecycleOwner(), result -> {
+            if (result instanceof Result.Success) {
+                populateChart(((Result.Success<ChartData>) result).getData());
+            } else {
+                Log.e(TAG, "Error loading chart: " + ((Result.Error) result).getMessage());
+                Toast.makeText(requireContext(), "Impossibile caricare il grafico", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -214,37 +189,31 @@ public class StockDetailsFragment extends Fragment implements StockResponseCallb
         List<String> dates = chartData.getDates();
         List<Float> prices = chartData.getPrices();
 
-        // Crea gli entry per il grafico
         for (int i = 0; i < prices.size(); i++) {
             entries.add(new Entry(i, prices.get(i)));
         }
 
-        // Calcola se il trend è positivo o negativo
         boolean isPositiveTrend = prices.get(prices.size() - 1) >= prices.get(0);
-        int lineColor = isPositiveTrend ? Color.parseColor("#4CAF50") : Color.parseColor("#F44336"); // Verde o Rosso
+        int lineColor = isPositiveTrend ? Color.parseColor("#4CAF50") : Color.parseColor("#F44336");
 
-        // Crea il dataset con stile moderno
         LineDataSet dataSet = new LineDataSet(entries, "Prezzo");
         dataSet.setColor(lineColor);
         dataSet.setLineWidth(3f);
-        dataSet.setDrawCircles(false); // Rimuove i punti
-        dataSet.setDrawValues(false); // Rimuove i valori sui punti
-        dataSet.setDrawFilled(true); // Abilita il riempimento
+        dataSet.setDrawCircles(false);
+        dataSet.setDrawValues(false);
+        dataSet.setDrawFilled(true);
         dataSet.setFillColor(lineColor);
-        dataSet.setFillAlpha(30); // Trasparenza del riempimento
-        dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER); // Linea curva smooth
-        dataSet.setCubicIntensity(0.2f); // Intensità della curva (più basso = più smooth)
+        dataSet.setFillAlpha(30);
+        dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        dataSet.setCubicIntensity(0.2f);
         dataSet.setDrawHorizontalHighlightIndicator(false);
         dataSet.setHighLightColor(lineColor);
 
-        // Crea LineData e assegnalo al grafico
         LineData lineData = new LineData(dataSet);
         weeklyChart.setData(lineData);
 
-        // Formatta le date sull'asse X (mostra solo giorno-mese, es: "23/12")
         List<String> formattedDates = new ArrayList<>();
         for (String date : dates) {
-            // date formato: "2025-12-23" -> mostra "23/12"
             String[] parts = date.split("-");
             if (parts.length == 3) {
                 formattedDates.add(parts[2] + "/" + parts[1]);
@@ -256,26 +225,19 @@ public class StockDetailsFragment extends Fragment implements StockResponseCallb
         XAxis xAxis = weeklyChart.getXAxis();
         xAxis.setValueFormatter(new IndexAxisValueFormatter(formattedDates));
         xAxis.setLabelCount(formattedDates.size());
-        xAxis.setDrawGridLines(false); // Rimuove le linee verticali
+        xAxis.setDrawGridLines(false);
 
-        // Aggiorna il grafico con animazione
-        weeklyChart.animateX(800); // Animazione di 800ms
+        weeklyChart.animateX(800);
     }
 
-
-    @Override
-    public void onSuccess(StockQuote stockQuote) {
+    private void handleStockQuoteSuccess(StockQuote stockQuote) {
         if (getActivity() == null) return;
-
-        this.currentStockQuote = stockQuote;
 
         requireActivity().runOnUiThread(() -> {
             addToPortfolioButton.setEnabled(true);
 
-            // Ottieni il simbolo della valuta corretto
             String currencySymbol = getCurrencySymbol(currency);
 
-            // Mostra prezzo e variazione giornaliera con simbolo valuta dinamico
             String price = stockQuote.getPrice();
             String change = stockQuote.getChange();
             String changePercent = stockQuote.getChangePercent();
@@ -288,8 +250,7 @@ public class StockDetailsFragment extends Fragment implements StockResponseCallb
         });
     }
 
-    @Override
-    public void onFailure(String errorMessage) {
+    private void handleStockQuoteFailure(String errorMessage) {
         if (getActivity() == null) return;
 
         requireActivity().runOnUiThread(() -> {
@@ -305,18 +266,81 @@ public class StockDetailsFragment extends Fragment implements StockResponseCallb
             return;
         }
 
-        // DEBUG: Verifica autenticazione
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser == null) {
             Toast.makeText(requireContext(), "ERRORE: Non sei loggato!", Toast.LENGTH_LONG).show();
-            Log.e(TAG, "addToPortfolio: Utente non autenticato!");
             return;
         }
 
-        Log.d(TAG, "addToPortfolio: User ID = " + currentUser.getUid());
-        Log.d(TAG, "addToPortfolio: User Email = " + currentUser.getEmail());
+        showBuyStockDialog();
+    }
 
-        // Crea l'oggetto PortfolioStock con i dati dell'Agency
+    private void showBuyStockDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Compra " + companyName);
+
+        LinearLayout layout = new LinearLayout(requireContext());
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(50, 40, 50, 10);
+
+        TextView priceInfo = new TextView(requireContext());
+        priceInfo.setText("Prezzo attuale: " + getCurrencySymbol(currency) + currentStockQuote.getPrice());
+        priceInfo.setTextSize(16);
+        priceInfo.setPadding(0, 0, 0, 20);
+        layout.addView(priceInfo);
+
+        final EditText quantityInput = new EditText(requireContext());
+        quantityInput.setHint("Quantità");
+        quantityInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        layout.addView(quantityInput);
+
+        builder.setView(layout);
+
+        builder.setPositiveButton("CONFERMA", null);
+        builder.setNegativeButton("ANNULLA", (dialog, which) -> dialog.cancel());
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String quantityStr = quantityInput.getText().toString();
+
+            if (quantityStr.isEmpty()) {
+                Toast.makeText(requireContext(), "Inserisci una quantità", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            try {
+                double quantity = Double.parseDouble(quantityStr);
+
+                if (quantity <= 0) {
+                    Toast.makeText(requireContext(), "Quantità deve essere > 0", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                dialog.dismiss();
+                savePurchase(quantity);
+
+            } catch (NumberFormatException e) {
+                Toast.makeText(requireContext(), "Quantità non valida", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void savePurchase(double quantity) {
+        if (currentStockQuote == null) {
+            Toast.makeText(requireContext(), "Errore: dati prezzo mancanti", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        double currentPrice;
+        try {
+            currentPrice = Double.parseDouble(currentStockQuote.getPrice());
+        } catch (Exception e) {
+            Toast.makeText(requireContext(), "Errore parsing prezzo", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         PortfolioStock portfolioStock = new PortfolioStock(
                 symbol,
                 companyName != null ? companyName : symbol,
@@ -324,43 +348,28 @@ public class StockDetailsFragment extends Fragment implements StockResponseCallb
                 exchange != null ? exchange : "N/A",
                 exchangeFull != null ? exchangeFull : "N/A"
         );
+        portfolioStock.setQuantity(quantity);
+        portfolioStock.setAveragePrice(currentPrice);
 
-        addToPortfolioButton.setEnabled(false);
-        addToPortfolioButton.setText("Aggiungendo...");
+        viewModel.addStockToPortfolio(portfolioStock);
 
-        portfolioRepository.addStockToPortfolio(portfolioStock, new PortfolioFirebaseRepository.PortfolioCallback() {
-            @Override
-            public void onSuccess(String message) {
-                Log.d(TAG, "onSuccess: " + message);
-                if (getActivity() != null) {
-                    requireActivity().runOnUiThread(() -> {
-                        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
-                        addToPortfolioButton.setText("Aggiunto ✓");
-                        addToPortfolioButton.setEnabled(false);
-                    });
-                }
-            }
+        StockCache.saveStock(
+                requireContext(),
+                symbol,
+                companyName != null ? companyName : symbol,
+                currency != null ? currency : "USD",
+                exchange != null ? exchange : "N/A",
+                exchangeFull != null ? exchangeFull : "N/A",
+                currentPrice
+        );
 
-            @Override
-            public void onFailure(String errorMessage) {
-                Log.e(TAG, "onFailure: " + errorMessage);
-                if (getActivity() != null) {
-                    requireActivity().runOnUiThread(() -> {
-                        Toast.makeText(requireContext(), "ERRORE: " + errorMessage, Toast.LENGTH_LONG).show();
-                        addToPortfolioButton.setText("Aggiungi al portafoglio");
-                        addToPortfolioButton.setEnabled(true);
-                    });
-                }
-            }
-        });
+        Toast.makeText(requireContext(), "Acquistate " + quantity + " azioni di " + symbol + "!", Toast.LENGTH_SHORT).show();
+        addToPortfolioButton.setText("Aggiunto ✓");
     }
 
-    /**
-     * Restituisce il simbolo della valuta in base al codice
-     */
     private String getCurrencySymbol(String currencyCode) {
         if (currencyCode == null) {
-            return "$"; // Default USD
+            return "$";
         }
 
         switch (currencyCode.toUpperCase()) {
@@ -383,7 +392,7 @@ public class StockDetailsFragment extends Fragment implements StockResponseCallb
             case "INR":
                 return "₹";
             default:
-                return currencyCode + " "; // Se non riconosciuto, mostra il codice
+                return currencyCode + " ";
         }
     }
 }
