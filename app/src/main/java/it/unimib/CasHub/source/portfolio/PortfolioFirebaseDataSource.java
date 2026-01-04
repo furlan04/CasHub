@@ -154,7 +154,7 @@ public class PortfolioFirebaseDataSource extends BasePortfolioDataSource {
 
                         existingStock.setQuantity(totalQuantity);
                         existingStock.setAveragePrice(newAvgPrice);
-                        existingStock.setCurrentPrice(priceOfNewPurchase);
+                        existingStock.setAveragePrice(priceOfNewPurchase);
 
                         stockRef.setValue(existingStock)
                                 .addOnSuccessListener(aVoid -> callback.onSuccess(null))

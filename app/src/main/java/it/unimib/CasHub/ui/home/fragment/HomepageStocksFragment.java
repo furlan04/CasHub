@@ -145,9 +145,7 @@ public class HomepageStocksFragment extends Fragment {
         viewModel.getPortfolio().observe(getViewLifecycleOwner(), result -> {
             if (result instanceof Result.Success) {
                 DataSnapshot snapshot = ((Result.Success<DataSnapshot>) result).getData();
-                if (viewModel.shouldUpdatePortfolio()) {
-                    viewModel.refreshPortfolioStocks(snapshot);
-                }
+                viewModel.refreshPortfolioStocks(snapshot);
                 handlePortfolioSnapshot(snapshot);
             } else if (result instanceof Result.Error) {
                 progressBar.setVisibility(View.GONE);
@@ -164,7 +162,7 @@ public class HomepageStocksFragment extends Fragment {
         for (DataSnapshot child : snapshot.getChildren()) {
             PortfolioStock stock = child.getValue(PortfolioStock.class);
             if (stock != null) {
-                totalCurrentValue += stock.getQuantity() * stock.getCurrentPrice();
+                totalCurrentValue += stock.getQuantity() * stock.getAveragePrice();
                 stocks.add(stock);
             }
         }
