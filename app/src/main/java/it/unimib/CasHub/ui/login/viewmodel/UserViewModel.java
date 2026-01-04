@@ -12,14 +12,12 @@ import it.unimib.CasHub.repository.user.IUserRepository;
 public class UserViewModel extends ViewModel {
 
     private final IUserRepository userRepository;
-    private final ITransactionRepository transactionRepository;
     private MutableLiveData<Result> userMutableLiveData;
 
     private boolean authenticationError;
 
-    public UserViewModel(IUserRepository userRepository, ITransactionRepository transactionRepository) {
+    public UserViewModel(IUserRepository userRepository) {
         this.userRepository = userRepository;
-        this.transactionRepository = transactionRepository;
         authenticationError = false;
     }
 

@@ -52,10 +52,7 @@ public class RegistrationFragment extends Fragment {
         super.onCreate(savedInstanceState);
         IUserRepository userRepository = ServiceLocator.getInstance().getUserRepository(requireActivity().getApplication());
 
-        ITransactionRepository transactionRepository = ServiceLocator.getInstance().getTransactionRepository(this.getActivity().getApplication(), false);
-
-
-        userViewModel = new ViewModelProvider(requireActivity(), new UserViewModelFactory(userRepository, transactionRepository)).get(UserViewModel.class);
+        userViewModel = new ViewModelProvider(requireActivity(), new UserViewModelFactory(userRepository)).get(UserViewModel.class);
         userViewModel.setAuthenticationError(false);
     }
 
