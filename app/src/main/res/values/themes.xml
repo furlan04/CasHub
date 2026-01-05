@@ -1,5 +1,6 @@
 <resources>
-    <style name="AppTheme" parent="Theme.Material3.Light.NoActionBar">
+
+    <style name="Base.AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/md_theme_primary</item>
         <item name="colorOnPrimary">@color/md_theme_onPrimary</item>
         <item name="colorPrimaryContainer">@color/md_theme_primaryContainer</item>
@@ -46,15 +47,16 @@
         <item name="colorSurfaceContainer">@color/md_theme_surfaceContainer</item>
         <item name="colorSurfaceContainerHigh">@color/md_theme_surfaceContainerHigh</item>
         <item name="colorSurfaceContainerHighest">@color/md_theme_surfaceContainerHighest</item>
-    </style>
-  <!-- Base application theme. -->
-    <style name="Base.AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="fontFamily">@font/main_font</item>
     </style>
 
     <style name="FontMainLarge" parent="@style/TextAppearance.Material3.BodyLarge">
         <item name="fontFamily">@font/main_font</item>
+    </style>
+
+    <style name="RoundedDialogStyle" parent="Theme.MaterialComponents.Light.Dialog.Alert">
+        <item name="android:windowBackground">@drawable/dialog_rounded_background</item>
+        <item name="colorPrimary">#1E3A5F</item>
     </style>
 
     <style name="FontMainMedium" parent="@style/TextAppearance.Material3.BodyMedium">
@@ -64,4 +66,6 @@
     <style name="FontMainSmall" parent="@style/TextAppearance.Material3.BodySmall">
         <item name="fontFamily">@font/main_font</item>
     </style>
+
+
 </resources>

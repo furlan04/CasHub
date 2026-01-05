@@ -6,15 +6,49 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center"
-    tools:context=".LoginActivity"
+    android:gravity="center_horizontal"
+    tools:context=".RegisterActivity"
     android:background="@color/md_theme_background">
+
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="match_parent"
         android:layout_height="240dp"
-        app:srcCompat="@drawable/logonoback"
-        />
+        android:adjustViewBounds="true"
+        app:srcCompat="@drawable/logonoback" />
+
+    <!-- Bottone: Sei già registrato? -->
+    <Button
+        android:id="@+id/goToLogin"
+        style="@style/Widget.Material3.Button.TextButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="@dimen/margin"
+        android:layout_marginTop="8dp"
+        android:text="@string/register"
+        android:textAppearance="@style/FontMainSmall" />
+
+    <!-- Nome -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/nickname"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="@dimen/margin"
+        android:layout_marginTop="@dimen/margin"
+        style="?attr/textInputOutlinedStyle"
+        android:background="#05000000">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/textInputName"
+            android:textAppearance="@style/FontMainLarge"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#00000000"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Email -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -22,11 +56,9 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="@dimen/margin"
         android:layout_marginTop="@dimen/margin"
-
         style="?attr/textInputOutlinedStyle"
-        android:background="#05000000"
+        android:background="#05000000">
 
-        >
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/textInputEmail"
             android:textAppearance="@style/FontMainLarge"
@@ -34,6 +66,8 @@
             android:layout_height="wrap_content"
             android:background="#00000000"/>
     </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Password -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -43,7 +77,8 @@
         android:layout_marginTop="@dimen/margin"
         style="?attr/textInputOutlinedStyle"
         android:background="#05000000"
-        >
+        app:endIconMode="password_toggle">
+
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/textInputPassword"
             android:textAppearance="@style/FontMainLarge"
@@ -51,42 +86,47 @@
             android:layout_height="wrap_content"
             android:background="#00000000"/>
     </com.google.android.material.textfield.TextInputLayout>
-    <Button
-        style="@style/Widget.Material3.Button.TextButton"
+
+    <!-- Conferma Password -->
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="6dp"
-        android:gravity="center|start"
-        android:textAppearance="@style/FontMainSmall"
-        android:text="@string/are_you_already_registered"
-        />
+        android:hint="@string/confirm_password"
+        android:layout_marginStart="@dimen/margin"
+        android:layout_marginEnd="@dimen/margin"
+        android:layout_marginTop="@dimen/margin"
+        style="?attr/textInputOutlinedStyle"
+        android:background="#05000000"
+        app:endIconMode="password_toggle">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/textInputConfirmPassword"
+            android:textAppearance="@style/FontMainLarge"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#00000000"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Bottone Registrati -->
     <Button
-        style="@style/Widget.Material3.Button.TextButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="6dp"
-        android:gravity="center|start"
-        android:textAppearance="@style/FontMainSmall"
-        android:text="@string/did_you_forget_your_password"
-        />
-    <Button
-        android:id="@+id/login_button"
+        android:id="@+id/register_button"
         style="@style/Widget.Material3.Button.ElevatedButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/login"
+        android:text="@string/register"
+        android:layout_marginTop="12dp"
         android:layout_marginStart="50dp"
         android:layout_marginEnd="50dp"
-        android:textAppearance="@style/FontMainMedium"
+        android:textAppearance="@style/FontMainMedium" />
 
-        android:layout_gravity="center"
-        />
+    <!-- OPPURE con linee -->
     <RelativeLayout
-        android:layout_marginTop="@dimen/margin"
+        android:layout_marginTop="8dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="100dp"
         android:layout_marginEnd="100dp">
+
         <View
             android:layout_width="100dp"
             android:layout_height="1dp"
@@ -94,6 +134,7 @@
             android:layout_marginEnd="@dimen/margin"
             android:layout_centerInParent="true"
             android:background="#555"/>
+
         <TextView
             android:id="@+id/text_or"
             android:layout_width="wrap_content"
@@ -101,6 +142,7 @@
             android:layout_centerInParent="true"
             android:textAppearance="@style/FontMainMedium"
             android:text="@string/or" />
+
         <View
             android:layout_width="100dp"
             android:layout_height="1dp"
@@ -109,19 +151,26 @@
             android:layout_centerInParent="true"
             android:background="#555"/>
     </RelativeLayout>
+
+    <!-- Registrati con Google -->
     <Button
+        android:id="@+id/register_google_button"
         style="@style/Widget.Material3.Button.ElevatedButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/login_with_google"
+        android:text="@string/register_with_google"
         android:textAppearance="@style/FontMainMedium"
-
-        android:layout_marginTop="@dimen/margin"
+        android:layout_marginTop="8dp"
         android:layout_marginStart="50dp"
         android:layout_marginEnd="50dp"
-        android:layout_gravity="center"
         app:icon="@drawable/icon_google"
         app:iconGravity="textStart"
-        app:iconTint="@null"
-        />
+        app:iconTint="@null"/>
+
+    <!-- Spazio finale -->
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
 </LinearLayout>
