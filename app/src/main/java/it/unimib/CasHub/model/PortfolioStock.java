@@ -7,10 +7,10 @@ public class PortfolioStock {
     private String exchange;
     private String exchangeFullName;
     private long timestamp;
+    private String lastUpdate;
 
     private double quantity;
     private double averagePrice;
-    private double currentPrice;
 
     public PortfolioStock() {
 
@@ -27,8 +27,6 @@ public class PortfolioStock {
         this.quantity = 0;
         this.averagePrice = 0;
     }
-
-
 
     public String getSymbol() { return symbol; }
     public void setSymbol(String symbol) { this.symbol = symbol; }
@@ -48,18 +46,12 @@ public class PortfolioStock {
     public long getTimestamp() { return timestamp; }
     public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
 
+    public String getLastUpdate() { return lastUpdate; }
+    public void setLastUpdate(String lastUpdate) { this.lastUpdate = lastUpdate; }
 
     public double getQuantity() { return quantity; }
     public void setQuantity(double quantity) { this.quantity = quantity; }
 
     public double getAveragePrice() { return averagePrice; }
     public void setAveragePrice(double averagePrice) { this.averagePrice = averagePrice; }
-    public double getCurrentPrice() {
-        return currentPrice;
-    }
-
-    public void setCurrentPrice(double currentPrice) {
-        this.currentPrice = currentPrice;
-    }
-
 }

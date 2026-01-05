@@ -42,7 +42,10 @@ public class TransactionFirebaseDataSource extends BaseFirebaseTransactionDataSo
                         List<TransactionEntity> transactions = new ArrayList<>();
                         for (DataSnapshot ds : task.getResult().getChildren()) {
                             TransactionEntity transaction = ds.getValue(TransactionEntity.class);
-                            transactions.add(transaction);
+                            if (transaction != null) {
+                                transaction.setFirebaseKey(ds.getKey());
+                                transactions.add(transaction);
+                            }
                         }
                         callback.onTransactionsSuccess(transactions);
                     } else {
@@ -70,9 +73,48 @@ public class TransactionFirebaseDataSource extends BaseFirebaseTransactionDataSo
                 .setValue(new ArrayList<>(transaction)).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void unused) {
-                        Log.i(TAG, "fattoooo");
+                        callback.onTransactionInserted();
                     }
                 });
 
+    }
+
+    @Override
+    public void insertTransaction(TransactionEntity transaction) {
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        if (currentUser == null) {
+            callback.onTransactionsFailure(new Exception("User not authenticated"));
+            return;
+        }
+        String userId = currentUser.getUid();
+        databaseReference
+                .child(FIREBASE_USERS_COLLECTION)
+                .child(userId)
+                .child(FIREBASE_TRANSACTIONS_COLLECTION)
+                .push().setValue(transaction).addOnSuccessListener(aVoid -> {
+                    callback.onTransactionInserted();
+                }).addOnFailureListener(e -> {
+                    callback.onTransactionsFailure(e);
+                });
+    }
+
+    @Override
+    public void deleteTransaction(String transactionId) {
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        if (currentUser == null) {
+            callback.onTransactionsFailure(new Exception("User not authenticated"));
+            return;
+        }
+        String userId = currentUser.getUid();
+        databaseReference
+                .child(FIREBASE_USERS_COLLECTION)
+                .child(userId)
+                .child(FIREBASE_TRANSACTIONS_COLLECTION)
+                .child(transactionId)
+                .removeValue().addOnSuccessListener(aVoid -> {
+                    callback.onTransactionDeleted();
+                }).addOnFailureListener(e -> {
+                    callback.onTransactionsFailure(e);
+                });
     }
 }
