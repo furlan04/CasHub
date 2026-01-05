@@ -163,7 +163,7 @@ public class HomepageTransactionFragment extends Fragment implements Transaction
         }
 
         List<TransactionEntity> filteredTransactions = allTransactions.stream()
-                .filter(t -> selectedCategory == null || t.getType() == selectedCategory.toString())
+                .filter(t -> selectedCategory == null || t.getType().equals(selectedCategory.toString()))
                 .collect(Collectors.toList());
 
         // Mostra subito le transazioni originali
