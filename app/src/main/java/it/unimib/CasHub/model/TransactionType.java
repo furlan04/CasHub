@@ -10,5 +10,6 @@ public enum TransactionType {
     SALUTE,
     ISTRUZIONE,
     SHOPPING,
+    AZIONI,
     ALTRO
 }

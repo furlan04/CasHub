@@ -15,8 +15,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import it.unimib.CasHub.model.PortfolioStock;
 import it.unimib.CasHub.model.Result;
 import it.unimib.CasHub.model.StockQuote;
+import it.unimib.CasHub.model.TransactionEntity;
+import it.unimib.CasHub.model.TransactionType;
 import it.unimib.CasHub.repository.StockAPIRepository;
 import it.unimib.CasHub.repository.portfolio.IPortfolioRepository;
+import it.unimib.CasHub.repository.transaction.ITransactionRepository;
 import it.unimib.CasHub.utils.StockResponseCallback;
 
 public class HomepageStocksViewModel extends ViewModel {
@@ -24,12 +27,15 @@ public class HomepageStocksViewModel extends ViewModel {
     private final IPortfolioRepository portfolioRepository;
     private final StockAPIRepository stockAPIRepository;
     private final Application application;
+
+    private final ITransactionRepository transactionRepository;
     private final MutableLiveData<String> snackbarMessage = new MutableLiveData<>();
     private static final String TAG = "HomepageStocksViewModel";
 
-    public HomepageStocksViewModel(Application application, IPortfolioRepository portfolioRepository, StockAPIRepository stockAPIRepository) {
+    public HomepageStocksViewModel(Application application, IPortfolioRepository portfolioRepository, StockAPIRepository stockAPIRepository, ITransactionRepository transactionRepository) {
         this.application = application;
         this.portfolioRepository = portfolioRepository;
+        this.transactionRepository = transactionRepository;
         this.stockAPIRepository = stockAPIRepository;
     }
 
@@ -88,8 +94,11 @@ public class HomepageStocksViewModel extends ViewModel {
                         stock.setAveragePrice(currentPrice);
                         stock.setLastUpdate(todayDate);
                         portfolioRepository.updateStockInPortfolio(stock);
+                        //Thread.sleep(1000);
                     } catch (NumberFormatException e) {
                         android.util.Log.e(TAG, "Error parsing price for " + stock.getSymbol(), e);
+                    //} catch (InterruptedException e) {
+                    //    android.util.Log.e(TAG, "Error updating stock in portfolio", e);
                     } finally {
                         allStocks.add(stock);
                         if (updatesCounter.decrementAndGet() == 0) {
@@ -124,6 +133,12 @@ public class HomepageStocksViewModel extends ViewModel {
     }
 
     public LiveData<Result> removeStockFromPortfolio(PortfolioStock stock, double quantityToRemove) {
+        TransactionEntity transaction = new TransactionEntity();
+        transaction.setCurrency(stock.getCurrency());
+        transaction.setAmount(quantityToRemove * stock.getAveragePrice());
+        transaction.setType(TransactionType.AZIONI.name());
+        transaction.setName("Vendita di " + stock.getSymbol());
+        transactionRepository.insertTransaction(transaction);
         return portfolioRepository.removeStockFromPortfolio(stock, quantityToRemove);
     }
 }
