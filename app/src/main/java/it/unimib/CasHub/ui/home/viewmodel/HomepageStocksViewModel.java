@@ -88,8 +88,11 @@ public class HomepageStocksViewModel extends ViewModel {
                         stock.setAveragePrice(currentPrice);
                         stock.setLastUpdate(todayDate);
                         portfolioRepository.updateStockInPortfolio(stock);
+                        //Thread.sleep(1000);
                     } catch (NumberFormatException e) {
                         android.util.Log.e(TAG, "Error parsing price for " + stock.getSymbol(), e);
+                    //} catch (InterruptedException e) {
+                    //    android.util.Log.e(TAG, "Error updating stock in portfolio", e);
                     } finally {
                         allStocks.add(stock);
                         if (updatesCounter.decrementAndGet() == 0) {
