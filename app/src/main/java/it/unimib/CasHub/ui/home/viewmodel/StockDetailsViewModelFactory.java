@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import it.unimib.CasHub.repository.StockAPIRepository;
 import it.unimib.CasHub.repository.portfolio.IPortfolioRepository;
+import it.unimib.CasHub.repository.transaction.ITransactionRepository;
 import it.unimib.CasHub.utils.ServiceLocator;
 
 public class StockDetailsViewModelFactory implements ViewModelProvider.Factory {
@@ -24,7 +25,8 @@ public class StockDetailsViewModelFactory implements ViewModelProvider.Factory {
         if (modelClass.isAssignableFrom(StockDetailsViewModel.class)) {
             StockAPIRepository stockAPIRepository = StockAPIRepository.getInstance(application);
             IPortfolioRepository portfolioRepository = ServiceLocator.getInstance().getPortfolioRepository();
-            return (T) new StockDetailsViewModel(stockAPIRepository, portfolioRepository);
+            ITransactionRepository transactionRepository = ServiceLocator.getInstance().getTransactionRepository(application, false);
+            return (T) new StockDetailsViewModel(stockAPIRepository, portfolioRepository, transactionRepository);
         }
         throw new IllegalArgumentException("Unknown ViewModel class");
     }
