@@ -3,6 +3,7 @@ package it.unimib.CasHub.repository.transaction;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -39,7 +40,10 @@ public class TransactionRepository implements TransactionCallback, ITransactionR
         this.transactionsLiveData = new MutableLiveData<>();
         this.localDataSource = localDataSource;
         this.remoteDataSource = remoteDataSource;
-        userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        userId = user.getUid();
+
 
         if (localDataSource != null) {
             localDataSource.setCallback(this);

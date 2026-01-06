@@ -13,8 +13,8 @@ android {
 
     defaultConfig {
         applicationId = "it.unimib.CasHub"
-        minSdk = 30
-        targetSdk = 36
+        minSdk = 26
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 

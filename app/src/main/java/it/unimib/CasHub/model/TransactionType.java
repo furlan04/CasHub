@@ -1,14 +1,12 @@
 package it.unimib.CasHub.model;
 
 public enum TransactionType {
-    SVAGO,
-    HOBBY,
     CIBO,
-    TRASPORTI,
+    HOBBY,
+    STOCK,
+    SPORT,
+    VIAGGI,
     CASA,
-    BOLLETTE,
-    SALUTE,
-    ISTRUZIONE,
-    SHOPPING,
+    ABBONAMENTI,
     ALTRO
 }

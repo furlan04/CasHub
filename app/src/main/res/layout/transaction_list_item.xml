@@ -43,8 +43,10 @@
 
     <Button
         android:id="@+id/buttonDelete"
+        style="@style/Widget.Material3.Button.ElevatedButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:textColor="@android:color/holo_red_dark"
         android:text="Delete"
         android:layout_gravity="end"
         android:layout_marginTop="8dp"/>

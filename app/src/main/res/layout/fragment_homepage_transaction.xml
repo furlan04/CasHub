@@ -1,43 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".ui.home.fragment.HomepageTransactionFragment">
 
-    <com.github.mikephil.charting.charts.PieChart
-        android:id="@+id/pieChartTransaction"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnShowExpenses"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:text="◀"
+            android:visibility="gone" />
+
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <com.github.mikephil.charting.charts.PieChart
+                android:id="@+id/pieChartExpenses"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <com.github.mikephil.charting.charts.PieChart
+                android:id="@+id/pieChartBalance"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnShowBalance"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:text="▶" />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:padding="8dp">
 
         <Spinner
             android:id="@+id/spinnerBaseCurrency"
-            android:layout_width="177dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp" />
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content" />
 
         <TextView
             android:id="@+id/balanceTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:text="Saldo: " />
-
+            android:layout_marginStart="12dp"
+            android:text="Saldo:" />
     </LinearLayout>
 
     <Spinner
         android:id="@+id/spinnerCategory"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"/>
+        android:layout_margin="8dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewTransactions"
@@ -45,11 +79,13 @@
         android:layout_height="0dp"
         android:layout_weight="1" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnAddTransaction"
+        style="@style/Widget.Material3.Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="Add Transaction" />
+        android:text="Add Transaction"
+        android:layout_margin="12dp" />
 
 </LinearLayout>
