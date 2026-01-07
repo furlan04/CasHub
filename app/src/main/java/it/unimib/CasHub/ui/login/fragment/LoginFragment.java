@@ -1,6 +1,7 @@
 package it.unimib.CasHub.ui.login.fragment;
 
 import static android.content.ContentValues.TAG;
+import static it.unimib.CasHub.utils.Constants.INVALID_CREDENTIALS_ERROR;
 import static it.unimib.CasHub.utils.Constants.INVALID_USER_ERROR;
 import static it.unimib.CasHub.utils.Constants.USER_COLLISION_ERROR;
 import static it.unimib.CasHub.utils.Constants.WEAK_PASSWORD_ERROR;
@@ -187,8 +188,11 @@ public class LoginFragment extends Fragment {
         switch(message) {
             case WEAK_PASSWORD_ERROR:
                 return requireActivity().getString(R.string.error_password_login);
-                case INVALID_USER_ERROR:
-                    return requireActivity().getString(R.string.error_invalid_user);
+
+            case INVALID_USER_ERROR:
+            case INVALID_CREDENTIALS_ERROR: // <--- AGGIUNGI QUESTO CASO
+                return requireActivity().getString(R.string.error_invalid_user);
+
             default:
                 return requireActivity().getString(R.string.error_unexpected);
         }
