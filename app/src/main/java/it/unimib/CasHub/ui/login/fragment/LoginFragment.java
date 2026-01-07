@@ -138,28 +138,36 @@ public class LoginFragment extends Fragment {
 
         // 🔐 LOGIN EMAIL / PASSWORD REALE
         loginButton.setOnClickListener(v -> {
-
             String name = null;
             String email = editTextEmail.getText().toString().trim();
             String password = editTextPassword.getText().toString().trim();
 
             if (isEmailOk(email) && isPasswordOk(password)) {
-
+                // Osserviamo il risultato
                 userViewModel.getUserMutableLiveData(name, email, password, true)
-                        .observe(getViewLifecycleOwner(), result -> {
+                        .observe(getViewLifecycleOwner(), new androidx.lifecycle.Observer<Result>() {
+                            @Override
+                            public void onChanged(Result result) {
+                                // 🔹 Se il risultato è null, ignoriamo (è il reset del repository)
+                                if (result == null) {
+                                    return;
+                                }
 
-                            if (result.isSuccess()) {
-                                User user = (User) ((Result.Success) result).getData();
-                                //saveLoginData(email, password, user.getIdToken());
-                                userViewModel.setAuthenticationError(false);
-                                Navigation.findNavController(view).navigate(
-                                        R.id.action_loginFragment_to_mainActivity);
+                                if (result.isSuccess()) {
+                                    // Rimuoviamo l'osservatore per sicurezza
+                                    userViewModel.getUserMutableLiveData(name, email, password, true).removeObserver(this);
+                                    userViewModel.setAuthenticationError(false);
+                                    Navigation.findNavController(view).navigate(R.id.action_loginFragment_to_mainActivity);
+                                } else {
+                                    userViewModel.setAuthenticationError(true);
+                                    Snackbar.make(requireActivity().findViewById(android.R.id.content),
+                                            getErrorMessage(((Result.Error) result).getMessage()),
+                                            Snackbar.LENGTH_SHORT).show();
 
-                            } else {
-                                userViewModel.setAuthenticationError(true);
-                                Snackbar.make(requireActivity().findViewById(android.R.id.content),
-                                        getErrorMessage(((Result.Error) result).getMessage()),
-                                        Snackbar.LENGTH_SHORT).show();
+                                    // 🔹 IMPORTANTE: Dopo aver mostrato lo Snackbar,
+                                    // diciamo al repository di tornare a null così l'errore non "resta appeso"
+                                    // (Opzionale, ma consigliato)
+                                }
                             }
                         });
             }

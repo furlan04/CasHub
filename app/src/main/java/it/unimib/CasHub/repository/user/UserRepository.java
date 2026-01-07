@@ -28,6 +28,9 @@ public class UserRepository implements IUserRepository, UserResponseCallback {
 
     @Override
     public MutableLiveData<Result> getUser(String name, String email, String password, boolean isUserRegistered) {
+        // 🔹 AZZERIAMO il contenitore prima di iniziare
+        userMutableLiveData.setValue(null);
+
         if (isUserRegistered) {
             signIn(email, password);
         } else {
