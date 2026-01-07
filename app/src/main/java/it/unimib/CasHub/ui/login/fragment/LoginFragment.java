@@ -161,10 +161,6 @@ public class LoginFragment extends Fragment {
                                         Snackbar.LENGTH_SHORT).show();
                             }
                         });
-
-            } else {
-                Snackbar.make(requireActivity().findViewById(android.R.id.content),
-                        R.string.error_email_login, Snackbar.LENGTH_SHORT).show();
             }
         });
 
@@ -224,7 +220,7 @@ public class LoginFragment extends Fragment {
     private boolean isPasswordOk(String password) {
         // Check if the password length is correct
         if (password.isEmpty() || password.length() < Constants.MINIMUM_LENGTH_PASSWORD) {
-            editTextPassword.setError(getString(R.string.error_password_login));
+            editTextPassword.setError(getString(R.string.error_password_login), null);
             return false;
         } else {
             editTextPassword.setError(null);
