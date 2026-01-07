@@ -18,6 +18,7 @@ roomCompiler = "2.8.4"
 webgpu = "1.0.0-alpha01"
 firebaseAuth = "24.0.1"
 firebaseDatabase = "22.0.1"
+lifecycleLivedata = "2.10.0"
 
 [libraries]
 commons-validator = { module = "commons-validator:commons-validator", version.ref = "commonsValidator" }
@@ -39,6 +40,7 @@ room-compiler = { group = "androidx.room", name = "room-compiler", version.ref =
 webgpu = { group = "androidx.webgpu", name = "webgpu", version.ref = "webgpu" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
 firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
+lifecycle-livedata = { group = "androidx.lifecycle", name = "lifecycle-livedata", version.ref = "lifecycleLivedata" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

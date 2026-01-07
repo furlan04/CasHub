@@ -1,17 +1,23 @@
 package it.unimib.CasHub.ui.login.fragment;
 
+import static android.content.ContentValues.TAG;
 import static it.unimib.CasHub.utils.Constants.INVALID_USER_ERROR;
 import static it.unimib.CasHub.utils.Constants.USER_COLLISION_ERROR;
 import static it.unimib.CasHub.utils.Constants.WEAK_PASSWORD_ERROR;
 
+import android.app.Activity;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.IntentSenderRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +26,11 @@ import android.widget.Toast;
 
 import org.apache.commons.validator.routines.EmailValidator;
 
+import com.google.android.gms.auth.api.identity.BeginSignInRequest;
+import com.google.android.gms.auth.api.identity.Identity;
+import com.google.android.gms.auth.api.identity.SignInClient;
+import com.google.android.gms.auth.api.identity.SignInCredential;
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
@@ -44,6 +55,13 @@ public class LoginFragment extends Fragment {
         return fragment;
     }
 
+
+    // 🔹 One Tap Google
+    private SignInClient oneTapClient;
+    private BeginSignInRequest signInRequest;
+    private ActivityResultLauncher<IntentSenderRequest> activityResultLauncher;
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
@@ -54,6 +72,49 @@ public class LoginFragment extends Fragment {
 
         userViewModel = new ViewModelProvider(requireActivity(),
                 new UserViewModelFactory(userRepository)).get(UserViewModel.class);
+
+        // --- Configura One Tap Google
+        oneTapClient = Identity.getSignInClient(requireActivity());
+        signInRequest = BeginSignInRequest.builder()
+                .setPasswordRequestOptions(BeginSignInRequest.PasswordRequestOptions.builder()
+                        .setSupported(true).build())
+                .setGoogleIdTokenRequestOptions(BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                        .setSupported(true)
+                        .setServerClientId(getString(R.string.default_web_client_id))
+                        .setFilterByAuthorizedAccounts(false)
+                        .build())
+                .setAutoSelectEnabled(true)
+                .build();
+
+        activityResultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartIntentSenderForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                        try {
+                            SignInCredential credential = oneTapClient.getSignInCredentialFromIntent(result.getData());
+                            String idToken = credential.getGoogleIdToken();
+                            if (idToken != null) {
+                                userViewModel.getGoogleUserMutableLiveData(idToken)
+                                        .observe(getViewLifecycleOwner(), authenticationResult -> {
+                                            if (authenticationResult.isSuccess()) {
+                                                User user = (User) ((Result.Success) authenticationResult).getData();
+                                                Log.i(TAG, "Logged as: " + user.getEmail());
+                                                Navigation.findNavController(getView())
+                                                        .navigate(R.id.action_loginFragment_to_mainActivity);
+                                            } else {
+                                                Snackbar.make(requireActivity().findViewById(android.R.id.content),
+                                                        getErrorMessage(((Result.Error) authenticationResult).getMessage()),
+                                                        Snackbar.LENGTH_SHORT).show();
+                                            }
+                                        });
+                            }
+                        } catch (ApiException e) {
+                            Snackbar.make(requireActivity().findViewById(android.R.id.content),
+                                    getString(R.string.error_unexpected), Snackbar.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+        );
     }
 
     @Override
@@ -63,83 +124,6 @@ public class LoginFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_login, container, false);
     }
 
-    /*
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-
-        TextInputEditText inputEmail = view.findViewById(R.id.textInputEmail);
-        TextInputEditText inputPassword = view.findViewById(R.id.textInputPassword);
-        Button loginButton = view.findViewById(R.id.login_button);
-        Button goToRegistrationButton = view.findViewById(R.id.goToRegistration);
-
-        // Listener per login
-        loginButton.setOnClickListener(v -> {
-            String email = inputEmail.getText().toString().trim();
-            String password = inputPassword.getText().toString().trim();
-
-            if (!isEmailOk(email)) {
-                inputEmail.setError(getString(R.string.check_email));
-                return;
-            }
-            if (!isPasswordOk(password)) {
-                inputPassword.setError(getString(R.string.check_password));
-                return;
-            }
-
-            // Firebase Authentication login
-            mAuth.signInWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            // Login riuscito, recupera UID
-                            String uid = mAuth.getCurrentUser().getUid();
-
-                            // Recupera dati extra da Realtime Database
-                            realtimeDb.child(uid).get().addOnSuccessListener(snapshot -> {
-                                if (snapshot.exists()) {
-                                    String name = snapshot.child("name").getValue(String.class);
-                                    // Puoi usare altri campi se li hai
-                                    Toast.makeText(getContext(),
-                                            "Benvenuto " + name,
-                                            Toast.LENGTH_SHORT).show();
-
-                                    // Navigazione verso MainActivity
-                                    Navigation.findNavController(view)
-                                            .navigate(R.id.action_loginFragment_to_mainActivity);
-
-                                } else {
-                                    Toast.makeText(getContext(),
-                                            "Dati utente non trovati nel database",
-                                            Toast.LENGTH_SHORT).show();
-                                }
-                            }).addOnFailureListener(e -> {
-                                Toast.makeText(getContext(),
-                                        "Errore nel recupero dei dati: " + e.getMessage(),
-                                        Toast.LENGTH_LONG).show();
-                            });
-
-                        } else {
-                            new androidx.appcompat.app.AlertDialog.Builder(getContext())
-                                    .setTitle("Error")
-                                    .setMessage("Failed login: check your login credentials")
-                                    .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
-                                    .show();
-                        }
-                    });
-        });
-
-
-
-        goToRegistrationButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Navigation.findNavController(v).navigate(R.id.action_loginFragment_to_registrationFragment);
-            }
-        });
-    }
-
-     */
 
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -149,6 +133,7 @@ public class LoginFragment extends Fragment {
 
         Button loginButton = view.findViewById(R.id.login_button);
         Button signupButton = view.findViewById(R.id.goToRegistration);
+        Button googleLoginButton = view.findViewById(R.id.google_login_button);
 
         // 🔐 LOGIN EMAIL / PASSWORD REALE
         loginButton.setOnClickListener(v -> {
@@ -186,6 +171,20 @@ public class LoginFragment extends Fragment {
         signupButton.setOnClickListener(v ->
                 Navigation.findNavController(v)
                         .navigate(R.id.action_loginFragment_to_registrationFragment));
+
+        // --- Login Google
+        googleLoginButton.setOnClickListener(v ->
+                oneTapClient.beginSignIn(signInRequest)
+                        .addOnSuccessListener(requireActivity(), result -> {
+                            IntentSenderRequest intentSenderRequest =
+                                    new IntentSenderRequest.Builder(result.getPendingIntent()).build();
+                            activityResultLauncher.launch(intentSenderRequest);
+                        })
+                        .addOnFailureListener(requireActivity(), e ->
+                                Snackbar.make(requireActivity().findViewById(android.R.id.content),
+                                        getString(R.string.error_unexpected),
+                                        Snackbar.LENGTH_SHORT).show())
+        );
     }
 
     private String getErrorMessage(String message) {
