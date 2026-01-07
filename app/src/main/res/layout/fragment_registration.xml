@@ -70,6 +70,8 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            app:counterEnabled="true"
+            app:counterMaxLength="8"
             android:hint="@string/nickname"
             android:layout_marginBottom="12dp"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
@@ -85,6 +87,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:inputType="textPersonName"
+                android:maxLength="8"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"/>
         </com.google.android.material.textfield.TextInputLayout>
@@ -147,55 +150,6 @@
             android:textAppearance="@style/FontMainMedium"
             app:cornerRadius="28dp"
             android:layout_marginBottom="20dp"/>
-
-        <!-- Oppure -->
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:paddingStart="40dp"
-            android:paddingEnd="40dp">
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_toStartOf="@id/text_or"
-                android:layout_marginEnd="12dp"
-                android:layout_centerInParent="true"
-                android:background="#CCCCCC"/>
-
-            <TextView
-                android:id="@+id/text_or"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:textAppearance="@style/FontMainMedium"
-                android:textColor="#666666"
-                android:text="@string/or" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginStart="12dp"
-                android:layout_toEndOf="@id/text_or"
-                android:layout_centerInParent="true"
-                android:background="#CCCCCC"/>
-        </RelativeLayout>
-
-        <!-- Registrati con Google -->
-        <Button
-            android:id="@+id/register_google_button"
-            style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="@string/register_with_google"
-            android:textAppearance="@style/FontMainMedium"
-            app:cornerRadius="28dp"
-            app:strokeWidth="2dp"
-            app:icon="@drawable/icon_google"
-            app:iconGravity="textStart"
-            app:iconSize="24dp"
-            app:iconTint="@null"/>
 
     </LinearLayout>
 </ScrollView>
