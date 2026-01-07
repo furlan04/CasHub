@@ -66,13 +66,13 @@ public class StockDetailsViewModel extends ViewModel {
         });
     }
 
-    public LiveData<Result> addStockToPortfolio(PortfolioStock stock) {
+    public void addStockToPortfolio(PortfolioStock stock) {
         TransactionEntity transaction = new TransactionEntity();
         transaction.setCurrency(stock.getCurrency());
         transaction.setAmount(stock.getQuantity() * stock.getAveragePrice() * -1);
         transaction.setType(TransactionType.AZIONI.name());
         transaction.setName("Acquisto di " + stock.getSymbol());
         transactionRepository.insertTransaction(transaction);
-        return portfolioRepository.addStockToPortfolio(stock);
+        portfolioRepository.addStockToPortfolio(stock);
     }
 }

@@ -39,11 +39,11 @@ public class HomepageStocksViewModel extends ViewModel {
         this.stockAPIRepository = stockAPIRepository;
     }
 
-    public LiveData<Result> getPortfolio() {
+    public LiveData<Result<List<PortfolioStock>>> getPortfolio() {
         return portfolioRepository.getPortfolio();
     }
 
-    public LiveData<Result> getPortfolioHistory() {
+    public LiveData<Result<List<DataSnapshot>>> getPortfolioHistory() {
         return portfolioRepository.getPortfolioHistory();
     }
 
@@ -51,14 +51,13 @@ public class HomepageStocksViewModel extends ViewModel {
         return snackbarMessage;
     }
 
-    public void refreshPortfolioStocks(DataSnapshot portfolioSnapshot) {
+    public void refreshPortfolioStocks(List<PortfolioStock> portfolio) {
         String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
 
         List<PortfolioStock> stocksToUpdate = new ArrayList<>();
         List<PortfolioStock> alreadyUpdatedStocks = new ArrayList<>();
 
-        for (DataSnapshot child : portfolioSnapshot.getChildren()) {
-            PortfolioStock stock = child.getValue(PortfolioStock.class);
+        for (PortfolioStock stock : portfolio) {
             if (stock != null) {
                 if (!todayDate.equals(stock.getLastUpdate())) {
                     stocksToUpdate.add(stock);
@@ -70,13 +69,12 @@ public class HomepageStocksViewModel extends ViewModel {
 
         if (stocksToUpdate.isEmpty()) {
             double totalValue = 0;
-            for (DataSnapshot child : portfolioSnapshot.getChildren()) {
-                PortfolioStock stock = child.getValue(PortfolioStock.class);
+            for (PortfolioStock stock : portfolio) {
                 if (stock != null) {
                     totalValue += stock.getQuantity() * stock.getAveragePrice();
                 }
             }
-            if (portfolioSnapshot.hasChildren()) {
+            if (!portfolio.isEmpty()) {
                 savePortfolioSnapshot(totalValue);
             }
             return;
@@ -94,11 +92,8 @@ public class HomepageStocksViewModel extends ViewModel {
                         stock.setAveragePrice(currentPrice);
                         stock.setLastUpdate(todayDate);
                         portfolioRepository.updateStockInPortfolio(stock);
-                        //Thread.sleep(1000);
                     } catch (NumberFormatException e) {
                         android.util.Log.e(TAG, "Error parsing price for " + stock.getSymbol(), e);
-                    //} catch (InterruptedException e) {
-                    //    android.util.Log.e(TAG, "Error updating stock in portfolio", e);
                     } finally {
                         allStocks.add(stock);
                         if (updatesCounter.decrementAndGet() == 0) {
@@ -132,13 +127,13 @@ public class HomepageStocksViewModel extends ViewModel {
         portfolioRepository.savePortfolioSnapshot(totalValue);
     }
 
-    public LiveData<Result> removeStockFromPortfolio(PortfolioStock stock, double quantityToRemove) {
+    public void removeStockFromPortfolio(PortfolioStock stock, double quantityToRemove) {
         TransactionEntity transaction = new TransactionEntity();
         transaction.setCurrency(stock.getCurrency());
         transaction.setAmount(quantityToRemove * stock.getAveragePrice());
         transaction.setType(TransactionType.AZIONI.name());
         transaction.setName("Vendita di " + stock.getSymbol());
         transactionRepository.insertTransaction(transaction);
-        return portfolioRepository.removeStockFromPortfolio(stock, quantityToRemove);
+        portfolioRepository.removeStockFromPortfolio(stock, quantityToRemove);
     }
 }
