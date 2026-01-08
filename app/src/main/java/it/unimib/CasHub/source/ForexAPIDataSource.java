@@ -63,8 +63,4 @@ public class ForexAPIDataSource extends BaseForexDataSource {
             }
         });
     }
-    @Override
-    public void saveCurrencies(List<CurrencyEntity> currencies) {
-        // do nothing
-    }
 }
