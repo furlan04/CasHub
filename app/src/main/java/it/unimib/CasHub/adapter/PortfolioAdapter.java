@@ -1,4 +1,4 @@
-package it.unimib.CasHub.adapter;  // ✅ NON ui.portfolio.adapter
+package it.unimib.CasHub.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;

@@ -55,12 +55,13 @@ public class StockDetailsFragment extends Fragment {
 
     private StockDetailsViewModel viewModel;
 
-    // Dati ricevuti dal Bundle
+
     private String symbol;
     private String companyName;
     private String currency;
     private String exchange;
     private String exchangeFull;
+    private boolean fromPortfolio = false;
 
     private StockQuote currentStockQuote;
 
@@ -76,6 +77,7 @@ public class StockDetailsFragment extends Fragment {
             currency = getArguments().getString("agencyCurrency");
             exchange = getArguments().getString("agencyExchange");
             exchangeFull = getArguments().getString("agencyExchangeFull");
+            fromPortfolio = getArguments().getBoolean("fromPortfolio", false);
         }
 
         StockDetailsViewModelFactory factory = new StockDetailsViewModelFactory(requireActivity().getApplication());
@@ -99,6 +101,11 @@ public class StockDetailsFragment extends Fragment {
         exchangeTextView = view.findViewById(R.id.textExchange);
         addToPortfolioButton = view.findViewById(R.id.btnAddToPortfolio);
         weeklyChart = view.findViewById(R.id.weeklyChart);
+
+
+        if (fromPortfolio) {
+            addToPortfolioButton.setVisibility(View.GONE);
+        }
 
         if (companyName != null) {
             stockNameTextView.setText(companyName);
