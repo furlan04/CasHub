@@ -46,9 +46,4 @@ public class ForexMockDataSource extends BaseForexDataSource {
             callback.onCurrenciesFailureFromRemote(new Exception("Error reading mock currencies data: " + e.getMessage()));
         }
     }
-
-    @Override
-    public void saveCurrencies(List<CurrencyEntity> currencies) {
-
-    }
 }
