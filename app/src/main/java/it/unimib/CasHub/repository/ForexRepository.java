@@ -17,24 +17,25 @@ public class ForexRepository implements ForexCallback {
     private final MutableLiveData<Result<List<CurrencyEntity>>> currenciesMutableLiveData;
     private final MutableLiveData<Result<ForexAPIResponse>> ratesMutableLiveData;
 
-    private final BaseForexDataSource dataSource;
-    private final CurrencyDao currencyDao;
+    private final BaseForexDataSource remoteDataSource;
+    private final BaseForexDataSource localdatasource;
 
-    public ForexRepository(BaseForexDataSource dataSource, CurrencyDao currencyDao) {
+    public ForexRepository(BaseForexDataSource remotedataSource, BaseForexDataSource localdatasource) {
         this.currenciesMutableLiveData = new MutableLiveData<>();
         this.ratesMutableLiveData = new MutableLiveData<>();
-        this.dataSource = dataSource;
-        this.currencyDao = currencyDao;
-        this.dataSource.setCallback(this);
+        this.remoteDataSource = remotedataSource;
+        this.remoteDataSource.setCallback(this);
+        this.localdatasource = localdatasource;
+        this.localdatasource.setCallback(this);
     }
 
     public MutableLiveData<Result<List<CurrencyEntity>>> fetchCurrencies() {
-        dataSource.getCurrencies();
+        remoteDataSource.getCurrencies();
         return currenciesMutableLiveData;
     }
 
     public MutableLiveData<Result<ForexAPIResponse>> fetchRates(String base) {
-        dataSource.getRates(base);
+        remoteDataSource.getRates(base);
         return ratesMutableLiveData;
     }
 
@@ -50,27 +51,13 @@ public class ForexRepository implements ForexCallback {
 
     @Override
     public void onCurrenciesSuccessFromRemote(List<CurrencyEntity> currencies, long lastUpdate) {
-        new Thread(() -> {
-            currencyDao.insertAllCurrencies(currencies);
-        }).start();
+        localdatasource.saveCurrencies(currencies);
         currenciesMutableLiveData.postValue(new Result.Success<>(currencies));
     }
 
     @Override
     public void onCurrenciesFailureFromRemote(Exception exception) {
-        // If remote fails, try local
-        try {
-            new Thread(() -> {
-                List<CurrencyEntity> cached = currencyDao.getAllCurrencies();
-                if (cached != null && !cached.isEmpty()) {
-                    currenciesMutableLiveData.postValue(new Result.Success<>(cached));
-                } else {
-                    currenciesMutableLiveData.postValue(new Result.Error<>(exception.getMessage()));
-                }
-            }).start();
-        } catch (Exception e) {
-            currenciesMutableLiveData.postValue(new Result.Error<>(e.getMessage()));
-        }
+        localdatasource.getCurrencies();
     }
 
     @Override

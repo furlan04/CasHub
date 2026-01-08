@@ -15,6 +15,7 @@ import it.unimib.CasHub.service.AgencyAPIService;
 import it.unimib.CasHub.service.ForexAPIService;
 import it.unimib.CasHub.source.BaseForexDataSource;
 import it.unimib.CasHub.source.ForexAPIDataSource;
+import it.unimib.CasHub.source.ForexLocalDataSource;
 import it.unimib.CasHub.source.ForexMockDataSource;
 import it.unimib.CasHub.source.portfolio.PortfolioFirebaseDataSource;
 import it.unimib.CasHub.source.transaction.BaseFirebaseTransactionDataSource;
@@ -85,17 +86,19 @@ public class ServiceLocator {
     public ForexRepository getForexRepository(Application application, boolean debugMode) {
         ForexAPIService apiService = getForexAPIService();
         JSONParserUtils jsonParserUtils = new JSONParserUtils(application);
+
+        BaseForexDataSource remoteDataSource = new ForexAPIDataSource(apiService);
+        BaseForexDataSource localDataSource;
         CurrencyDao currencyDao = getCurrencyDB(application).currencyDao();
 
-        BaseForexDataSource dataSource;
 
         if (debugMode) {
-            dataSource = new ForexMockDataSource(jsonParserUtils);
+            localDataSource = new ForexMockDataSource(jsonParserUtils);
         } else {
-            dataSource = new ForexAPIDataSource(apiService);
+            localDataSource = new ForexLocalDataSource(currencyDao);
         }
 
-        return new ForexRepository(dataSource, currencyDao);
+        return new ForexRepository(remoteDataSource, localDataSource);
     }
 
     public TransactionRepository getTransactionRepository(Application application, boolean debugMode) {
