@@ -54,4 +54,6 @@ public class PortfolioStock {
 
     public double getAveragePrice() { return averagePrice; }
     public void setAveragePrice(double averagePrice) { this.averagePrice = averagePrice; }
+
+
 }
