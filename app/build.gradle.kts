@@ -62,6 +62,7 @@ dependencies {
     implementation(libs.room.runtime)
     implementation(libs.webgpu)
 
+    implementation("com.google.android.gms:play-services-auth:21.3.0")
     implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation(libs.firebase.auth)
@@ -70,6 +71,7 @@ dependencies {
 
     // 🎯 CACHE CON GSON
     implementation("com.google.code.gson:gson:2.10.1")
+    implementation(libs.lifecycle.livedata)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)

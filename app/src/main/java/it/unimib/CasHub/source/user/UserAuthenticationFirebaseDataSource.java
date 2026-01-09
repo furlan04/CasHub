@@ -101,29 +101,45 @@ public class UserAuthenticationFirebaseDataSource extends BaseUserAuthentication
         });
     }
 
+
+
     @Override
     public void signInWithGoogle(String idToken) {
-        if (idToken !=  null) {
-            // Got an ID token from Google. Use it to authenticate with Firebase.
+        if (idToken != null) {
+            // Crea la credenziale Firebase con l'idToken di Google
             AuthCredential firebaseCredential = GoogleAuthProvider.getCredential(idToken, null);
             firebaseAuth.signInWithCredential(firebaseCredential).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
-                    // Sign in success, update UI with the signed-in user's information
-                    Log.d(TAG, "signInWithCredential:success");
                     FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
                     if (firebaseUser != null) {
-                        userResponseCallback.onSuccessFromAuthentication(
-                                new User(firebaseUser.getDisplayName(),
-                                        firebaseUser.getEmail(),
-                                        firebaseUser.getUid()
-                                )
-                        );
+                        // Prendi il displayName completo e estrai solo il primo nome
+                        String fullName = firebaseUser.getDisplayName();
+                        String firstName = (fullName != null && !fullName.isEmpty()) ? fullName.split(" ")[0] : "";
+
+                        // Aggiorna il displayName su Firebase con solo il nome
+                        com.google.firebase.auth.UserProfileChangeRequest profileUpdates =
+                                new com.google.firebase.auth.UserProfileChangeRequest.Builder()
+                                        .setDisplayName(firstName)
+                                        .build();
+
+                        firebaseUser.updateProfile(profileUpdates).addOnCompleteListener(updateTask -> {
+                            if (updateTask.isSuccessful()) {
+                                Log.d(TAG, "Firebase displayName aggiornato a solo nome: " + firstName);
+                            } else {
+                                Log.w(TAG, "Errore aggiornamento displayName: ", updateTask.getException());
+                            }
+
+                            // Restituisci il User alla callback con solo il nome
+                            userResponseCallback.onSuccessFromAuthentication(
+                                    new User(firstName, firebaseUser.getEmail(), firebaseUser.getUid())
+                            );
+                        });
+
                     } else {
                         userResponseCallback.onFailureFromAuthentication(
                                 getErrorMessage(task.getException()));
                     }
                 } else {
-                    // If sign in fails, display a message to the user.
                     Log.w(TAG, "signInWithCredential:failure", task.getException());
                     userResponseCallback.onFailureFromAuthentication(getErrorMessage(task.getException()));
                 }

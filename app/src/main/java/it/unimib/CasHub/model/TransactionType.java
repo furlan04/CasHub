@@ -3,7 +3,7 @@ package it.unimib.CasHub.model;
 public enum TransactionType {
     CIBO,
     HOBBY,
-    STOCK,
+    AZIONI,
     SPORT,
     VIAGGI,
     CASA,

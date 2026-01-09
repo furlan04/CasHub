@@ -10,7 +10,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import it.unimib.CasHub.model.PortfolioStock;
 
@@ -19,6 +21,7 @@ public class PortfolioFirebaseDataSource extends BasePortfolioDataSource {
     private static final String TAG = PortfolioFirebaseDataSource.class.getSimpleName();
     private final DatabaseReference databaseReference;
     private final FirebaseAuth firebaseAuth;
+
     public PortfolioFirebaseDataSource() {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         this.databaseReference = database.getReference();
@@ -26,10 +29,10 @@ public class PortfolioFirebaseDataSource extends BasePortfolioDataSource {
     }
 
     @Override
-    public void getPortfolio(PortfolioResponseCallback<DataSnapshot> callback) {
+    public void getPortfolio() {
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
         if (currentUser == null) {
-            callback.onError("User not authenticated");
+            callback.onPortfolioFailure(new Exception("User not authenticated"));
             return;
         }
 
@@ -39,12 +42,17 @@ public class PortfolioFirebaseDataSource extends BasePortfolioDataSource {
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        callback.onSuccess(snapshot);
+                        List<PortfolioStock> portfolio = new ArrayList<>();
+                        for (DataSnapshot stockSnapshot : snapshot.getChildren()) {
+                            PortfolioStock stock = stockSnapshot.getValue(PortfolioStock.class);
+                            portfolio.add(stock);
+                        }
+                        callback.onPortfolioSuccess(portfolio);
                     }
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        callback.onError(error.getMessage());
+                        callback.onPortfolioFailure(error.toException());
                     }
                 });
     }
@@ -64,14 +72,14 @@ public class PortfolioFirebaseDataSource extends BasePortfolioDataSource {
 
         historyRef.child(dateKey).setValue(totalValue)
                 .addOnSuccessListener(aVoid -> Log.d(TAG, "Snapshot saved: " + dateKey + " = " + totalValue))
-                .addOnFailureListener(e -> Log.e(TAG, "Error saving snapshot: " + e.getMessage()));
+                .addOnFailureListener(e -> callback.onPortfolioFailure(e));
     }
 
     @Override
-    public void removeStockFromPortfolio(PortfolioStock stock, double quantityToRemove, PortfolioResponseCallback<Void> callback) {
+    public void removeStockFromPortfolio(PortfolioStock stock, double quantityToRemove) {
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
         if (currentUser == null) {
-            callback.onError("User not authenticated");
+            callback.onPortfolioFailure(new Exception("User not authenticated"));
             return;
         }
 
@@ -87,21 +95,21 @@ public class PortfolioFirebaseDataSource extends BasePortfolioDataSource {
 
         if (newQuantity <= 0) {
             stockRef.removeValue()
-                    .addOnSuccessListener(aVoid -> callback.onSuccess(null))
-                    .addOnFailureListener(e -> callback.onError(e.getMessage()));
+                    .addOnSuccessListener(aVoid -> callback.onStockRemoved())
+                    .addOnFailureListener(e -> callback.onPortfolioFailure(e));
         } else {
             stock.setQuantity(newQuantity);
             stockRef.setValue(stock)
-                    .addOnSuccessListener(aVoid -> callback.onSuccess(null))
-                    .addOnFailureListener(e -> callback.onError(e.getMessage()));
+                    .addOnSuccessListener(aVoid -> callback.onStockUpdated())
+                    .addOnFailureListener(e -> callback.onPortfolioFailure(e));
         }
     }
 
     @Override
-    public void getPortfolioHistory(PortfolioResponseCallback<DataSnapshot> callback) {
+    public void getPortfolioHistory() {
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
         if (currentUser == null) {
-            callback.onError("User not authenticated");
+            callback.onPortfolioFailure(new Exception("User not authenticated"));
             return;
         }
 
@@ -111,87 +119,99 @@ public class PortfolioFirebaseDataSource extends BasePortfolioDataSource {
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        callback.onSuccess(snapshot);
+                        List<DataSnapshot> history = new ArrayList<>();
+                        for(DataSnapshot data : snapshot.getChildren()) {
+                            history.add(data);
+                        }
+                        callback.onHistorySuccess(history);
                     }
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        callback.onError(error.getMessage());
+                        callback.onPortfolioFailure(error.toException());
                     }
                 });
     }
 
     @Override
-    public void addStockToPortfolio(PortfolioStock newPurchase, PortfolioResponseCallback<Void> callback) {
-        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-        if (currentUser == null) {
-            callback.onError("User not authenticated");
-            return;
-        }
+    public void addStockToPortfolio(PortfolioStock newPurchase) {
+        try {
+            FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+            if (currentUser == null) {
+                callback.onPortfolioFailure(new Exception("User not authenticated"));
+                return;
+            }
 
-        String safeSymbol = getSafeSymbol(newPurchase.getSymbol());
+            String safeSymbol = getSafeSymbol(newPurchase.getSymbol());
 
-        DatabaseReference stockRef = databaseReference
-                .child("users")
-                .child(currentUser.getUid())
-                .child("portfolio")
-                .child(safeSymbol);
+            DatabaseReference stockRef = databaseReference
+                    .child("users")
+                    .child(currentUser.getUid())
+                    .child("portfolio")
+                    .child(safeSymbol);
 
-        stockRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    PortfolioStock existingStock = snapshot.getValue(PortfolioStock.class);
-                    if (existingStock != null) {
-                        double newQuantityToAdd = newPurchase.getQuantity();
-                        double priceOfNewPurchase = newPurchase.getAveragePrice();
+            stockRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        PortfolioStock existingStock = snapshot.getValue(PortfolioStock.class);
+                        if (existingStock != null) {
+                            double newQuantityToAdd = newPurchase.getQuantity();
+                            double priceOfNewPurchase = newPurchase.getAveragePrice();
 
-                        double oldQuantity = existingStock.getQuantity();
-                        double oldAvgPrice = existingStock.getAveragePrice();
+                            double oldQuantity = existingStock.getQuantity();
+                            double oldAvgPrice = existingStock.getAveragePrice();
 
-                        double totalQuantity = oldQuantity + newQuantityToAdd;
-                        double newAvgPrice = ((oldAvgPrice * oldQuantity) + (priceOfNewPurchase * newQuantityToAdd)) / totalQuantity;
+                            double totalQuantity = oldQuantity + newQuantityToAdd;
+                            double newAvgPrice = ((oldAvgPrice * oldQuantity) + (priceOfNewPurchase * newQuantityToAdd)) / totalQuantity;
 
-                        existingStock.setQuantity(totalQuantity);
-                        existingStock.setAveragePrice(newAvgPrice);
-                        existingStock.setCurrentPrice(priceOfNewPurchase);
+                            existingStock.setQuantity(totalQuantity);
+                            existingStock.setAveragePrice(newAvgPrice);
 
-                        stockRef.setValue(existingStock)
-                                .addOnSuccessListener(aVoid -> callback.onSuccess(null))
-                                .addOnFailureListener(e -> callback.onError(e.getMessage()));
+                            stockRef.setValue(existingStock)
+                                    .addOnSuccessListener(aVoid -> callback.onStockUpdated())
+                                    .addOnFailureListener(e -> callback.onPortfolioFailure(e));
+                        } else {
+                            stockRef.setValue(newPurchase)
+                                    .addOnSuccessListener(aVoid -> callback.onStockAdded())
+                                    .addOnFailureListener(e -> callback.onPortfolioFailure(e));
+                        }
                     } else {
                         stockRef.setValue(newPurchase)
-                                .addOnSuccessListener(aVoid -> callback.onSuccess(null))
-                                .addOnFailureListener(e -> callback.onError(e.getMessage()));
+                                .addOnSuccessListener(aVoid -> callback.onStockAdded())
+                                .addOnFailureListener(e -> callback.onPortfolioFailure(e));
                     }
-                } else {
-                    stockRef.setValue(newPurchase)
-                            .addOnSuccessListener(aVoid -> callback.onSuccess(null))
-                            .addOnFailureListener(e -> callback.onError(e.getMessage()));
                 }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                callback.onError(error.getMessage());
-            }
-        });
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    callback.onPortfolioFailure(error.toException());
+                }
+            });
+        }catch (Exception e){
+            callback.onPortfolioFailure(e);
+        }
     }
 
     @Override
     public void updateStockInPortfolio(PortfolioStock stock) {
-        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-        if (currentUser == null) return;
+        try {
+            FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+            if (currentUser == null) return;
 
-        String safeSymbol = getSafeSymbol(stock.getSymbol());
+            String safeSymbol = getSafeSymbol(stock.getSymbol());
 
-        databaseReference
-                .child("users")
-                .child(currentUser.getUid())
-                .child("portfolio")
-                .child(safeSymbol)
-                .setValue(stock)
-                .addOnFailureListener(e -> Log.e(TAG, "Failed to update stock: " + e.getMessage()));
+            databaseReference
+                    .child("users")
+                    .child(currentUser.getUid())
+                    .child("portfolio")
+                    .child(safeSymbol)
+                    .setValue(stock)
+                    .addOnSuccessListener(aVoid -> callback.onStockUpdated())
+                    .addOnFailureListener(e -> callback.onPortfolioFailure(e));
+        } catch (Exception e) {
+            callback.onPortfolioFailure(e);
+        }
     }
 
     private String getSafeSymbol(String symbol) {

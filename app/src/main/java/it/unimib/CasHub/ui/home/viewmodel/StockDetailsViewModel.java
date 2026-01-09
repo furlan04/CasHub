@@ -7,20 +7,25 @@ import it.unimib.CasHub.model.ChartData;
 import it.unimib.CasHub.model.PortfolioStock;
 import it.unimib.CasHub.model.Result;
 import it.unimib.CasHub.model.StockQuote;
+import it.unimib.CasHub.model.TransactionEntity;
+import it.unimib.CasHub.model.TransactionType;
 import it.unimib.CasHub.repository.StockAPIRepository;
 import it.unimib.CasHub.repository.portfolio.IPortfolioRepository;
+import it.unimib.CasHub.repository.transaction.ITransactionRepository;
 import it.unimib.CasHub.utils.StockResponseCallback;
 
 public class StockDetailsViewModel extends ViewModel {
 
     private final StockAPIRepository stockAPIRepository;
     private final IPortfolioRepository portfolioRepository;
+    private final ITransactionRepository transactionRepository;
     private final MutableLiveData<Result> stockQuoteLiveData = new MutableLiveData<>();
     private final MutableLiveData<Result> chartDataLiveData = new MutableLiveData<>();
 
-    public StockDetailsViewModel(StockAPIRepository stockAPIRepository, IPortfolioRepository portfolioRepository) {
+    public StockDetailsViewModel(StockAPIRepository stockAPIRepository, IPortfolioRepository portfolioRepository, ITransactionRepository transactionRepository) {
         this.stockAPIRepository = stockAPIRepository;
         this.portfolioRepository = portfolioRepository;
+        this.transactionRepository = transactionRepository;
     }
 
     public LiveData<Result> getStockQuote(String symbol) {
@@ -61,7 +66,13 @@ public class StockDetailsViewModel extends ViewModel {
         });
     }
 
-    public LiveData<Result> addStockToPortfolio(PortfolioStock stock) {
-        return portfolioRepository.addStockToPortfolio(stock);
+    public void addStockToPortfolio(PortfolioStock stock) {
+        TransactionEntity transaction = new TransactionEntity();
+        transaction.setCurrency(stock.getCurrency());
+        transaction.setAmount(stock.getQuantity() * stock.getAveragePrice() * -1);
+        transaction.setType(TransactionType.AZIONI.name());
+        transaction.setName("Acquisto di " + stock.getSymbol());
+        transactionRepository.insertTransaction(transaction);
+        portfolioRepository.addStockToPortfolio(stock);
     }
 }

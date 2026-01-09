@@ -1,4 +1,4 @@
-package it.unimib.CasHub.adapter;  // ✅ NON ui.portfolio.adapter
+package it.unimib.CasHub.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -78,7 +78,7 @@ public class PortfolioAdapter extends RecyclerView.Adapter<PortfolioAdapter.View
             tvAveragePrice.setText(String.format(Locale.US, "%s %.2f",
                     stock.getCurrency(), stock.getAveragePrice()));
 
-            double currentPrice = stock.getCurrentPrice() > 0 ? stock.getCurrentPrice() : stock.getAveragePrice();
+            double currentPrice = stock.getAveragePrice() > 0 ? stock.getAveragePrice() : stock.getAveragePrice();
             double totalValue = currentPrice * stock.getQuantity();
             double totalCost = stock.getAveragePrice() * stock.getQuantity();
             double profitLoss = totalValue - totalCost;

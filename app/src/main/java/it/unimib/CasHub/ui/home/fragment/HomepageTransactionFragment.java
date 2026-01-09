@@ -334,6 +334,6 @@ public class HomepageTransactionFragment extends Fragment
 
     @Override
     public void onDeleteButtonClicked(TransactionEntity transaction) {
-        homepageTransactionViewModel.deleteTransaction(transaction.getId());
+        homepageTransactionViewModel.deleteTransaction(transaction.getFirebaseKey());
     }
 }
