@@ -123,10 +123,9 @@
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- BOTTONE CONFERMA -->
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnConferma"
-            style="@style/Widget.Material3.Button.ElevatedButton"
+            style="@style/Widget.Material3.Button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/transaction_confirm"

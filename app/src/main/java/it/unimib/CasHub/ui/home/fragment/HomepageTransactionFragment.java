@@ -13,7 +13,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
@@ -28,13 +27,11 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.ValueFormatter;
-import com.github.mikephil.charting.formatter.PercentFormatter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import it.unimib.CasHub.R;
 import it.unimib.CasHub.adapter.CategorySpinnerAdapter;
@@ -53,9 +50,10 @@ import it.unimib.CasHub.ui.home.viewmodel.RatesConversionViewModel;
 import it.unimib.CasHub.ui.home.viewmodel.RatesConversionViewModelFactory;
 import it.unimib.CasHub.utils.ServiceLocator;
 
-public class HomepageTransactionFragment extends Fragment implements TransactionRecyclerAdapter.OnDeleteButtonClickListener {
+public class HomepageTransactionFragment extends Fragment
+        implements TransactionRecyclerAdapter.OnDeleteButtonClickListener {
 
-    private PieChart pieChartExpenses, pieChartBalance;
+    private PieChart pieChartBalance, pieChartExpenses;
     private Button btnShowExpenses, btnShowBalance;
 
     private RecyclerView recyclerView;
@@ -83,8 +81,8 @@ public class HomepageTransactionFragment extends Fragment implements Transaction
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        pieChartExpenses = view.findViewById(R.id.pieChartExpenses);
         pieChartBalance = view.findViewById(R.id.pieChartBalance);
+        pieChartExpenses = view.findViewById(R.id.pieChartExpenses);
         btnShowExpenses = view.findViewById(R.id.btnShowExpenses);
         btnShowBalance = view.findViewById(R.id.btnShowBalance);
 
@@ -107,63 +105,83 @@ public class HomepageTransactionFragment extends Fragment implements Transaction
         baseCurrencyAdapter = new CurrencySpinnerAdapter(requireContext(), new ArrayList<>());
         baseCurrencySpinner.setAdapter(baseCurrencyAdapter);
 
-        ForexRepository forexRepository = ServiceLocator.getInstance().getForexRepository(
-                requireActivity().getApplication(), getResources().getBoolean(R.bool.debug));
+        ForexRepository forexRepository = ServiceLocator.getInstance()
+                .getForexRepository(requireActivity().getApplication(),
+                        getResources().getBoolean(R.bool.debug));
 
-        currencyListViewModel = new ViewModelProvider(this, new CurrencyListViewModelFactory(forexRepository))
-                .get(CurrencyListViewModel.class);
+        currencyListViewModel = new ViewModelProvider(
+                this,
+                new CurrencyListViewModelFactory(forexRepository)
+        ).get(CurrencyListViewModel.class);
 
-        ratesConversionViewModel = new ViewModelProvider(this, new RatesConversionViewModelFactory(forexRepository))
-                .get(RatesConversionViewModel.class);
+        ratesConversionViewModel = new ViewModelProvider(
+                this,
+                new RatesConversionViewModelFactory(forexRepository)
+        ).get(RatesConversionViewModel.class);
 
-        homepageTransactionViewModel = new ViewModelProvider(requireActivity(),
-                new HomepageTransactionViewModelFactory(requireActivity().getApplication(),
-                        getResources().getBoolean(R.bool.debug)))
-                .get(HomepageTransactionViewModel.class);
+        homepageTransactionViewModel = new ViewModelProvider(
+                requireActivity(),
+                new HomepageTransactionViewModelFactory(
+                        requireActivity().getApplication(),
+                        getResources().getBoolean(R.bool.debug)
+                )
+        ).get(HomepageTransactionViewModel.class);
 
-        homepageTransactionViewModel.getTransactions().observe(getViewLifecycleOwner(), result -> {
-            if (result.isSuccess()) {
-                allTransactions = ((Result.Success<List<TransactionEntity>>) result).getData();
-                updateDisplayedTransactions();
-            }
-        });
+        homepageTransactionViewModel.getTransactions()
+                .observe(getViewLifecycleOwner(), result -> {
+                    if (result.isSuccess()) {
+                        allTransactions =
+                                ((Result.Success<List<TransactionEntity>>) result).getData();
+                        updateDisplayedTransactions();
+                    }
+                });
 
-        currencyListViewModel.getCurrencies().observe(getViewLifecycleOwner(), result -> {
-            if (result.isSuccess()) {
-                baseCurrencyAdapter.clear();
-                baseCurrencyAdapter.addAll(((Result.Success<List<CurrencyEntity>>) result).getData());
-                baseCurrencyAdapter.notifyDataSetChanged();
-            }
-        });
+        currencyListViewModel.getCurrencies()
+                .observe(getViewLifecycleOwner(), result -> {
+                    if (result.isSuccess()) {
+                        baseCurrencyAdapter.clear();
+                        baseCurrencyAdapter.addAll(
+                                ((Result.Success<List<CurrencyEntity>>) result).getData());
+                        baseCurrencyAdapter.notifyDataSetChanged();
+                    }
+                });
 
-        AdapterView.OnItemSelectedListener listener = new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                updateDisplayedTransactions();
-            }
+        AdapterView.OnItemSelectedListener spinnerListener =
+                new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view,
+                                               int position, long id) {
+                        updateDisplayedTransactions();
+                    }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
-        };
-        categorySpinner.setOnItemSelectedListener(listener);
-        baseCurrencySpinner.setOnItemSelectedListener(listener);
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {}
+                };
+
+        categorySpinner.setOnItemSelectedListener(spinnerListener);
+        baseCurrencySpinner.setOnItemSelectedListener(spinnerListener);
+
+        btnShowBalance.setOnClickListener(v -> showExpensesChart());
+        btnShowExpenses.setOnClickListener(v -> showBalanceChart());
 
         Button btnAddTransaction = view.findViewById(R.id.btnAddTransaction);
-        btnAddTransaction.setOnClickListener(v -> {
-            Navigation.findNavController(v)
-                    .navigate(R.id.action_homepageTransactionFragment_to_transactionFragment);
-        });
+        btnAddTransaction.setOnClickListener(v ->
+                Navigation.findNavController(v)
+                        .navigate(R.id.action_homepageTransactionFragment_to_transactionFragment)
+        );
     }
 
     private void updateDisplayedTransactions() {
-        CurrencyEntity baseCurrency = (CurrencyEntity) baseCurrencySpinner.getSelectedItem();
-        TransactionType selectedCategory = (TransactionType) categorySpinner.getSelectedItem();
+        CurrencyEntity baseCurrency =
+                (CurrencyEntity) baseCurrencySpinner.getSelectedItem();
+        TransactionType selectedCategory =
+                (TransactionType) categorySpinner.getSelectedItem();
 
         if (baseCurrency == null) {
             adapter.clear();
             adapter.notifyDataSetChanged();
-            pieChartExpenses.clear();
             pieChartBalance.clear();
+            pieChartExpenses.clear();
             return;
         }
 
@@ -173,7 +191,8 @@ public class HomepageTransactionFragment extends Fragment implements Transaction
 
         List<TransactionEntity> filtered = new ArrayList<>();
         for (TransactionEntity t : allTransactions) {
-            if (selectedCategory == null || t.getType().equals(selectedCategory.toString())) {
+            if (selectedCategory == null ||
+                    t.getType().equals(selectedCategory.toString())) {
                 filtered.add(t);
             }
         }
@@ -182,41 +201,53 @@ public class HomepageTransactionFragment extends Fragment implements Transaction
         adapter.addAll(filtered);
         adapter.notifyDataSetChanged();
 
-        currentConversionLiveData = ratesConversionViewModel.getBasedList(filtered, baseCurrency.getCode());
+        currentConversionLiveData =
+                ratesConversionViewModel.getBasedList(filtered,
+                        baseCurrency.getCode());
+
         currentConversionLiveData.observe(getViewLifecycleOwner(), result -> {
             if (result instanceof Result.Success) {
-                List<TransactionEntity> converted = ((Result.Success<List<TransactionEntity>>) result).getData();
+                List<TransactionEntity> converted =
+                        ((Result.Success<List<TransactionEntity>>) result).getData();
 
-                double balance = 0.0;
-                for (TransactionEntity t : converted) balance += t.getAmount();
-                balanceTextView.setText(String.format("Saldo: %.2f %s", balance, baseCurrency.getCode()));
+                double balance = 0;
+                for (TransactionEntity t : converted) {
+                    balance += t.getAmount();
+                }
+
+                balanceTextView.setText(
+                        String.format("Saldo: %.2f %s",
+                                balance, baseCurrency.getCode()));
 
                 setupBalanceChart(converted);
                 setupExpensesChart(converted);
 
             } else if (result instanceof Result.Error) {
-                Toast.makeText(getContext(), "Errore: " + ((Result.Error<?>) result).getMessage(),
+                Toast.makeText(getContext(),
+                        "Errore: " +
+                                ((Result.Error<?>) result).getMessage(),
                         Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void showExpensesChart() {
-        pieChartExpenses.setVisibility(View.VISIBLE);
         pieChartBalance.setVisibility(View.GONE);
-        btnShowExpenses.setVisibility(View.GONE);
-        btnShowBalance.setVisibility(View.VISIBLE);
+        pieChartExpenses.setVisibility(View.VISIBLE);
+        btnShowBalance.setVisibility(View.GONE);
+        btnShowExpenses.setVisibility(View.VISIBLE);
     }
 
     private void showBalanceChart() {
         pieChartExpenses.setVisibility(View.GONE);
         pieChartBalance.setVisibility(View.VISIBLE);
-        btnShowExpenses.setVisibility(View.VISIBLE);
-        btnShowBalance.setVisibility(View.GONE);
+        btnShowExpenses.setVisibility(View.GONE);
+        btnShowBalance.setVisibility(View.VISIBLE);
     }
 
     private void setupBalanceChart(List<TransactionEntity> list) {
         float income = 0f, expenses = 0f;
+
         for (TransactionEntity t : list) {
             if (t.getAmount() >= 0) income += t.getAmount();
             else expenses += Math.abs(t.getAmount());
@@ -234,8 +265,8 @@ public class HomepageTransactionFragment extends Fragment implements Transaction
     }
 
     private void setupExpensesChart(List<TransactionEntity> list) {
-        // Somma per categoria
         HashMap<String, Float> map = new HashMap<>();
+
         for (TransactionEntity t : list) {
             if (t.getAmount() < 0) {
                 String key = t.getType();
@@ -246,7 +277,10 @@ public class HomepageTransactionFragment extends Fragment implements Transaction
 
         ArrayList<PieEntry> entries = new ArrayList<>();
         ArrayList<Integer> colors = new ArrayList<>();
-        int[] palette = {Color.RED, Color.BLUE, Color.MAGENTA, Color.CYAN, Color.YELLOW, Color.GREEN};
+        int[] palette = {
+                Color.RED, Color.BLUE, Color.MAGENTA,
+                Color.CYAN, Color.YELLOW, Color.GREEN
+        };
 
         int i = 0;
         for (String k : map.keySet()) {
@@ -258,7 +292,10 @@ public class HomepageTransactionFragment extends Fragment implements Transaction
         setupPieChartGeneric(pieChartExpenses, entries, colors);
     }
 
-    private void setupPieChartGeneric(PieChart chart, ArrayList<PieEntry> entries, ArrayList<Integer> colors) {
+    private void setupPieChartGeneric(PieChart chart,
+                                      ArrayList<PieEntry> entries,
+                                      ArrayList<Integer> colors) {
+
         if (entries.isEmpty()) {
             chart.clear();
             chart.invalidate();
@@ -270,8 +307,6 @@ public class HomepageTransactionFragment extends Fragment implements Transaction
         dataSet.setSliceSpace(3f);
         dataSet.setValueTextSize(12f);
         dataSet.setValueTextColor(Color.WHITE);
-
-        // Mostra il valore reale quando tocchi la fetta
         dataSet.setValueFormatter(new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
@@ -281,22 +316,18 @@ public class HomepageTransactionFragment extends Fragment implements Transaction
 
         PieData data = new PieData(dataSet);
         chart.setData(data);
-        chart.setUsePercentValues(false);
+
         chart.setDrawHoleEnabled(true);
-        chart.setHoleColor(Color.TRANSPARENT);
         chart.setHoleRadius(45f);
         chart.setTransparentCircleRadius(55f);
-
         chart.setDrawEntryLabels(false);
+        chart.getDescription().setEnabled(false);
 
         Legend legend = chart.getLegend();
         legend.setVerticalAlignment(Legend.LegendVerticalAlignment.CENTER);
         legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.RIGHT);
         legend.setOrientation(Legend.LegendOrientation.VERTICAL);
-        legend.setDrawInside(false);
-        legend.setTextSize(12f);
 
-        chart.getDescription().setEnabled(false);
         chart.animateY(1200, Easing.EaseInOutQuad);
         chart.invalidate();
     }
@@ -304,6 +335,5 @@ public class HomepageTransactionFragment extends Fragment implements Transaction
     @Override
     public void onDeleteButtonClicked(TransactionEntity transaction) {
         homepageTransactionViewModel.deleteTransaction(transaction.getId());
-
     }
 }
