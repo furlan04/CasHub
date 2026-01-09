@@ -132,7 +132,7 @@ public class HomepageStocksViewModel extends ViewModel {
         transaction.setCurrency(stock.getCurrency());
         transaction.setAmount(quantityToRemove * stock.getAveragePrice());
         transaction.setType(TransactionType.AZIONI.name());
-        transaction.setName("Vendita di " + stock.getSymbol());
+        transaction.setName("Vendita di " + stock.getName());
         transactionRepository.insertTransaction(transaction);
         portfolioRepository.removeStockFromPortfolio(stock, quantityToRemove);
     }
