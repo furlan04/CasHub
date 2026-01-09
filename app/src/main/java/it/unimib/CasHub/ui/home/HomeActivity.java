@@ -31,11 +31,10 @@ import it.unimib.CasHub.utils.ServiceLocator;
 
 public class HomeActivity extends AppCompatActivity {
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -44,9 +43,7 @@ public class HomeActivity extends AppCompatActivity {
             return insets;
         });
 
-
         //Gestione toolbar
-
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -68,20 +65,25 @@ public class HomeActivity extends AppCompatActivity {
 
         Button btnLogout = findViewById(R.id.btnLogout);
         btnLogout.setOnClickListener(v -> {
-            // 1. Esegui il logout (azione immediata)
-            userViewModel.logout();
 
-            // 2. Naviga immediatamente alla LoginActivity
-            Toast.makeText(HomeActivity.this, "Logout effettuato", Toast.LENGTH_SHORT).show();
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setTitle("Conferma logout")
+                    .setMessage("Sei sicuro di voler effettuare il logout?")
+                    .setPositiveButton("Logout", (dialog, which) -> {
 
-            Intent intent = new Intent(HomeActivity.this, NavLoginHomeActivity.class);
-            // Pulisci lo stack così l'utente non può tornare indietro col tasto back
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            finish();
+                        userViewModel.logout();
+
+                        Toast.makeText(HomeActivity.this,
+                                "Logout effettuato", Toast.LENGTH_SHORT).show();
+
+                        Intent intent = new Intent(HomeActivity.this, NavLoginHomeActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        finish();
+                    })
+                    .setNegativeButton("Annulla", null)
+                    .show();
         });
-
-
 
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().
                 findFragmentById(R.id.fragmentContainerView);

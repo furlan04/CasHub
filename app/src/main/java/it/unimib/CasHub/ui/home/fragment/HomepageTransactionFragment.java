@@ -26,12 +26,12 @@ import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
-import com.github.mikephil.charting.formatter.PercentFormatter;
+import com.github.mikephil.charting.formatter.ValueFormatter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import it.unimib.CasHub.R;
 import it.unimib.CasHub.adapter.CategorySpinnerAdapter;
@@ -50,32 +50,26 @@ import it.unimib.CasHub.ui.home.viewmodel.RatesConversionViewModel;
 import it.unimib.CasHub.ui.home.viewmodel.RatesConversionViewModelFactory;
 import it.unimib.CasHub.utils.ServiceLocator;
 
-public class HomepageTransactionFragment extends Fragment implements TransactionRecyclerAdapter.OnDeleteButtonClickListener {
+public class HomepageTransactionFragment extends Fragment
+        implements TransactionRecyclerAdapter.OnDeleteButtonClickListener {
 
-    private PieChart pieChart;
+    private PieChart pieChartBalance, pieChartExpenses;
+    private Button btnShowExpenses, btnShowBalance;
+
     private RecyclerView recyclerView;
     private TransactionRecyclerAdapter adapter;
     private HomepageTransactionViewModel homepageTransactionViewModel;
     private CurrencyListViewModel currencyListViewModel;
     private RatesConversionViewModel ratesConversionViewModel;
-    private Spinner categorySpinner;
-    private Spinner baseCurrencySpinner;
+
+    private Spinner categorySpinner, baseCurrencySpinner;
     private CategorySpinnerAdapter categoryAdapter;
     private CurrencySpinnerAdapter baseCurrencyAdapter;
+
     private List<TransactionEntity> allTransactions = new ArrayList<>();
     private TextView balanceTextView;
 
-    public HomepageTransactionFragment() {
-        // Required empty public constructor
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        ForexRepository forexRepository = ServiceLocator.getInstance().getForexRepository(requireActivity().getApplication(), getResources().getBoolean(R.bool.debug));
-        currencyListViewModel = new ViewModelProvider(this, new CurrencyListViewModelFactory(forexRepository)).get(CurrencyListViewModel.class);
-        ratesConversionViewModel = new ViewModelProvider(this, new RatesConversionViewModelFactory(forexRepository)).get(RatesConversionViewModel.class);
-    }
+    private LiveData<Result<List<TransactionEntity>>> currentConversionLiveData;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -87,7 +81,11 @@ public class HomepageTransactionFragment extends Fragment implements Transaction
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        pieChart = view.findViewById(R.id.pieChartTransaction);
+        pieChartBalance = view.findViewById(R.id.pieChartBalance);
+        pieChartExpenses = view.findViewById(R.id.pieChartExpenses);
+        btnShowExpenses = view.findViewById(R.id.btnShowExpenses);
+        btnShowBalance = view.findViewById(R.id.btnShowBalance);
+
         recyclerView = view.findViewById(R.id.recyclerViewTransactions);
         categorySpinner = view.findViewById(R.id.spinnerCategory);
         baseCurrencySpinner = view.findViewById(R.id.spinnerBaseCurrency);
@@ -97,6 +95,7 @@ public class HomepageTransactionFragment extends Fragment implements Transaction
         adapter = new TransactionRecyclerAdapter(new ArrayList<>(), this);
         recyclerView.setAdapter(adapter);
 
+        // Spinner categorie
         List<TransactionType> categories = new ArrayList<>();
         categories.add(null);
         categories.addAll(Arrays.asList(TransactionType.values()));
@@ -106,134 +105,200 @@ public class HomepageTransactionFragment extends Fragment implements Transaction
         baseCurrencyAdapter = new CurrencySpinnerAdapter(requireContext(), new ArrayList<>());
         baseCurrencySpinner.setAdapter(baseCurrencyAdapter);
 
-        boolean debugMode = getResources().getBoolean(R.bool.debug);
-        homepageTransactionViewModel = new ViewModelProvider(requireActivity(), new HomepageTransactionViewModelFactory(requireActivity().getApplication(), debugMode)).get(HomepageTransactionViewModel.class);
+        ForexRepository forexRepository = ServiceLocator.getInstance()
+                .getForexRepository(requireActivity().getApplication(),
+                        getResources().getBoolean(R.bool.debug));
 
-        homepageTransactionViewModel.getTransactions().observe(getViewLifecycleOwner(), result -> {
-            if (result.isSuccess()) {
-                allTransactions = ((Result.Success<List<TransactionEntity>>) result).getData();
-                updateDisplayedTransactions();
-            } else {
-                showError(((Result.Error<?>) result).getMessage());
-            }
-        });
+        currencyListViewModel = new ViewModelProvider(
+                this,
+                new CurrencyListViewModelFactory(forexRepository)
+        ).get(CurrencyListViewModel.class);
 
-        currencyListViewModel.getCurrencies().observe(getViewLifecycleOwner(), result -> {
-            if (result.isSuccess()) {
-                List<CurrencyEntity> currencies = ((Result.Success<List<CurrencyEntity>>) result).getData();
-                baseCurrencyAdapter.clear();
-                baseCurrencyAdapter.addAll(currencies);
-                baseCurrencyAdapter.notifyDataSetChanged();
-            } else {
-                showError(((Result.Error<?>) result).getMessage());
-            }
-        });
+        ratesConversionViewModel = new ViewModelProvider(
+                this,
+                new RatesConversionViewModelFactory(forexRepository)
+        ).get(RatesConversionViewModel.class);
 
-        AdapterView.OnItemSelectedListener listener = new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                updateDisplayedTransactions();
-            }
+        homepageTransactionViewModel = new ViewModelProvider(
+                requireActivity(),
+                new HomepageTransactionViewModelFactory(
+                        requireActivity().getApplication(),
+                        getResources().getBoolean(R.bool.debug)
+                )
+        ).get(HomepageTransactionViewModel.class);
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
-        };
+        homepageTransactionViewModel.getTransactions()
+                .observe(getViewLifecycleOwner(), result -> {
+                    if (result.isSuccess()) {
+                        allTransactions =
+                                ((Result.Success<List<TransactionEntity>>) result).getData();
+                        updateDisplayedTransactions();
+                    }
+                });
 
-        categorySpinner.setOnItemSelectedListener(listener);
-        baseCurrencySpinner.setOnItemSelectedListener(listener);
+        currencyListViewModel.getCurrencies()
+                .observe(getViewLifecycleOwner(), result -> {
+                    if (result.isSuccess()) {
+                        baseCurrencyAdapter.clear();
+                        baseCurrencyAdapter.addAll(
+                                ((Result.Success<List<CurrencyEntity>>) result).getData());
+                        baseCurrencyAdapter.notifyDataSetChanged();
+                    }
+                });
+
+        AdapterView.OnItemSelectedListener spinnerListener =
+                new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view,
+                                               int position, long id) {
+                        updateDisplayedTransactions();
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {}
+                };
+
+        categorySpinner.setOnItemSelectedListener(spinnerListener);
+        baseCurrencySpinner.setOnItemSelectedListener(spinnerListener);
+
+        btnShowBalance.setOnClickListener(v -> showExpensesChart());
+        btnShowExpenses.setOnClickListener(v -> showBalanceChart());
 
         Button btnAddTransaction = view.findViewById(R.id.btnAddTransaction);
-        btnAddTransaction.setOnClickListener(v -> {
-            Navigation.findNavController(v)
-                    .navigate(R.id.action_homepageTransactionFragment_to_transactionFragment);
-        });
+        btnAddTransaction.setOnClickListener(v ->
+                Navigation.findNavController(v)
+                        .navigate(R.id.action_homepageTransactionFragment_to_transactionFragment)
+        );
     }
 
     private void updateDisplayedTransactions() {
-        TransactionType selectedCategory = (TransactionType) categorySpinner.getSelectedItem();
-        CurrencyEntity baseCurrency = (CurrencyEntity) baseCurrencySpinner.getSelectedItem();
+        CurrencyEntity baseCurrency =
+                (CurrencyEntity) baseCurrencySpinner.getSelectedItem();
+        TransactionType selectedCategory =
+                (TransactionType) categorySpinner.getSelectedItem();
 
         if (baseCurrency == null) {
-            balanceTextView.setText("");
             adapter.clear();
             adapter.notifyDataSetChanged();
-            pieChart.clear();
-            pieChart.invalidate();
+            pieChartBalance.clear();
+            pieChartExpenses.clear();
             return;
         }
 
-        List<TransactionEntity> filteredTransactions = allTransactions.stream()
-                .filter(t -> selectedCategory == null || t.getType().equals(selectedCategory.toString()))
-                .collect(Collectors.toList());
+        if (currentConversionLiveData != null) {
+            currentConversionLiveData.removeObservers(getViewLifecycleOwner());
+        }
 
-        // Mostra subito le transazioni originali
+        List<TransactionEntity> filtered = new ArrayList<>();
+        for (TransactionEntity t : allTransactions) {
+            if (selectedCategory == null ||
+                    t.getType().equals(selectedCategory.toString())) {
+                filtered.add(t);
+            }
+        }
+
         adapter.clear();
-        adapter.addAll(filteredTransactions);
+        adapter.addAll(filtered);
         adapter.notifyDataSetChanged();
 
-        // Converti per calcolare il saldo e il grafico
-        LiveData<Result<List<TransactionEntity>>> conversionResult =
-                ratesConversionViewModel.getBasedList(filteredTransactions, baseCurrency.getCode());
+        currentConversionLiveData =
+                ratesConversionViewModel.getBasedList(filtered,
+                        baseCurrency.getCode());
 
-        conversionResult.observe(getViewLifecycleOwner(), result -> {
+        currentConversionLiveData.observe(getViewLifecycleOwner(), result -> {
             if (result instanceof Result.Success) {
-                List<TransactionEntity> basedTransactions =
+                List<TransactionEntity> converted =
                         ((Result.Success<List<TransactionEntity>>) result).getData();
 
-                double balance = 0.0;
-                for (TransactionEntity transaction : basedTransactions) {
-                    balance += transaction.getAmount();
+                double balance = 0;
+                for (TransactionEntity t : converted) {
+                    balance += t.getAmount();
                 }
 
-                balanceTextView.setText(String.format("Saldo: %.2f %s",
-                        balance, baseCurrency.getCode()));
+                balanceTextView.setText(
+                        String.format("Saldo: %.2f %s",
+                                balance, baseCurrency.getCode()));
 
-                // Aggiorna il grafico con i valori convertiti
-                setupPieChart(basedTransactions);
+                setupBalanceChart(converted);
+                setupExpensesChart(converted);
 
             } else if (result instanceof Result.Error) {
-                showError(((Result.Error<?>) result).getMessage());
+                Toast.makeText(getContext(),
+                        "Errore: " +
+                                ((Result.Error<?>) result).getMessage(),
+                        Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    @Override
-    public void onDeleteButtonClicked(TransactionEntity transaction) {
-        String firebaseKey = transaction.getFirebaseKey();
-        homepageTransactionViewModel.deleteTransaction(firebaseKey);
+    private void showExpensesChart() {
+        pieChartBalance.setVisibility(View.GONE);
+        pieChartExpenses.setVisibility(View.VISIBLE);
+        btnShowBalance.setVisibility(View.GONE);
+        btnShowExpenses.setVisibility(View.VISIBLE);
     }
 
-    private void showError(String message) {
-        Toast.makeText(getContext(), "Error: " + message, Toast.LENGTH_SHORT).show();
+    private void showBalanceChart() {
+        pieChartExpenses.setVisibility(View.GONE);
+        pieChartBalance.setVisibility(View.VISIBLE);
+        btnShowExpenses.setVisibility(View.GONE);
+        btnShowBalance.setVisibility(View.VISIBLE);
     }
 
-    private void setupPieChart(List<TransactionEntity> transactions) {
-        float totalIncome = 0f;
-        float totalExpenses = 0f;
+    private void setupBalanceChart(List<TransactionEntity> list) {
+        float income = 0f, expenses = 0f;
 
-        for (TransactionEntity transaction : transactions) {
-            if (transaction.getAmount() >= 0) {
-                totalIncome += (float) transaction.getAmount();
-            } else {
-                totalExpenses += (float) Math.abs(transaction.getAmount());
+        for (TransactionEntity t : list) {
+            if (t.getAmount() >= 0) income += t.getAmount();
+            else expenses += Math.abs(t.getAmount());
+        }
+
+        ArrayList<PieEntry> entries = new ArrayList<>();
+        if (income > 0) entries.add(new PieEntry(income, "Entrate"));
+        if (expenses > 0) entries.add(new PieEntry(expenses, "Uscite"));
+
+        ArrayList<Integer> colors = new ArrayList<>();
+        if (income > 0) colors.add(Color.GREEN);
+        if (expenses > 0) colors.add(Color.RED);
+
+        setupPieChartGeneric(pieChartBalance, entries, colors);
+    }
+
+    private void setupExpensesChart(List<TransactionEntity> list) {
+        HashMap<String, Float> map = new HashMap<>();
+
+        for (TransactionEntity t : list) {
+            if (t.getAmount() < 0) {
+                String key = t.getType();
+                float value = Math.abs((float) t.getAmount());
+                map.put(key, map.getOrDefault(key, 0f) + value);
             }
         }
 
         ArrayList<PieEntry> entries = new ArrayList<>();
         ArrayList<Integer> colors = new ArrayList<>();
+        int[] palette = {
+                Color.RED, Color.BLUE, Color.MAGENTA,
+                Color.CYAN, Color.YELLOW, Color.GREEN
+        };
 
-        if (totalIncome > 0) {
-            entries.add(new PieEntry(totalIncome, "Entrate"));
-            colors.add(Color.GREEN);
+        int i = 0;
+        for (String k : map.keySet()) {
+            entries.add(new PieEntry(map.get(k), k));
+            colors.add(palette[i % palette.length]);
+            i++;
         }
-        if (totalExpenses > 0) {
-            entries.add(new PieEntry(totalExpenses, "Uscite"));
-            colors.add(Color.RED);
-        }
+
+        setupPieChartGeneric(pieChartExpenses, entries, colors);
+    }
+
+    private void setupPieChartGeneric(PieChart chart,
+                                      ArrayList<PieEntry> entries,
+                                      ArrayList<Integer> colors) {
 
         if (entries.isEmpty()) {
-            pieChart.clear();
-            pieChart.invalidate();
+            chart.clear();
+            chart.invalidate();
             return;
         }
 
@@ -242,28 +307,33 @@ public class HomepageTransactionFragment extends Fragment implements Transaction
         dataSet.setSliceSpace(3f);
         dataSet.setValueTextSize(12f);
         dataSet.setValueTextColor(Color.WHITE);
+        dataSet.setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                return String.format("%.2f", value);
+            }
+        });
 
         PieData data = new PieData(dataSet);
-        data.setValueFormatter(new PercentFormatter(pieChart));
-        pieChart.setUsePercentValues(true);
-        pieChart.setDrawHoleEnabled(true);
-        pieChart.setHoleColor(Color.TRANSPARENT);
-        pieChart.setHoleRadius(45f);
-        pieChart.setTransparentCircleRadius(55f);
+        chart.setData(data);
 
-        pieChart.getDescription().setEnabled(false);
-        pieChart.setDrawEntryLabels(false);
+        chart.setDrawHoleEnabled(true);
+        chart.setHoleRadius(45f);
+        chart.setTransparentCircleRadius(55f);
+        chart.setDrawEntryLabels(false);
+        chart.getDescription().setEnabled(false);
 
-        Legend legend = pieChart.getLegend();
+        Legend legend = chart.getLegend();
         legend.setVerticalAlignment(Legend.LegendVerticalAlignment.CENTER);
         legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.RIGHT);
         legend.setOrientation(Legend.LegendOrientation.VERTICAL);
-        legend.setDrawInside(false);
-        legend.setTextSize(12f);
 
-        pieChart.animateY(1200, Easing.EaseInOutQuad);
+        chart.animateY(1200, Easing.EaseInOutQuad);
+        chart.invalidate();
+    }
 
-        pieChart.setData(data);
-        pieChart.invalidate();
+    @Override
+    public void onDeleteButtonClicked(TransactionEntity transaction) {
+        homepageTransactionViewModel.deleteTransaction(transaction.getFirebaseKey());
     }
 }

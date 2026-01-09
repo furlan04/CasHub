@@ -45,18 +45,33 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnLogout"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end|center_vertical"
-            android:paddingEnd="20dp"
             android:layout_marginEnd="16dp"
-            android:text="Logout"
+
+            app:icon="@drawable/logout_icon"
+            app:iconSize="20dp"
+            app:iconPadding="0dp"
+            app:iconTint="?attr/colorError"
+            android:textColor="@color/md_theme_error"
+            android:text="LogOut"
+
+            app:backgroundTint="@android:color/transparent"
+            app:strokeColor="?attr/colorError"
+            app:strokeWidth="1.5dp"
+
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:padding="6dp"
+
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
+            app:layout_constraintTop_toTopOf="parent"/>
     </androidx.appcompat.widget.Toolbar>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

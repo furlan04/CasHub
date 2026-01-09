@@ -1,5 +1,6 @@
 package it.unimib.CasHub.adapter;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -74,6 +75,11 @@ public class TransactionRecyclerAdapter extends RecyclerView.Adapter<Transaction
         public void bind(TransactionEntity transaction, OnDeleteButtonClickListener listener) {
             nameTextView.setText(transaction.getName());
             amountTextView.setText(String.valueOf(transaction.getAmount()));
+            if (transaction.getAmount() < 0) {
+                amountTextView.setTextColor(Color.RED);
+            } else {
+                amountTextView.setTextColor(Color.GREEN);
+            }
             typeTextView.setText(transaction.getType().toString());
             currencyTextView.setText(transaction.getCurrency());
             deleteButton.setOnClickListener(v -> listener.onDeleteButtonClicked(transaction));
