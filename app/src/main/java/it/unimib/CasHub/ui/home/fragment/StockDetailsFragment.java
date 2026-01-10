@@ -126,7 +126,9 @@ public class StockDetailsFragment extends Fragment {
 
         if (symbol != null && !symbol.isEmpty()) {
             observeStockQuote();
-            observeChartData();
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                observeChartData();
+            }, 1500);
         } else {
             Toast.makeText(requireContext(), "Simbolo non valido", Toast.LENGTH_SHORT).show();
         }
