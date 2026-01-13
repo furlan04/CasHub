@@ -2,21 +2,26 @@ package it.unimib.CasHub.utils;
 
 import android.app.Application;
 
+import it.unimib.CasHub.R;
 import it.unimib.CasHub.database.CurrencyDao;
 import it.unimib.CasHub.database.CurrencyRoomDatabase;
 import it.unimib.CasHub.database.TransactionDao;
 import it.unimib.CasHub.database.TransactionRoomDatabase;
 import it.unimib.CasHub.repository.ForexRepository;
 import it.unimib.CasHub.repository.portfolio.PortfolioRepository;
+import it.unimib.CasHub.repository.stock.StockRepository;
 import it.unimib.CasHub.repository.transaction.TransactionRepository;
 import it.unimib.CasHub.repository.user.IUserRepository;
 import it.unimib.CasHub.repository.user.UserRepository;
 import it.unimib.CasHub.service.AgencyAPIService;
 import it.unimib.CasHub.service.ForexAPIService;
+import it.unimib.CasHub.service.StockAPIService;
 import it.unimib.CasHub.source.BaseForexDataSource;
 import it.unimib.CasHub.source.ForexAPIDataSource;
 import it.unimib.CasHub.source.ForexMockDataSource;
 import it.unimib.CasHub.source.portfolio.PortfolioFirebaseDataSource;
+import it.unimib.CasHub.source.stock.BaseStockDataSource;
+import it.unimib.CasHub.source.stock.StockDataSource;
 import it.unimib.CasHub.source.transaction.BaseFirebaseTransactionDataSource;
 import it.unimib.CasHub.source.transaction.BaseLocalTransactionDataSource;
 import it.unimib.CasHub.source.transaction.TransactionFirebaseDataSource;
@@ -73,6 +78,14 @@ public class ServiceLocator {
                 .build();
         return retrofit.create(AgencyAPIService.class);
     }
+    public StockAPIService getStockAPIService() {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(Constants.STOCK_BASE_URL)
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        return retrofit.create(StockAPIService.class);
+    }
 
     private CurrencyRoomDatabase getCurrencyDB(Application application) {
         return CurrencyRoomDatabase.getDatabase(application);
@@ -96,6 +109,13 @@ public class ServiceLocator {
         }
 
         return new ForexRepository(dataSource, currencyDao);
+    }
+
+    public StockRepository getStockRepository(Application application) {
+        StockAPIService apiService = getStockAPIService();
+        String apiKey = application.getString(R.string.sma_api_key);
+        BaseStockDataSource dataSource = new StockDataSource(apiService, apiKey);
+        return new StockRepository(dataSource);
     }
 
     public TransactionRepository getTransactionRepository(Application application, boolean debugMode) {

@@ -17,6 +17,11 @@ public class Constants {
     public static final String AGENCY_STRING_APIKEY = "apikey";
     public static final String TEST_AGENCY_APP = "test_agency_app.json";
 
+    public static final String STOCK_BASE_URL = "https://www.alphavantage.co/";
+    public static final String STOCK_API_KEY = "demo";
+    public static final String CHART_ENDPOINT = "TIME_SERIES_DAILY";
+    public static final String QUOTE_ENDPOINT = "GLOBAL_QUOTE";
+
     // Sample Data
     public static final String SAMPLE_CURRENCIES_JSON = "sample_currencies.json";
     public static final String SAMPLE_RATES_JSON = "sample_rates.json";
