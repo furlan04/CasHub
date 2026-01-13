@@ -1,8 +1,11 @@
 package it.unimib.CasHub.ui.home.viewmodel;
 
 import android.app.Application;
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 import com.google.firebase.database.DataSnapshot;
 import java.text.SimpleDateFormat;
@@ -17,26 +20,25 @@ import it.unimib.CasHub.model.Result;
 import it.unimib.CasHub.model.StockQuote;
 import it.unimib.CasHub.model.TransactionEntity;
 import it.unimib.CasHub.model.TransactionType;
-import it.unimib.CasHub.repository.StockAPIRepository;
 import it.unimib.CasHub.repository.portfolio.IPortfolioRepository;
+import it.unimib.CasHub.repository.stock.IStockRepository;
 import it.unimib.CasHub.repository.transaction.ITransactionRepository;
-import it.unimib.CasHub.utils.StockResponseCallback;
 
 public class HomepageStocksViewModel extends ViewModel {
 
     private final IPortfolioRepository portfolioRepository;
-    private final StockAPIRepository stockAPIRepository;
+    private final IStockRepository stockRepository;
     private final Application application;
 
     private final ITransactionRepository transactionRepository;
     private final MutableLiveData<String> snackbarMessage = new MutableLiveData<>();
     private static final String TAG = "HomepageStocksViewModel";
 
-    public HomepageStocksViewModel(Application application, IPortfolioRepository portfolioRepository, StockAPIRepository stockAPIRepository, ITransactionRepository transactionRepository) {
+    public HomepageStocksViewModel(Application application, IPortfolioRepository portfolioRepository, IStockRepository stockRepository, ITransactionRepository transactionRepository) {
         this.application = application;
         this.portfolioRepository = portfolioRepository;
         this.transactionRepository = transactionRepository;
-        this.stockAPIRepository = stockAPIRepository;
+        this.stockRepository = stockRepository;
     }
 
     public LiveData<Result<List<PortfolioStock>>> getPortfolio() {
@@ -84,35 +86,45 @@ public class HomepageStocksViewModel extends ViewModel {
         final List<PortfolioStock> allStocks = Collections.synchronizedList(new ArrayList<>(alreadyUpdatedStocks));
 
         for (PortfolioStock stock : stocksToUpdate) {
-            stockAPIRepository.getStockQuote(stock.getSymbol(), new StockResponseCallback() {
-                @Override
-                public void onSuccess(StockQuote stockQuote) {
-                    try {
-                        double currentPrice = Double.parseDouble(stockQuote.getPrice());
-                        stock.setAveragePrice(currentPrice);
-                        stock.setLastUpdate(todayDate);
-                        portfolioRepository.updateStockInPortfolio(stock);
-                    } catch (NumberFormatException e) {
-                        android.util.Log.e(TAG, "Error parsing price for " + stock.getSymbol(), e);
-                    } finally {
-                        allStocks.add(stock);
-                        if (updatesCounter.decrementAndGet() == 0) {
-                            updatePortfolioHistory(allStocks);
-                        }
-                    }
-                }
 
+            LiveData<Result<StockQuote>> stockLiveData =
+                    stockRepository.getStockQuote(stock.getSymbol());
+
+            stockLiveData.observeForever(new Observer<Result<StockQuote>>() {
                 @Override
-                public void onFailure(String errorMessage) {
-                    android.util.Log.e(TAG, "Error fetching stock quote for " + stock.getSymbol() + ": " + errorMessage);
-                    allStocks.add(stock); // Add the stock with its old price
+                public void onChanged(Result<StockQuote> result) {
+
+                    stockLiveData.removeObserver(this);
+
+                    if (result instanceof Result.Success) {
+                        StockQuote stockData =
+                                ((Result.Success<StockQuote>) result).getData();
+
+                        try {
+                            double currentPrice =
+                                    Double.parseDouble(stockData.getPrice());
+
+                            stock.setAveragePrice(currentPrice);
+                            stock.setLastUpdate(todayDate);
+
+                            portfolioRepository.updateStockInPortfolio(stock);
+                            allStocks.add(stock);
+
+                        } catch (NumberFormatException e) {
+                            Log.e(TAG, "Error parsing price for " + stock.getSymbol(), e);
+                        }
+
+                    } else if (result instanceof Result.Error) {
+                        Log.e(TAG, "Error fetching " + stock.getSymbol() + ": "
+                                + ((Result.Error<?>) result).getMessage());
+                    }
+
                     if (updatesCounter.decrementAndGet() == 0) {
                         updatePortfolioHistory(allStocks);
                     }
                 }
             });
         }
-        snackbarMessage.postValue("Prezzi del portfolio aggiornati");
     }
 
     private void updatePortfolioHistory(List<PortfolioStock> allStocks) {

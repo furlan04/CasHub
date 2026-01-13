@@ -1,5 +1,9 @@
 package it.unimib.CasHub.source.portfolio;
 
+import static it.unimib.CasHub.utils.Constants.FIREBASE_PORTFOLIO_COLLECTION;
+import static it.unimib.CasHub.utils.Constants.FIREBASE_PORTFOLIO_HISTORY_COLLECTION;
+import static it.unimib.CasHub.utils.Constants.FIREBASE_USERS_COLLECTION;
+
 import android.util.Log;
 import androidx.annotation.NonNull;
 import com.google.firebase.auth.FirebaseAuth;
@@ -36,9 +40,9 @@ public class PortfolioFirebaseDataSource extends BasePortfolioDataSource {
             return;
         }
 
-        databaseReference.child("users")
+        databaseReference.child(FIREBASE_USERS_COLLECTION)
                 .child(currentUser.getUid())
-                .child("portfolio")
+                .child(FIREBASE_PORTFOLIO_COLLECTION)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -63,9 +67,9 @@ public class PortfolioFirebaseDataSource extends BasePortfolioDataSource {
         if (currentUser == null) return;
 
         DatabaseReference historyRef = databaseReference
-                .child("users")
+                .child(FIREBASE_USERS_COLLECTION)
                 .child(currentUser.getUid())
-                .child("portfolioHistory");
+                    .child(FIREBASE_PORTFOLIO_HISTORY_COLLECTION);
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         String dateKey = dateFormat.format(new Date());
@@ -86,9 +90,9 @@ public class PortfolioFirebaseDataSource extends BasePortfolioDataSource {
         String safeSymbol = getSafeSymbol(stock.getSymbol());
 
         DatabaseReference stockRef = databaseReference
-                .child("users")
+                .child(FIREBASE_USERS_COLLECTION)
                 .child(currentUser.getUid())
-                .child("portfolio")
+                .child(FIREBASE_PORTFOLIO_COLLECTION)
                 .child(safeSymbol);
 
         double newQuantity = stock.getQuantity() - quantityToRemove;
@@ -113,9 +117,9 @@ public class PortfolioFirebaseDataSource extends BasePortfolioDataSource {
             return;
         }
 
-        databaseReference.child("users")
+        databaseReference.child(FIREBASE_USERS_COLLECTION)
                 .child(currentUser.getUid())
-                .child("portfolioHistory")
+                .child(FIREBASE_PORTFOLIO_HISTORY_COLLECTION)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -145,9 +149,9 @@ public class PortfolioFirebaseDataSource extends BasePortfolioDataSource {
             String safeSymbol = getSafeSymbol(newPurchase.getSymbol());
 
             DatabaseReference stockRef = databaseReference
-                    .child("users")
+                    .child(FIREBASE_USERS_COLLECTION)
                     .child(currentUser.getUid())
-                    .child("portfolio")
+                    .child(FIREBASE_PORTFOLIO_COLLECTION)
                     .child(safeSymbol);
 
             stockRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -202,9 +206,9 @@ public class PortfolioFirebaseDataSource extends BasePortfolioDataSource {
             String safeSymbol = getSafeSymbol(stock.getSymbol());
 
             databaseReference
-                    .child("users")
+                    .child(FIREBASE_USERS_COLLECTION)
                     .child(currentUser.getUid())
-                    .child("portfolio")
+                    .child(FIREBASE_PORTFOLIO_COLLECTION)
                     .child(safeSymbol)
                     .setValue(stock)
                     .addOnSuccessListener(aVoid -> callback.onStockUpdated())

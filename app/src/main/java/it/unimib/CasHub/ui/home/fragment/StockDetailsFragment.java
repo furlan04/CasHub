@@ -39,7 +39,6 @@ import it.unimib.CasHub.model.StockQuote;
 import it.unimib.CasHub.ui.home.viewmodel.StockDetailsViewModel;
 import it.unimib.CasHub.ui.home.viewmodel.StockDetailsViewModelFactory;
 import it.unimib.CasHub.utils.NetworkUtil;
-import it.unimib.CasHub.utils.StockCache;
 
 public class StockDetailsFragment extends Fragment {
 
@@ -63,7 +62,7 @@ public class StockDetailsFragment extends Fragment {
     private String exchangeFull;
     private boolean fromPortfolio = false;
 
-    private StockQuote currentStockQuote;
+    private StockQuote currentStock;
 
     public StockDetailsFragment() {}
 
@@ -170,8 +169,8 @@ public class StockDetailsFragment extends Fragment {
         addToPortfolioButton.setEnabled(false);
         viewModel.getStockQuote(symbol).observe(getViewLifecycleOwner(), result -> {
             if (result instanceof Result.Success) {
-                currentStockQuote = ((Result.Success<StockQuote>) result).getData();
-                handleStockQuoteSuccess(currentStockQuote);
+                currentStock = ((Result.Success<StockQuote>) result).getData();
+                handleStockQuoteSuccess(currentStock);
             } else {
                 handleStockQuoteFailure(((Result.Error) result).getMessage());
             }
@@ -239,7 +238,7 @@ public class StockDetailsFragment extends Fragment {
         weeklyChart.animateX(800);
     }
 
-    private void handleStockQuoteSuccess(StockQuote stockQuote) {
+    private void handleStockQuoteSuccess(StockQuote stock) {
         if (getActivity() == null) return;
 
         requireActivity().runOnUiThread(() -> {
@@ -247,9 +246,9 @@ public class StockDetailsFragment extends Fragment {
 
             String currencySymbol = getCurrencySymbol(currency);
 
-            String price = stockQuote.getPrice();
-            String change = stockQuote.getChange();
-            String changePercent = stockQuote.getChangePercent();
+            String price = stock.getPrice();
+            String change = stock.getChange();
+            String changePercent = stock.getChangePercent();
 
             String priceInfo = "Prezzo: " + currencySymbol + price +
                     "\n\nVariazione giornaliera: " + currencySymbol + change +
@@ -270,7 +269,7 @@ public class StockDetailsFragment extends Fragment {
     }
 
     private void addToPortfolio() {
-        if (currentStockQuote == null) {
+        if (currentStock == null) {
             Toast.makeText(requireContext(), "Dati non ancora caricati", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -293,7 +292,7 @@ public class StockDetailsFragment extends Fragment {
         layout.setPadding(50, 40, 50, 10);
 
         TextView priceInfo = new TextView(requireContext());
-        priceInfo.setText("Prezzo attuale: " + getCurrencySymbol(currency) + currentStockQuote.getPrice());
+        priceInfo.setText("Prezzo attuale: " + getCurrencySymbol(currency) + currentStock.getPrice());
         priceInfo.setTextSize(16);
         priceInfo.setPadding(0, 0, 0, 20);
         layout.addView(priceInfo);
@@ -337,14 +336,14 @@ public class StockDetailsFragment extends Fragment {
     }
 
     private void savePurchase(double quantity) {
-        if (currentStockQuote == null) {
+        if (currentStock == null) {
             Toast.makeText(requireContext(), "Errore: dati prezzo mancanti", Toast.LENGTH_SHORT).show();
             return;
         }
 
         double currentPrice;
         try {
-            currentPrice = Double.parseDouble(currentStockQuote.getPrice());
+            currentPrice = Double.parseDouble(currentStock.getPrice());
         } catch (Exception e) {
             Toast.makeText(requireContext(), "Errore parsing prezzo", Toast.LENGTH_SHORT).show();
             return;
@@ -361,16 +360,6 @@ public class StockDetailsFragment extends Fragment {
         portfolioStock.setAveragePrice(currentPrice);
 
         viewModel.addStockToPortfolio(portfolioStock);
-
-        StockCache.saveStock(
-                requireContext(),
-                symbol,
-                companyName != null ? companyName : symbol,
-                currency != null ? currency : "USD",
-                exchange != null ? exchange : "N/A",
-                exchangeFull != null ? exchangeFull : "N/A",
-                currentPrice
-        );
 
         Toast.makeText(requireContext(), "Acquistate " + quantity + " azioni di " + symbol + "!", Toast.LENGTH_SHORT).show();
         addToPortfolioButton.setText("Aggiunto ✓");
