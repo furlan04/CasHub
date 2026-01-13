@@ -11,12 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import it.unimib.CasHub.R;
 import it.unimib.CasHub.model.ChartData;
 import it.unimib.CasHub.model.DailyTimeSeries;
 import it.unimib.CasHub.model.DailyTimeSeriesResponse;
 import it.unimib.CasHub.model.StockQuoteResponse;
-import it.unimib.CasHub.repository.StockAPIRepository;
 import it.unimib.CasHub.service.StockAPIService;
 import retrofit2.Call;
 import retrofit2.Callback;

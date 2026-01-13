@@ -5,7 +5,6 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import it.unimib.CasHub.repository.StockAPIRepository;
 import it.unimib.CasHub.repository.portfolio.IPortfolioRepository;
 import it.unimib.CasHub.repository.stock.IStockRepository;
 import it.unimib.CasHub.repository.transaction.ITransactionRepository;

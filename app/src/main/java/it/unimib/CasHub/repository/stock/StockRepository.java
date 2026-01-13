@@ -12,8 +12,7 @@ import it.unimib.CasHub.source.stock.BaseStockDataSource;
 
 public class StockRepository implements IStockRepository, StockResponseCallback {
 
-    private final Map<String, MutableLiveData<Result<StockQuote>>> stockLiveDataMap =
-            new ConcurrentHashMap<>();
+    private final Map<String, MutableLiveData<Result<StockQuote>>> stockLiveDataMap;
     private final MutableLiveData<Result<ChartData>> chartLiveData;
     private final BaseStockDataSource stockDataSource;
 
@@ -21,6 +20,7 @@ public class StockRepository implements IStockRepository, StockResponseCallback 
         this.chartLiveData = new MutableLiveData<>();
         this.stockDataSource = stockDataSource;
         this.stockDataSource.setCallback(this);
+        this.stockLiveDataMap = new ConcurrentHashMap<>();
     }
 
     @Override

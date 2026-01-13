@@ -38,6 +38,8 @@ public class Constants {
     public static final String REALTIME_DB_URL = BuildConfig.REALTIME_DB_URL;
     public static final String FIREBASE_USERS_COLLECTION = "users";
     public static final String FIREBASE_TRANSACTIONS_COLLECTION = "transactions";
+    public static final String FIREBASE_PORTFOLIO_COLLECTION = "portfolio";
+    public static final String FIREBASE_PORTFOLIO_HISTORY_COLLECTION = "portfolioHistory";
 
     // Timeout for fetching fresh data
     public static final long FRESH_TIMEOUT = 60000; // 1 minute

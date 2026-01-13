@@ -39,7 +39,6 @@ import it.unimib.CasHub.model.StockQuote;
 import it.unimib.CasHub.ui.home.viewmodel.StockDetailsViewModel;
 import it.unimib.CasHub.ui.home.viewmodel.StockDetailsViewModelFactory;
 import it.unimib.CasHub.utils.NetworkUtil;
-import it.unimib.CasHub.utils.StockCache;
 
 public class StockDetailsFragment extends Fragment {
 
@@ -361,16 +360,6 @@ public class StockDetailsFragment extends Fragment {
         portfolioStock.setAveragePrice(currentPrice);
 
         viewModel.addStockToPortfolio(portfolioStock);
-
-        StockCache.saveStock(
-                requireContext(),
-                symbol,
-                companyName != null ? companyName : symbol,
-                currency != null ? currency : "USD",
-                exchange != null ? exchange : "N/A",
-                exchangeFull != null ? exchangeFull : "N/A",
-                currentPrice
-        );
 
         Toast.makeText(requireContext(), "Acquistate " + quantity + " azioni di " + symbol + "!", Toast.LENGTH_SHORT).show();
         addToPortfolioButton.setText("Aggiunto ✓");
