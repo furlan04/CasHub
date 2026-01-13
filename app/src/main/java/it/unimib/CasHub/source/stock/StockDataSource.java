@@ -48,7 +48,7 @@ public class StockDataSource extends BaseStockDataSource {
                 if (response.isSuccessful() && response.body() != null) {
                     StockQuoteResponse stockResponse = response.body();
 
-                    if (stockResponse.getGlobalQuote() != null) {
+                    if (stockResponse.getGlobalQuote() != null && stockResponse.getGlobalQuote().getSymbol() != null) {
                         callback.onStockDetailsSuccess(stockResponse.getGlobalQuote());
                     } else {
                         callback.onStockDetailsFailure(symbol, "Dati non disponibili per questo simbolo");
