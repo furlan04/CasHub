@@ -41,7 +41,7 @@ import it.unimib.CasHub.model.CurrencyEntity;
 import it.unimib.CasHub.model.Result;
 import it.unimib.CasHub.model.TransactionEntity;
 import it.unimib.CasHub.model.TransactionType;
-import it.unimib.CasHub.repository.ForexRepository;
+import it.unimib.CasHub.repository.forex.ForexRepository;
 import it.unimib.CasHub.ui.home.viewmodel.CurrencyListViewModel;
 import it.unimib.CasHub.ui.home.viewmodel.CurrencyListViewModelFactory;
 import it.unimib.CasHub.ui.home.viewmodel.HomepageTransactionViewModel;

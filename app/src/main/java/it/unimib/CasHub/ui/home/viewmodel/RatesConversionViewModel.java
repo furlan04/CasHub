@@ -10,7 +10,7 @@ import java.util.List;
 import it.unimib.CasHub.model.ForexAPIResponse;
 import it.unimib.CasHub.model.Result;
 import it.unimib.CasHub.model.TransactionEntity;
-import it.unimib.CasHub.repository.ForexRepository;
+import it.unimib.CasHub.repository.forex.ForexRepository;
 
 public class RatesConversionViewModel extends ViewModel {
     private final ForexRepository forexRepository;

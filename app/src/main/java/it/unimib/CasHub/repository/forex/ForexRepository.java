@@ -1,16 +1,14 @@
-package it.unimib.CasHub.repository;
+package it.unimib.CasHub.repository.forex;
 
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import java.util.List;
 
-import it.unimib.CasHub.database.CurrencyDao;
 import it.unimib.CasHub.model.CurrencyEntity;
 import it.unimib.CasHub.model.ForexAPIResponse;
 import it.unimib.CasHub.model.Result;
-import it.unimib.CasHub.source.BaseForexDataSource;
-import it.unimib.CasHub.source.ForexCallback;
+import it.unimib.CasHub.source.forex.BaseForexDataSource;
+import it.unimib.CasHub.source.forex.ForexCallback;
 
 public class ForexRepository implements ForexCallback {
 

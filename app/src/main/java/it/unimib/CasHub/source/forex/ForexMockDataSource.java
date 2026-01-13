@@ -1,4 +1,4 @@
-package it.unimib.CasHub.source;
+package it.unimib.CasHub.source.forex;
 
 import java.io.IOException;
 import java.util.ArrayList;
