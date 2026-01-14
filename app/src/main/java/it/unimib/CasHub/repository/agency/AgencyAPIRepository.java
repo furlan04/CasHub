@@ -22,14 +22,12 @@ public class AgencyAPIRepository implements IAgencyRepository, AgencyResponseCal
 
     @Override
     public MutableLiveData<Result<List<Agency>>> getAllAgencies(String query) {
-        // Avviamo la chiamata asincrona
+        agencyLiveData.setValue(null);
+        agencyLiveData.postValue(new Result.Loading<>());
         agencyDataSource.getAllAgencies(query);
-
-        // Restituiamo il riferimento al LiveData che verrà aggiornato dalle callback
         return agencyLiveData;
     }
 
-    // Callback chiamata dalla DataSource in caso di successo
     @Override
     public void onSuccess(List<Agency> agencyList, long lastUpdate) {
         if (agencyList != null) {
@@ -37,7 +35,6 @@ public class AgencyAPIRepository implements IAgencyRepository, AgencyResponseCal
         }
     }
 
-    // Callback chiamata dalla DataSource in caso di errore
     @Override
     public void onFailure(String errorMessage) {
         agencyLiveData.postValue(new Result.Error<>(errorMessage));

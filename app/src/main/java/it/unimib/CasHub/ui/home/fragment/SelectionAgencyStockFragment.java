@@ -71,6 +71,9 @@ public class SelectionAgencyStockFragment extends Fragment implements AgencyResp
         noInternetText = noInternetMessage.findViewById(R.id.noInternetMessage); // TextView interna
         searchEditText = view.findViewById(R.id.searchEditText);
 
+
+
+
         // Inizializza repository
 
         AgencyViewModelFactory factory = new AgencyViewModelFactory(requireActivity().getApplication());
@@ -113,7 +116,7 @@ public class SelectionAgencyStockFragment extends Fragment implements AgencyResp
         });
 
         // Stato iniziale
-        loadingIndicator.setVisibility(View.VISIBLE);
+        //loadingIndicator.setVisibility(View.VISIBLE);
         recyclerView.setVisibility(View.GONE);
 
         if (!NetworkUtil.isInternetAvailable(requireContext())) {
@@ -165,6 +168,7 @@ public class SelectionAgencyStockFragment extends Fragment implements AgencyResp
             agencyList.clear();
             adapter.notifyDataSetChanged();
             noInternetMessage.setVisibility(View.GONE);
+
             return;
         }
 
@@ -178,27 +182,35 @@ public class SelectionAgencyStockFragment extends Fragment implements AgencyResp
 
         // Osserva LiveData
         viewModel.getAllAgencies(query).observe(getViewLifecycleOwner(), result -> {
-            loadingIndicator.setVisibility(View.GONE);
-
-            if (result instanceof Result.Success) {
-                List<Agency> agencies = ((Result.Success<List<Agency>>) result).getData();
-                agencyList.clear();
-                agencyList.addAll(agencies);
-                adapter.notifyDataSetChanged();
-
-                recyclerView.setVisibility(agencies.isEmpty() ? View.GONE : View.VISIBLE);
-
-                if (agencies.isEmpty()) {
-                    noInternetMessage.setVisibility(View.VISIBLE);
-                    noInternetText.setText(getString(R.string.no_agency_found));
-                } else {
-                    noInternetMessage.setVisibility(View.GONE);
-                }
-
-            } else if (result instanceof Result.Error) {
-                noInternetMessage.setVisibility(View.VISIBLE);
-                noInternetText.setText("No agencies found");
+            if (result instanceof Result.Loading) {
+                // Mostra lo spinner
+                loadingIndicator.setVisibility(View.VISIBLE);
                 recyclerView.setVisibility(View.GONE);
+                noInternetMessage.setVisibility(View.GONE);
+            } else {
+                // Nascondi lo spinner
+                loadingIndicator.setVisibility(View.GONE);
+
+                if (result instanceof Result.Success) {
+                    List<Agency> agencies = ((Result.Success<List<Agency>>) result).getData();
+                    agencyList.clear();
+                    agencyList.addAll(agencies);
+                    adapter.notifyDataSetChanged();
+
+                    recyclerView.setVisibility(agencies.isEmpty() ? View.GONE : View.VISIBLE);
+
+                    if (agencies.isEmpty()) {
+                        noInternetMessage.setVisibility(View.VISIBLE);
+                        noInternetText.setText(getString(R.string.no_agency_found));
+                    } else {
+                        noInternetMessage.setVisibility(View.GONE);
+                    }
+
+                } else if (result instanceof Result.Error) {
+                    noInternetMessage.setVisibility(View.VISIBLE);
+                    noInternetText.setText("No agencies found");
+                    recyclerView.setVisibility(View.GONE);
+                }
             }
         });
     }
