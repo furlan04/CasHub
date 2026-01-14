@@ -1,4 +1,4 @@
-package it.unimib.CasHub.source;
+package it.unimib.CasHub.source.forex;
 
 import java.util.List;
 
@@ -29,7 +29,7 @@ public class ForexLocalDataSource extends BaseForexDataSource {
     public void getRates(String base) {
         throw new UnsupportedOperationException("ForexLocalDataSource does not support rates retrieval");
     }
-
+    @Override
     public void saveCurrencies(List<CurrencyEntity> currencyList) {
         new Thread(() -> {
             currencyDao.insertAllCurrencies(currencyList);
