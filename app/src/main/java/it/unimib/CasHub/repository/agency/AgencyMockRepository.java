@@ -1,4 +1,4 @@
-package it.unimib.CasHub.repository;
+package it.unimib.CasHub.repository.agency;
 
 import android.app.Application;
 
@@ -9,12 +9,12 @@ import it.unimib.CasHub.R;
 import it.unimib.CasHub.model.Agency;
 import it.unimib.CasHub.utils.Constants;
 import it.unimib.CasHub.utils.JSONParserUtils;
-import it.unimib.CasHub.utils.AgencyResponseCallBack;
+import it.unimib.CasHub.source.agency.AgencyResponseCallback;
 
-public class AgencyMockRepository implements IAgencyRepository{
+public class AgencyMockRepository implements IAgencyRepository {
     private final Application application;
-    private final AgencyResponseCallBack responseCallback;
-    public AgencyMockRepository(Application application, AgencyResponseCallBack responseCallback) {
+    private final AgencyResponseCallback responseCallback;
+    public AgencyMockRepository(Application application, AgencyResponseCallback responseCallback) {
         this.application = application;
         this.responseCallback = responseCallback;
     }

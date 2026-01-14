@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,13 +23,13 @@ import java.util.List;
 import it.unimib.CasHub.R;
 import it.unimib.CasHub.adapter.AgencyRecyclerAdapter;
 import it.unimib.CasHub.model.Agency;
-import it.unimib.CasHub.repository.AgencyAPIRepository;
-import it.unimib.CasHub.repository.AgencyMockRepository;
-import it.unimib.CasHub.repository.IAgencyRepository;
+import it.unimib.CasHub.repository.agency.AgencyAPIRepository;
+import it.unimib.CasHub.repository.agency.AgencyMockRepository;
+import it.unimib.CasHub.repository.agency.IAgencyRepository;
 import it.unimib.CasHub.utils.NetworkUtil;
-import it.unimib.CasHub.utils.AgencyResponseCallBack;
+import it.unimib.CasHub.source.agency.AgencyResponseCallback;
 
-public class SelectionAgencyStockFragment extends Fragment implements AgencyResponseCallBack {
+public class SelectionAgencyStockFragment extends Fragment implements AgencyResponseCallback {
 
     public static final String TAG = SelectionAgencyStockFragment.class.getName();
 

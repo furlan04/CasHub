@@ -1,4 +1,4 @@
-package it.unimib.CasHub.repository;
+package it.unimib.CasHub.repository.agency;
 
 import android.app.Application;
 import android.util.Log;
@@ -9,17 +9,17 @@ import it.unimib.CasHub.R;
 import it.unimib.CasHub.model.Agency;
 import it.unimib.CasHub.service.AgencyAPIService;
 import it.unimib.CasHub.utils.ServiceLocator;
-import it.unimib.CasHub.utils.AgencyResponseCallBack;
+import it.unimib.CasHub.source.agency.AgencyResponseCallback;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class AgencyAPIRepository implements IAgencyRepository {
     private final Application application;
-    private final AgencyResponseCallBack responseCallback;
+    private final AgencyResponseCallback responseCallback;
     private final AgencyAPIService apiService;
     private final String apiKey;
-    public AgencyAPIRepository(Application application, AgencyResponseCallBack callback) {
+    public AgencyAPIRepository(Application application, AgencyResponseCallback callback) {
         this.application = application;
         this.responseCallback = callback;
 
