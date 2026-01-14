@@ -1,4 +1,4 @@
-package it.unimib.CasHub.source;
+package it.unimib.CasHub.source.forex;
 
 import androidx.annotation.NonNull;
 
@@ -62,5 +62,9 @@ public class ForexAPIDataSource extends BaseForexDataSource {
                 callback.onCurrenciesFailureFromRemote(new Exception(t));
             }
         });
+    }
+    @Override
+    public void saveCurrencies(List<CurrencyEntity> currencies) {
+        // do nothing
     }
 }

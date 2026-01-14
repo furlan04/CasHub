@@ -9,6 +9,7 @@ import it.unimib.CasHub.database.TransactionDao;
 import it.unimib.CasHub.database.TransactionRoomDatabase;
 import it.unimib.CasHub.repository.ForexRepository;
 import it.unimib.CasHub.repository.agency.AgencyAPIRepository;
+import it.unimib.CasHub.repository.forex.ForexRepository;
 import it.unimib.CasHub.repository.portfolio.PortfolioRepository;
 import it.unimib.CasHub.repository.stock.StockRepository;
 import it.unimib.CasHub.repository.transaction.TransactionRepository;
@@ -22,6 +23,10 @@ import it.unimib.CasHub.source.ForexAPIDataSource;
 import it.unimib.CasHub.source.ForexMockDataSource;
 import it.unimib.CasHub.source.agency.AgencyDataSource;
 import it.unimib.CasHub.source.agency.BaseAgencyDataSource;
+import it.unimib.CasHub.source.forex.BaseForexDataSource;
+import it.unimib.CasHub.source.forex.ForexAPIDataSource;
+import it.unimib.CasHub.source.forex.ForexLocalDataSource;
+import it.unimib.CasHub.source.forex.ForexMockDataSource;
 import it.unimib.CasHub.source.portfolio.PortfolioFirebaseDataSource;
 import it.unimib.CasHub.source.stock.BaseStockDataSource;
 import it.unimib.CasHub.source.stock.StockDataSource;
@@ -101,17 +106,19 @@ public class ServiceLocator {
     public ForexRepository getForexRepository(Application application, boolean debugMode) {
         ForexAPIService apiService = getForexAPIService();
         JSONParserUtils jsonParserUtils = new JSONParserUtils(application);
+
+        BaseForexDataSource remoteDataSource = new ForexAPIDataSource(apiService);
+        BaseForexDataSource localDataSource;
         CurrencyDao currencyDao = getCurrencyDB(application).currencyDao();
 
-        BaseForexDataSource dataSource;
 
         if (debugMode) {
-            dataSource = new ForexMockDataSource(jsonParserUtils);
+            localDataSource = new ForexMockDataSource(jsonParserUtils);
         } else {
-            dataSource = new ForexAPIDataSource(apiService);
+            localDataSource = new ForexLocalDataSource(currencyDao);
         }
 
-        return new ForexRepository(dataSource, currencyDao);
+        return new ForexRepository(remoteDataSource, localDataSource);
     }
 
     public StockRepository getStockRepository(Application application) {
