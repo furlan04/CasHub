@@ -4,12 +4,12 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,19 +24,23 @@ import java.util.List;
 import it.unimib.CasHub.R;
 import it.unimib.CasHub.adapter.AgencyRecyclerAdapter;
 import it.unimib.CasHub.model.Agency;
-import it.unimib.CasHub.repository.AgencyAPIRepository;
-import it.unimib.CasHub.repository.AgencyMockRepository;
-import it.unimib.CasHub.repository.IAgencyRepository;
+import it.unimib.CasHub.model.Result;
+import it.unimib.CasHub.repository.agency.AgencyAPIRepository;
+import it.unimib.CasHub.repository.agency.IAgencyRepository;
+import it.unimib.CasHub.ui.home.viewmodel.AgencyViewModel;
+import it.unimib.CasHub.ui.home.viewmodel.AgencyViewModelFactory;
+import it.unimib.CasHub.ui.home.viewmodel.StockDetailsViewModel;
+import it.unimib.CasHub.ui.home.viewmodel.StockDetailsViewModelFactory;
 import it.unimib.CasHub.utils.NetworkUtil;
-import it.unimib.CasHub.utils.AgencyResponseCallBack;
+import it.unimib.CasHub.source.agency.AgencyResponseCallback;
 
-public class SelectionAgencyStockFragment extends Fragment implements AgencyResponseCallBack {
+public class SelectionAgencyStockFragment extends Fragment implements AgencyResponseCallback {
 
     public static final String TAG = SelectionAgencyStockFragment.class.getName();
-
-    private IAgencyRepository agencyRepository;
     private List<Agency> agencyList = new ArrayList<>();
     private AgencyRecyclerAdapter adapter;
+
+    private AgencyViewModel viewModel;
 
     private RecyclerView recyclerView;
     private TextInputEditText searchEditText;
@@ -67,12 +71,14 @@ public class SelectionAgencyStockFragment extends Fragment implements AgencyResp
         noInternetText = noInternetMessage.findViewById(R.id.noInternetMessage); // TextView interna
         searchEditText = view.findViewById(R.id.searchEditText);
 
+
+
+
         // Inizializza repository
-        if (requireActivity().getResources().getBoolean(R.bool.debug)) {
-            agencyRepository = new AgencyMockRepository(requireActivity().getApplication(), this);
-        } else {
-            agencyRepository = new AgencyAPIRepository(requireActivity().getApplication(), this);
-        }
+
+        AgencyViewModelFactory factory = new AgencyViewModelFactory(requireActivity().getApplication());
+        viewModel = new ViewModelProvider(this, factory).get(AgencyViewModel.class);
+
 
         // Adapter RecyclerView
         adapter = new AgencyRecyclerAdapter(agencyList, agency -> {
@@ -110,7 +116,7 @@ public class SelectionAgencyStockFragment extends Fragment implements AgencyResp
         });
 
         // Stato iniziale
-        loadingIndicator.setVisibility(View.VISIBLE);
+        //loadingIndicator.setVisibility(View.VISIBLE);
         recyclerView.setVisibility(View.GONE);
 
         if (!NetworkUtil.isInternetAvailable(requireContext())) {
@@ -119,7 +125,7 @@ public class SelectionAgencyStockFragment extends Fragment implements AgencyResp
             loadingIndicator.setVisibility(View.GONE);
         } else {
             noInternetMessage.setVisibility(View.GONE);
-            agencyRepository.getAllAgencies("");
+            viewModel.getAllAgencies("");
         }
     }
 
@@ -161,7 +167,8 @@ public class SelectionAgencyStockFragment extends Fragment implements AgencyResp
         if (query.trim().isEmpty()) {
             agencyList.clear();
             adapter.notifyDataSetChanged();
-            noInternetMessage.setVisibility(View.GONE); // Nascondi messaggio se campo vuoto
+            noInternetMessage.setVisibility(View.GONE);
+
             return;
         }
 
@@ -172,6 +179,39 @@ public class SelectionAgencyStockFragment extends Fragment implements AgencyResp
         }
 
         loadingIndicator.setVisibility(View.VISIBLE);
-        agencyRepository.getAllAgencies(query);
+
+        // Osserva LiveData
+        viewModel.getAllAgencies(query).observe(getViewLifecycleOwner(), result -> {
+            if (result instanceof Result.Loading) {
+                // Mostra lo spinner
+                loadingIndicator.setVisibility(View.VISIBLE);
+                recyclerView.setVisibility(View.GONE);
+                noInternetMessage.setVisibility(View.GONE);
+            } else {
+                // Nascondi lo spinner
+                loadingIndicator.setVisibility(View.GONE);
+
+                if (result instanceof Result.Success) {
+                    List<Agency> agencies = ((Result.Success<List<Agency>>) result).getData();
+                    agencyList.clear();
+                    agencyList.addAll(agencies);
+                    adapter.notifyDataSetChanged();
+
+                    recyclerView.setVisibility(agencies.isEmpty() ? View.GONE : View.VISIBLE);
+
+                    if (agencies.isEmpty()) {
+                        noInternetMessage.setVisibility(View.VISIBLE);
+                        noInternetText.setText(getString(R.string.no_agency_found));
+                    } else {
+                        noInternetMessage.setVisibility(View.GONE);
+                    }
+
+                } else if (result instanceof Result.Error) {
+                    noInternetMessage.setVisibility(View.VISIBLE);
+                    noInternetText.setText("No agencies found");
+                    recyclerView.setVisibility(View.GONE);
+                }
+            }
+        });
     }
 }
