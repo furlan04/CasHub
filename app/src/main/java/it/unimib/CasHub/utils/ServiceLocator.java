@@ -8,6 +8,7 @@ import it.unimib.CasHub.database.CurrencyRoomDatabase;
 import it.unimib.CasHub.database.TransactionDao;
 import it.unimib.CasHub.database.TransactionRoomDatabase;
 import it.unimib.CasHub.repository.ForexRepository;
+import it.unimib.CasHub.repository.agency.AgencyAPIRepository;
 import it.unimib.CasHub.repository.portfolio.PortfolioRepository;
 import it.unimib.CasHub.repository.stock.StockRepository;
 import it.unimib.CasHub.repository.transaction.TransactionRepository;
@@ -19,6 +20,8 @@ import it.unimib.CasHub.service.StockAPIService;
 import it.unimib.CasHub.source.BaseForexDataSource;
 import it.unimib.CasHub.source.ForexAPIDataSource;
 import it.unimib.CasHub.source.ForexMockDataSource;
+import it.unimib.CasHub.source.agency.AgencyDataSource;
+import it.unimib.CasHub.source.agency.BaseAgencyDataSource;
 import it.unimib.CasHub.source.portfolio.PortfolioFirebaseDataSource;
 import it.unimib.CasHub.source.stock.BaseStockDataSource;
 import it.unimib.CasHub.source.stock.StockDataSource;
@@ -116,6 +119,13 @@ public class ServiceLocator {
         String apiKey = application.getString(R.string.sma_api_key);
         BaseStockDataSource dataSource = new StockDataSource(apiService, apiKey);
         return new StockRepository(dataSource);
+    }
+
+    public AgencyAPIRepository getAgencyRepository(Application application) {
+        AgencyAPIService apiService = getAgencyAPIService();
+        String apiKey = application.getString(R.string.stocks_api_key);
+        BaseAgencyDataSource dataSource = new AgencyDataSource(apiService, apiKey);
+        return new AgencyAPIRepository(dataSource);
     }
 
     public TransactionRepository getTransactionRepository(Application application, boolean debugMode) {

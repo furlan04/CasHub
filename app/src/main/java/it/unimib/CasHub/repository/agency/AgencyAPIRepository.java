@@ -1,65 +1,45 @@
 package it.unimib.CasHub.repository.agency;
 
-import android.app.Application;
-import android.util.Log;
-
+import androidx.lifecycle.MutableLiveData;
 import java.util.List;
 
-import it.unimib.CasHub.R;
 import it.unimib.CasHub.model.Agency;
-import it.unimib.CasHub.service.AgencyAPIService;
-import it.unimib.CasHub.utils.ServiceLocator;
+import it.unimib.CasHub.model.Result;
+import it.unimib.CasHub.source.agency.BaseAgencyDataSource;
 import it.unimib.CasHub.source.agency.AgencyResponseCallback;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
-public class AgencyAPIRepository implements IAgencyRepository {
-    private final Application application;
-    private final AgencyResponseCallback responseCallback;
-    private final AgencyAPIService apiService;
-    private final String apiKey;
-    public AgencyAPIRepository(Application application, AgencyResponseCallback callback) {
-        this.application = application;
-        this.responseCallback = callback;
+public class AgencyAPIRepository implements IAgencyRepository, AgencyResponseCallback {
 
-        // Prendi l'API key dal file resources (gradle resValue)
-        this.apiKey = application.getString(R.string.stocks_api_key);
+    private final BaseAgencyDataSource agencyDataSource;
+    // Usiamo un singolo LiveData per i risultati delle agenzie
+    private final MutableLiveData<Result<List<Agency>>> agencyLiveData;
 
-        // Recuperi il servizio Retrofit tramite il ServiceLocator
-        this.apiService = ServiceLocator.getInstance().getAgencyAPIService();
+    public AgencyAPIRepository(BaseAgencyDataSource agencyDataSource) {
+        this.agencyDataSource = agencyDataSource;
+        this.agencyDataSource.setCallback(this);
+        this.agencyLiveData = new MutableLiveData<>();
     }
+
     @Override
-    public void getAllAgencies(String query){
-        // Creo la chiamata API con il parametro query (e l'API key)
-        Call<List<Agency>> call = apiService.getAgencies(query, apiKey);
+    public MutableLiveData<Result<List<Agency>>> getAllAgencies(String query) {
+        // Avviamo la chiamata asincrona
+        agencyDataSource.getAllAgencies(query);
 
-        Log.e("API_DEBUG", "URL: " + call.request().url());
+        // Restituiamo il riferimento al LiveData che verrà aggiornato dalle callback
+        return agencyLiveData;
+    }
 
-        // Chiamata async
-        call.enqueue(new Callback<List<Agency>>() {
-            @Override
-            public void onResponse(Call<List<Agency>> call, Response<List<Agency>> response) {
-                Log.e("API_DEBUG", "Response code: " + response.code());
-                Log.e("API_DEBUG", "Body: " + response.body());
+    // Callback chiamata dalla DataSource in caso di successo
+    @Override
+    public void onSuccess(List<Agency> agencyList, long lastUpdate) {
+        if (agencyList != null) {
+            agencyLiveData.postValue(new Result.Success<>(agencyList));
+        }
+    }
 
-                if (response.isSuccessful() && response.body() != null) {
-                    List<Agency> agencies = response.body();
-                    if (agencies != null && !agencies.isEmpty()) {
-                        responseCallback.onSuccess(agencies, System.currentTimeMillis());
-                    } else {
-                        responseCallback.onFailure("Nessun risultato");
-                    }
-                } else {
-                    responseCallback.onFailure("Errore HTTP: " + response.code() + " - " + response.message());
-                }
-
-            }
-
-            @Override
-            public void onFailure(Call<List<Agency>> call, Throwable t) {
-                responseCallback.onFailure("Errore rete: " + t.getMessage());
-            }
-        });
+    // Callback chiamata dalla DataSource in caso di errore
+    @Override
+    public void onFailure(String errorMessage) {
+        agencyLiveData.postValue(new Result.Error<>(errorMessage));
     }
 }
