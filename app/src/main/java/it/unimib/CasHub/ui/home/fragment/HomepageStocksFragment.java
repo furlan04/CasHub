@@ -31,7 +31,6 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +38,7 @@ import java.util.List;
 import it.unimib.CasHub.R;
 import it.unimib.CasHub.adapter.PortfolioAdapter;
 import it.unimib.CasHub.adapter.SellStockAdapter;
+import it.unimib.CasHub.model.ChartData;
 import it.unimib.CasHub.model.PortfolioStock;
 import it.unimib.CasHub.model.Result;
 import it.unimib.CasHub.ui.home.viewmodel.HomepageStocksViewModel;
@@ -59,7 +59,6 @@ public class HomepageStocksFragment extends Fragment {
     private LineChart portfolioChart;
     private static final String TAG = "HomepageStocksFragment";
     private HomepageStocksViewModel viewModel;
-    private double lastPortfolioValue = 0.0;
     private final List<PortfolioStock> portfolioStocks = new ArrayList<>();
 
     @Nullable
@@ -173,14 +172,6 @@ public class HomepageStocksFragment extends Fragment {
     private void handlePortfolio(List<PortfolioStock> stocks) {
         this.portfolioStocks.clear();
         this.portfolioStocks.addAll(stocks);
-        double totalCurrentValue = 0.0;
-
-        for (PortfolioStock stock : stocks) {
-            if (stock != null) {
-                totalCurrentValue += stock.getQuantity() * stock.getAveragePrice();
-            }
-        }
-
         progressBar.setVisibility(View.GONE);
 
         if (stocks.isEmpty()) {
@@ -193,44 +184,29 @@ public class HomepageStocksFragment extends Fragment {
             tvEmpty.setVisibility(View.GONE);
             recyclerViewPortfolio.setVisibility(View.VISIBLE);
             adapter.setStocks(stocks);
-
-            textViewTitoli.setText(String.format("€%.2f", totalCurrentValue));
-
-            double change = 0.0;
-            double changePercent = 0.0;
-            if (lastPortfolioValue > 0) {
-                change = totalCurrentValue - lastPortfolioValue;
-                changePercent = (change / lastPortfolioValue) * 100;
-            }
-
-            String changeText = String.format("€%.2f (%.2f%%)", change, changePercent);
-            textViewRendimentoPortafoglio.setText(changeText);
-
-            if (change >= 0) {
-                textViewRendimentoPortafoglio.setTextColor(Color.parseColor("#4CAF50"));
-            } else {
-                textViewRendimentoPortafoglio.setTextColor(Color.parseColor("#F44336"));
-            }
-
-            viewModel.savePortfolioSnapshot(totalCurrentValue);
+            viewModel.refreshPortfolioStocks(stocks);
+            adapter.notifyDataSetChanged();
         }
     }
 
     private void observePortfolioHistory() {
         viewModel.getPortfolioHistory().observe(getViewLifecycleOwner(), result -> {
             if (result instanceof Result.Success) {
-                List<DataSnapshot> history = ((Result.Success<List<DataSnapshot>>) result).getData();
-                handlePortfolioHistory(history);
+                ChartData chartData = ((Result.Success<ChartData>) result).getData();
+                handlePortfolioHistory(chartData);
             } else if (result instanceof Result.Error) {
                 Log.e(TAG, "Error loading chart: " + ((Result.Error) result).getMessage());
             }
         });
     }
 
-    private void handlePortfolioHistory(List<DataSnapshot> history) {
+    private void handlePortfolioHistory(ChartData chartData) {
         if (!isAdded() || getContext() == null) return;
 
-        if (history.isEmpty()) {
+        List<String> dates = chartData.getDates();
+        List<Float> prices = chartData.getPrices();
+
+        if (prices.isEmpty()) {
             portfolioChart.setNoDataText("Dati storici non disponibili");
             portfolioChart.clear();
             portfolioChart.invalidate();
@@ -238,45 +214,30 @@ public class HomepageStocksFragment extends Fragment {
         }
 
         List<Entry> entries = new ArrayList<>();
-        List<String> labels = new ArrayList<>();
+        for (int i = 0; i < prices.size(); i++) {
+            entries.add(new Entry(i, prices.get(i)));
+        }
 
-        if (history.size() > 1) {
-            DataSnapshot previousSnapshot = history.get(history.size() - 2);
-            Double previousValue = previousSnapshot.getValue(Double.class);
-            if (previousValue != null) {
-                lastPortfolioValue = previousValue;
-            }
-        } else if (history.size() == 1) {
-            DataSnapshot firstSnapshot = history.get(0);
-            Double firstValue = firstSnapshot.getValue(Double.class);
-            if (firstValue != null) {
-                lastPortfolioValue = firstValue;
+        float lastPortfolioValue = prices.get(prices.size() - 1);
+        textViewTitoli.setText(String.format("€%.2f", lastPortfolioValue));
+
+        double change = 0.0;
+        double changePercent = 0.0;
+        if (prices.size() > 1) {
+            float previousValue = prices.get(prices.size() - 2);
+            change = lastPortfolioValue - previousValue;
+            if (previousValue > 0) {
+                changePercent = (change / previousValue) * 100;
             }
         }
 
-        int index = 0;
-        for (DataSnapshot child : history) {
-            String timeKey = child.getKey();
-            Double value = child.getValue(Double.class);
+        String changeText = String.format("€%.2f (%.2f%%)", change, changePercent);
+        textViewRendimentoPortafoglio.setText(changeText);
 
-            if (value != null && timeKey != null) {
-                entries.add(new Entry(index, value.floatValue()));
-
-                String[] parts = timeKey.split("-");
-                if (parts.length == 3) {
-                    labels.add(parts[2] + "/" + parts[1]);
-                } else {
-                    labels.add(timeKey);
-                }
-                index++;
-            }
-        }
-
-        if (entries.isEmpty()) {
-            portfolioChart.setNoDataText("Nessun dato disponibile");
-            portfolioChart.clear();
-            portfolioChart.invalidate();
-            return;
+        if (change >= 0) {
+            textViewRendimentoPortafoglio.setTextColor(Color.parseColor("#4CAF50"));
+        } else {
+            textViewRendimentoPortafoglio.setTextColor(Color.parseColor("#F44336"));
         }
 
         LineDataSet dataSet = new LineDataSet(entries, "Valore Portafoglio");
@@ -293,7 +254,7 @@ public class HomepageStocksFragment extends Fragment {
         portfolioChart.setData(lineData);
 
         XAxis xAxis = portfolioChart.getXAxis();
-        xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
+        xAxis.setValueFormatter(new IndexAxisValueFormatter(dates));
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setGranularity(1f);
         xAxis.setTextColor(Color.WHITE);

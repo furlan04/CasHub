@@ -20,9 +20,13 @@ public class HomepageTransactionViewModel extends ViewModel {
 
     public MutableLiveData<Result<List<TransactionEntity>>> getTransactions() {
         if (transactionsLiveData == null) {
-            transactionsLiveData = transactionRepository.getTransactions();
+            fetchTransactions();
         }
         return transactionsLiveData;
+    }
+
+    void fetchTransactions() {
+        transactionsLiveData = transactionRepository.getTransactions();
     }
 
     public void insertTransaction(TransactionEntity transaction) {

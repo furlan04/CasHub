@@ -12,4 +12,5 @@ public interface PortfolioResponseCallback {
     void onStockRemoved();
     void onStockUpdated();
     void onHistorySuccess(List<DataSnapshot> history);
+    void onHistoryFailure(Exception exception);
 }

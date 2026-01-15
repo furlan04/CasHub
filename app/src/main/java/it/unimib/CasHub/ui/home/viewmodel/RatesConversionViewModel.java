@@ -2,6 +2,7 @@ package it.unimib.CasHub.ui.home.viewmodel;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import java.util.ArrayList;
@@ -14,12 +15,20 @@ import it.unimib.CasHub.repository.forex.ForexRepository;
 
 public class RatesConversionViewModel extends ViewModel {
     private final ForexRepository forexRepository;
+    private LiveData<Result<List<TransactionEntity>>> transactionsLiveData;
+
 
     public RatesConversionViewModel(ForexRepository forexRepository) {
         this.forexRepository = forexRepository;
     }
 
     public LiveData<Result<List<TransactionEntity>>> getBasedList(
+            List<TransactionEntity> transactions, String base) {
+        calculateGetBasedList(transactions, base);
+        return transactionsLiveData;
+    }
+
+    public void calculateGetBasedList(
             List<TransactionEntity> transactions, String base) {
 
         MediatorLiveData<Result<List<TransactionEntity>>> result = new MediatorLiveData<>();
@@ -54,6 +63,6 @@ public class RatesConversionViewModel extends ViewModel {
             }
         });
 
-        return result;
+        transactionsLiveData = result;
     }
 }

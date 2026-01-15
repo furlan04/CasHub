@@ -7,7 +7,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
-import com.google.firebase.database.DataSnapshot;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,6 +15,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import it.unimib.CasHub.model.ChartData;
 import it.unimib.CasHub.model.PortfolioStock;
 import it.unimib.CasHub.model.Result;
 import it.unimib.CasHub.model.StockQuote;
@@ -32,6 +34,10 @@ public class HomepageStocksViewModel extends ViewModel {
 
     private final ITransactionRepository transactionRepository;
     private final MutableLiveData<String> snackbarMessage = new MutableLiveData<>();
+    private MutableLiveData<Result<List<PortfolioStock>>> portfolioLiveData;
+    private MutableLiveData<Result<ChartData>> portfolioHistoryLiveData;
+
+    // <TAG>
     private static final String TAG = "HomepageStocksViewModel";
 
     public HomepageStocksViewModel(Application application, IPortfolioRepository portfolioRepository, IStockRepository stockRepository, ITransactionRepository transactionRepository) {
@@ -42,11 +48,21 @@ public class HomepageStocksViewModel extends ViewModel {
     }
 
     public LiveData<Result<List<PortfolioStock>>> getPortfolio() {
-        return portfolioRepository.getPortfolio();
+        fetchPortfolio();
+        return portfolioLiveData;
     }
 
-    public LiveData<Result<List<DataSnapshot>>> getPortfolioHistory() {
-        return portfolioRepository.getPortfolioHistory();
+    void fetchPortfolio(){
+        portfolioLiveData = portfolioRepository.getPortfolio();
+    }
+
+    public LiveData<Result<ChartData>> getPortfolioHistory() {
+        fetchPortfolioHistory();
+        return portfolioHistoryLiveData;
+    }
+
+    void fetchPortfolioHistory() {
+        portfolioHistoryLiveData = portfolioRepository.getPortfolioHistory();
     }
 
     public LiveData<String> getSnackbarMessage() {
