@@ -18,6 +18,9 @@ public class StockDetailsViewModel extends ViewModel {
     private final IStockRepository stockRepository;
     private final IPortfolioRepository portfolioRepository;
     private final ITransactionRepository transactionRepository;
+    private MutableLiveData<Result<StockQuote>> stockQuoteLiveData;
+    private MutableLiveData<Result<ChartData>> chartDataLiveData;
+
 
     public StockDetailsViewModel(IStockRepository stockRepository, IPortfolioRepository portfolioRepository, ITransactionRepository transactionRepository) {
         this.stockRepository = stockRepository;
@@ -26,11 +29,25 @@ public class StockDetailsViewModel extends ViewModel {
     }
 
     public LiveData<Result<StockQuote>> getStockQuote(String symbol) {
-        return stockRepository.getStockQuote(symbol);
+        if (stockQuoteLiveData == null){
+            fetchStockQuote(symbol);
+        }
+        return stockQuoteLiveData;
+    }
+
+    void fetchStockQuote(String symbol) {
+        stockQuoteLiveData = stockRepository.getStockQuote(symbol);
     }
 
     public LiveData<Result<ChartData>> getChartData(String symbol) {
-        return stockRepository.getWeeklyChart(symbol);
+        if (chartDataLiveData == null){
+            fetchChartData(symbol);
+        }
+        return chartDataLiveData;
+    }
+
+    void fetchChartData(String symbol) {
+        chartDataLiveData = stockRepository.getWeeklyChart(symbol);
     }
 
     public void addStockToPortfolio(PortfolioStock stock) {

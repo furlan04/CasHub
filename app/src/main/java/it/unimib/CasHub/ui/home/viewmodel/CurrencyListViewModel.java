@@ -20,8 +20,12 @@ public class CurrencyListViewModel extends ViewModel {
 
     public LiveData<Result<List<CurrencyEntity>>> getCurrencies() {
         if (currencies == null) {
-            currencies = forexRepository.fetchCurrencies();
+            fetchCurrencies();
         }
         return currencies;
+    }
+
+    void fetchCurrencies() {
+        currencies = forexRepository.fetchCurrencies();
     }
 }

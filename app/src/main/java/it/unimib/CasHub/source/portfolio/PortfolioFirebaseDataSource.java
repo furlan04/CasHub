@@ -132,7 +132,7 @@ public class PortfolioFirebaseDataSource extends BasePortfolioDataSource {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        callback.onPortfolioFailure(error.toException());
+                        callback.onHistoryFailure(error.toException());
                     }
                 });
     }

@@ -8,6 +8,7 @@ import com.google.firebase.database.DataSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
+import it.unimib.CasHub.model.ChartData;
 import it.unimib.CasHub.model.PortfolioStock;
 import it.unimib.CasHub.model.Result;
 import it.unimib.CasHub.source.portfolio.BasePortfolioDataSource;
@@ -16,7 +17,7 @@ import it.unimib.CasHub.source.portfolio.PortfolioResponseCallback;
 public class PortfolioRepository implements IPortfolioRepository, PortfolioResponseCallback {
 
     private final MutableLiveData<Result<List<PortfolioStock>>> portfolioLiveData;
-    private final MutableLiveData<Result<List<DataSnapshot>>> historyLiveData;
+    private final MutableLiveData<Result<ChartData>> historyLiveData;
     private final BasePortfolioDataSource remoteDataSource;
     private final String userId;
 
@@ -45,7 +46,7 @@ public class PortfolioRepository implements IPortfolioRepository, PortfolioRespo
     }
 
     @Override
-    public MutableLiveData<Result<List<DataSnapshot>>> getPortfolioHistory() {
+    public MutableLiveData<Result<ChartData>> getPortfolioHistory() {
         remoteDataSource.getPortfolioHistory();
         return historyLiveData;
     }
@@ -95,6 +96,26 @@ public class PortfolioRepository implements IPortfolioRepository, PortfolioRespo
 
     @Override
     public void onHistorySuccess(List<DataSnapshot> history) {
-        historyLiveData.postValue(new Result.Success<>(history));
+        List<String> dates = new ArrayList<>();
+        List<Float> prices = new ArrayList<>();
+        for (DataSnapshot snapshot : history) {
+            String timeKey = snapshot.getKey();
+            Double value = snapshot.getValue(Double.class);
+            if (timeKey != null && value != null) {
+                String[] parts = timeKey.split("-");
+                if (parts.length == 3) {
+                    dates.add(parts[2] + "/" + parts[1]);
+                } else {
+                    dates.add(timeKey);
+                }
+                prices.add(value.floatValue());
+            }
+        }
+        historyLiveData.postValue(new Result.Success<>(new ChartData(dates, prices)));
+    }
+
+    @Override
+    public void onHistoryFailure(Exception exception) {
+        historyLiveData.postValue(new Result.Error<>(exception.getMessage()));
     }
 }
