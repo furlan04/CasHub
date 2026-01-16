@@ -30,7 +30,6 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 app:icon="@drawable/arrow_left"
-                android:backgroundTint="?attr/colorSurfaceVariant"
                 android:visibility="gone" />
 
             <FrameLayout
@@ -55,12 +54,10 @@
                 style="@style/Widget.Material3.Button.IconButton"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                app:icon="@drawable/arrow_right"
-                android:backgroundTint="?attr/colorSurfaceVariant" />
+                app:icon="@drawable/arrow_right"/>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- CARD FILTRI -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -105,7 +102,6 @@
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- RECYCLER VIEW -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewTransactions"
         android:layout_width="match_parent"
@@ -114,14 +110,30 @@
         android:clipToPadding="false"
         android:padding="8dp" />
 
-    <!-- BOTTONE AGGIUNGI -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnAddTransaction"
         style="@style/Widget.Material3.Button"
+
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:layout_gravity="center_horizontal"
-        android:text="Add Transaction"
-        android:layout_margin="12dp" />
+
+        android:layout_margin="16dp"
+        android:text="Add transaction"
+        android:textAllCaps="false"
+
+        app:icon="@drawable/add_icon"
+        app:iconTint="?attr/colorOnPrimary"
+        app:iconPadding="12dp"
+        app:iconGravity="textStart"
+
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+
+        app:cornerRadius="20dp"
+        app:backgroundTint="?attr/colorPrimary"
+        android:textColor="?attr/colorOnPrimary"
+        app:elevation="2dp"/>
+
 
 </LinearLayout>
