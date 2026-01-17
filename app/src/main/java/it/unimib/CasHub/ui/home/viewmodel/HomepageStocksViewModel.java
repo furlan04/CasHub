@@ -127,10 +127,12 @@ public class HomepageStocksViewModel extends ViewModel {
                             allStocks.add(stock);
 
                         } catch (NumberFormatException e) {
+                            allStocks.add(stock);
                             Log.e(TAG, "Error parsing price for " + stock.getSymbol(), e);
                         }
 
                     } else if (result instanceof Result.Error) {
+                        allStocks.add(stock);
                         Log.e(TAG, "Error fetching " + stock.getSymbol() + ": "
                                 + ((Result.Error<?>) result).getMessage());
                     }
