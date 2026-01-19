@@ -31,6 +31,8 @@ import it.unimib.CasHub.utils.ServiceLocator;
 
 public class HomeActivity extends AppCompatActivity {
 
+    private final android.os.Handler navigationHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,6 +91,24 @@ public class HomeActivity extends AppCompatActivity {
                 findFragmentById(R.id.fragmentContainerView);
 
         NavController navController = navHostFragment.getNavController();
+
+
+
+        navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
+            toolbar.post(() -> {
+                for (int i = 0; i < toolbar.getChildCount(); i++) {
+                    android.view.View child = toolbar.getChildAt(i);
+                    if (child instanceof android.widget.ImageButton) {
+                        child.setEnabled(false);
+                        navigationHandler.postDelayed(() -> {
+                            child.setEnabled(true);
+                        }, 1500);
+                        break;
+                    }
+                }
+            });
+        });
+
 
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigation);
 

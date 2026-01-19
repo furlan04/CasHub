@@ -49,7 +49,7 @@ public class StockDataSource extends BaseStockDataSource {
                     if (stockResponse.getGlobalQuote() != null && stockResponse.getGlobalQuote().getSymbol() != null) {
                         callback.onStockDetailsSuccess(stockResponse.getGlobalQuote());
                     } else {
-                        callback.onStockDetailsFailure(symbol, "Dati non disponibili per questo simbolo");
+                        callback.onStockDetailsFailure(symbol, call.request().url().toString());
                     }
                 } else {
                     callback.onStockDetailsFailure(symbol, "Errore nella risposta API: " + response.code());
@@ -108,7 +108,7 @@ public class StockDataSource extends BaseStockDataSource {
                             callback.onChartCallFailure("Nessun dato disponibile per il grafico");
                         }
                     } else {
-                        callback.onChartCallFailure("Rate limit raggiunto. Riprova tra qualche minuto.");
+                        callback.onChartCallFailure(call.request().url().toString());
                     }
                 } else {
                     if (response.code() == 429) {
