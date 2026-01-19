@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">CasHub</string>
     <string name="next">Prossimo</string>
     <string name="previous">Precedente</string>
     <string name="welcome">Benvenuto</string>
@@ -22,6 +21,7 @@
     <string name="home_label">Casa</string>
     <string name="Monthly_expenses">Spese mensili</string>
     <string name="Graph">Grafico</string>
+    <string name="error_invalid_user">Utente invalido</string>
     <string name="hello_blank_fragment">Ciao Frammento Bianco</string>
     <string name="nickname_too_short">Il nickname deve avere almeno 3 caratteri</string>
     <string name="check_email">Controlla la tua email</string>
@@ -47,4 +47,27 @@
     <string name="Quantity">Quantità</string>
     <string name="no_agency_found">Nessuna agenzia trovata</string>
     <string name="search_agency">Cerca agenzia</string>
+    <string name="name">Nome</string>
+    <string name="Amount">Quantità</string>
+    <string name="Type">Tipo</string>
+    <string name="Currency">Valuta</string>
+    <string name="CompanyName">Nome Azienda</string>
+    <string name="currentValue">Valore Corrente</string>
+    <string name="AveragePrice">Prezzo Medio</string>
+    <string name="ExchangeInfo">Informazioni Cambio</string>
+    <string name="error_credentials">Controlla le credenziali</string>
+    <string name="error_email_login">Controlla la mail</string>
+    <string name="error_password_login">La password deve avere al massimo 8 caratteri</string>
+    <string name="error_retrieving_news">C\'è stato un errore con gli aggiornamenti</string>
+    <string name="error_no_internet">Nessuna connessione internet</string>
+    <string name="error_collision_user">L\'email è già stata registrata</string>
+    <string name="error_unexpected">Errore inaspettato</string>
+    <string name="Symbol">Valuta</string>
+    <string name="Exchange">Scambio</string>
+    <string name="AddToPortfolio">Aggiungi al portafoglio</string>
+    <string name="balance">Bilancio</string>
+    <string name="EmptyPortfolio">Portafoglio vuoto</string>
+    <string name="sellAction">Vendi azioni</string>
+    <string name="buyAction">Compra azioni</string>
+    <string name="actionMenu">Menù azione</string>
 </resources>

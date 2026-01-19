@@ -57,7 +57,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Hai già un account?"
+                    android:text="@string/already_have_account"
                     android:textSize="15sp"
                     android:textColor="#555555"
                     android:gravity="end"
@@ -146,6 +146,5 @@
             android:textColor="@color/md_theme_onSurface"
             app:cornerRadius="28dp"
             android:layout_marginBottom="20dp"/>
-
     </LinearLayout>
 </ScrollView>

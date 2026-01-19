@@ -101,4 +101,23 @@
     <string name="remove_transaction">Remove Transaction</string>
     <string name="no_agency_found">No agencies found</string>
     <string name="search_agency">Search agency</string>
+    <string name="name">Name</string>
+    <string name="Amount">Amount</string>
+    <string name="Type">Type</string>
+    <string name="Currency">Currency</string>
+    <string name="CompanyName">Company Name</string>
+    <string name="currentValue">Current Value</string>
+    <string name="QuantityNumber" translatable="false">Quantity Number</string>
+    <string name="AveragePrice">medium Price</string>
+    <string name="AveragePriceNumber" translatable="false">AveragePriceNumber</string>
+    <string name="ExchangeInfo">ExchangeInfo</string>
+    <string name="Symbol">Symbol</string>
+    <string name="Exchange">Exchange</string>
+    <string name="AddToPortfolio">Add to your portfolio</string>
+    <string name="balance">balance</string>
+    <string name="EmptyPortfolio">Empty Portfolio</string>
+    <string name="sellAction">sell Action</string>
+    <string name="buyAction">buy Action</string>
+    <string name="actionMenu">action Menu</string>
+    <string name="ExchangeFull" translatable="false">Exchange Full</string>
 </resources>

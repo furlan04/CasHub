@@ -31,7 +31,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Name"
+                android:text="@string/name"
                 android:textStyle="bold"
                 android:textSize="16sp"
                 android:textColor="?attr/colorOnSurface"/>
@@ -59,7 +59,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Amount"
+                android:text="@string/Amount"
                 android:textColor="?attr/colorOnSurface"/>
 
             <TextView
@@ -67,7 +67,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Type"
+                android:text="@string/Type"
                 android:textColor="?attr/colorOnSurfaceVariant"/>
 
             <TextView
@@ -75,7 +75,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Currency"
+                android:text="@string/Currency"
                 android:textColor="?attr/colorOnSurfaceVariant"/>
         </LinearLayout>
 

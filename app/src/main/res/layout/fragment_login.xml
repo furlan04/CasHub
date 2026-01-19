@@ -47,7 +47,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Non hai un account?"
+                    android:text="@string/not_account"
                     android:textSize="15sp"
                     android:textColor="#555555"
                     android:paddingEnd="8dp"/>
@@ -57,7 +57,7 @@
                     style="@style/Widget.Material3.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Registrati"
+                    android:text="@string/register"
                     android:textSize="15sp"
                     android:textStyle="bold"
                     android:minWidth="0dp"

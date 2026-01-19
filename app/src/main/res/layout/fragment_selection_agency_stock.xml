@@ -7,7 +7,6 @@
     android:layout_height="match_parent"
     tools:context=".ui.home.fragment.SelectionAgencyStockFragment">
 
-    <!-- Search bar -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/searchInputLayout"
         android:layout_width="0dp"
@@ -25,7 +24,6 @@
             android:inputType="text"/>
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="0dp"
@@ -37,7 +35,6 @@
         android:paddingTop="16dp"
         android:clipToPadding="false"/>
 
-    <!-- Loading indicator -->
     <com.google.android.material.loadingindicator.LoadingIndicator
         style="@style/Widget.Material3.LoadingIndicator.Contained"
         android:id="@+id/loadingIndicator"
@@ -49,7 +46,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Messaggio di errore ricerca -->
     <TextView
         android:id="@+id/searchErrorText"
         android:layout_width="match_parent"
@@ -65,7 +61,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Messaggio di assenza rete -->
     <TextView
         android:id="@+id/noInternetMessage"
         android:layout_width="match_parent"

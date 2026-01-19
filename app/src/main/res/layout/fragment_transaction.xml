@@ -11,7 +11,6 @@
         android:orientation="vertical"
         android:padding="@dimen/margin">
 
-        <!-- CARD CONTENITORE -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -26,7 +25,6 @@
                 android:orientation="vertical"
                 android:padding="@dimen/margin">
 
-                <!-- BOTTONI ENTRATA / USCITA -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -56,7 +54,6 @@
                         android:textAppearance="@style/FontMainMedium" />
                 </LinearLayout>
 
-                <!-- CAMPO NOME -->
                 <com.google.android.material.textfield.TextInputLayout
                     style="?attr/textInputOutlinedStyle"
                     android:layout_width="match_parent"
@@ -72,7 +69,6 @@
                         android:textAppearance="@style/FontMainLarge" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- QUANTITÀ + SPINNER VALUTA -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -104,7 +100,6 @@
                         android:layout_marginStart="@dimen/margin" />
                 </LinearLayout>
 
-                <!-- TITOLO CATEGORIA -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -113,7 +108,6 @@
                     android:textAppearance="@style/FontMainMedium"
                     android:textStyle="bold" />
 
-                <!-- SPINNER CATEGORIA -->
                 <Spinner
                     android:id="@+id/spinnerCategoria"
                     android:layout_width="match_parent"

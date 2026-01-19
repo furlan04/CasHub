@@ -7,12 +7,10 @@
     android:layout_height="match_parent"
     tools:context=".ui.home.fragment.HomepageStocksFragment">
 
-    <!-- CONTENUTO PRINCIPALE -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- VALORE TOTALE -->
         <TextView
             android:id="@+id/textViewTitoli"
             android:layout_width="wrap_content"
@@ -24,8 +22,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
-
-        <!-- RENDIMENTO PORTAFOGLIO -->
+>
         <TextView
             android:id="@+id/textViewRendimentoPortafoglio"
             android:layout_width="wrap_content"
@@ -38,7 +35,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- WRAPPER CARDVIEW CON ANGOLI SMUSSATI -->
         <androidx.cardview.widget.CardView
             android:id="@+id/cardViewChart"
             android:layout_width="0dp"
@@ -60,7 +56,6 @@
 
         </androidx.cardview.widget.CardView>
 
-        <!-- RECYCLERVIEW CON SCROLL INDIPENDENTE -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerViewPortfolio"
             android:layout_width="0dp"
@@ -75,12 +70,11 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- TESTO VUOTO -->
         <TextView
             android:id="@+id/tvEmptyPortfolio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Nessuna azione in portafoglio"
+            android:text="@string/EmptyPortfolio"
             android:textSize="16sp"
             android:textColor="@android:color/darker_gray"
             android:visibility="gone"
@@ -89,7 +83,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- LOADING -->
         <ProgressBar
             android:id="@+id/progressBar"
             android:layout_width="wrap_content"
@@ -102,7 +95,6 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- OVERLAY SCURO (quando FAB espanso) -->
     <View
         android:id="@+id/fabOverlay"
         android:layout_width="match_parent"
@@ -112,7 +104,6 @@
         android:clickable="true"
         android:focusable="true" />
 
-    <!-- MINI FAB RIMUOVI (ROSSO) -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabRemove"
         android:layout_width="wrap_content"
@@ -126,7 +117,7 @@
         app:backgroundTint="#F44336"
         app:tint="@android:color/white"
         android:visibility="gone"
-        android:contentDescription="Vendi titolo" />
+        android:contentDescription="@string/sellAction" />
 
     <TextView
         android:id="@+id/tvRemove"
@@ -135,7 +126,7 @@
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="68dp"
         android:layout_marginBottom="168dp"
-        android:text="Vendi titolo"
+        android:text="@string/sellAction"
         android:textColor="@android:color/white"
         android:textStyle="bold"
         android:textSize="14sp"
@@ -145,7 +136,6 @@
         android:shadowRadius="4"
         android:visibility="gone" />
 
-    <!-- MINI FAB AGGIUNGI (VERDE) -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAdd"
         android:layout_width="wrap_content"
@@ -159,7 +149,7 @@
         app:backgroundTint="#4CAF50"
         app:tint="@android:color/white"
         android:visibility="gone"
-        android:contentDescription="Compra titolo" />
+        android:contentDescription="@string/buyAction" />
 
     <TextView
         android:id="@+id/tvAdd"
@@ -168,7 +158,7 @@
         android:layout_gravity="bottom|end"
         android:layout_marginEnd="68dp"
         android:layout_marginBottom="113dp"
-        android:text="Compra titolo"
+        android:text="buyAction"
         android:textColor="@android:color/white"
         android:textStyle="bold"
         android:textSize="14sp"
@@ -178,7 +168,6 @@
         android:shadowRadius="4"
         android:visibility="gone" />
 
-    <!-- FAB PRINCIPALE (BLU SCURO) -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabMain"
         android:layout_width="wrap_content"
@@ -188,6 +177,5 @@
         android:src="@android:drawable/ic_input_add"
         app:backgroundTint="#1E3A5F"
         app:tint="@android:color/white"
-        android:contentDescription="Menu azioni" />
-
+        android:contentDescription="@string/actionMenu" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
