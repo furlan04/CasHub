@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
@@ -330,6 +331,7 @@ public class HomepageTransactionFragment extends Fragment
         legend.setVerticalAlignment(Legend.LegendVerticalAlignment.CENTER);
         legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.RIGHT);
         legend.setOrientation(Legend.LegendOrientation.VERTICAL);
+        legend.setTextColor(ContextCompat.getColor(getContext(), R.color.md_theme_onSurface));
 
         chart.animateY(1200, Easing.EaseInOutQuad);
         chart.invalidate();

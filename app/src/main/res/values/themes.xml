@@ -56,6 +56,8 @@
 
     <style name="RoundedDialogStyle" parent="Theme.MaterialComponents.Light.Dialog.Alert">
         <item name="android:windowBackground">@drawable/dialog_rounded_background</item>
+        <item name="android:textColor">@color/md_theme_onSurface</item>
+        <item name="android:colorForeground">@color/md_theme_onSurface</item>
         <item name="colorPrimary">#1E3A5F</item>
     </style>
 
