@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
+    android:color="@color/md_theme_background"
     android:paddingVertical="12dp"
     android:paddingHorizontal="4dp">
 
@@ -16,6 +17,7 @@
             android:id="@+id/tvName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:color="@color/md_theme_onSurface"
             android:textStyle="bold"
             android:textSize="15sp"
             android:maxLines="1"/>
@@ -24,6 +26,7 @@
             android:id="@+id/tvMeta"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:color="@color/md_theme_onSurface"
             android:textSize="12sp"
             android:alpha="0.8"
             android:maxLines="1"/>
@@ -34,6 +37,7 @@
         android:id="@+id/tvValue"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:color="@color/md_theme_onSurface"
         android:textStyle="bold"
         android:textSize="14sp"/>
 </LinearLayout>

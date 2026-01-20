@@ -15,6 +15,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
@@ -385,6 +386,7 @@ public class HomepageStocksFragment extends Fragment {
         LinearLayout layout = new LinearLayout(requireContext());
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(60, 40, 60, 20);
+        layout.setBackgroundColor(ContextCompat.getColor(getContext(), R.color.md_theme_background));
 
         String currencySymbol = getCurrencySymbol(stock.getCurrency());
 
@@ -435,7 +437,7 @@ public class HomepageStocksFragment extends Fragment {
 
             double sellValue = q * price;
             tvSellValue.setText(getString(R.string.sell_value, currencySymbol, String.format("%.2f", sellValue)));
-            tvSellValue.setTextColor(Color.parseColor("#B0B0B0"));
+            tvSellValue.setTextColor(ContextCompat.getColor(getContext(), R.color.md_theme_onSurface));
         };
 
         updateSellValue.run();
