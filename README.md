@@ -18,7 +18,9 @@ Per il corretto funzionamento del progetto è necessario ottenere le seguenti AP
 ```bash
 sma_api_key="..."      # https://www.alphavantage.co
 stocks_api_key="..."  # https://financialmodelingprep.com
-
+REALTIME_DB_URL="..."
+```
+Aggiungere la propria SHA-1 in Firebase -> Impostazioni progetto
 
 
 # Guida Repository - Le Basi
