@@ -1,3 +1,26 @@
+# 📌 Informazioni Progetto
+
+## 👥 Nome Gruppo
+**muznet**
+
+## 👤 Componenti
+- **Francesco Bagnato** — 914521  
+- **Simone Cambiaghi** — 909462  
+- **Davide Casati** — 909547  
+- **Gabriele Furlan** — 909389  
+
+---
+
+## 🔑 API Key
+
+Per il corretto funzionamento del progetto è necessario ottenere le seguenti API key:
+
+```bash
+sma_api_key="..."      # https://www.alphavantage.co
+stocks_api_key="..."  # https://financialmodelingprep.com
+
+
+
 # Guida Repository - Le Basi
 
 ## 🌳 Struttura Branch
