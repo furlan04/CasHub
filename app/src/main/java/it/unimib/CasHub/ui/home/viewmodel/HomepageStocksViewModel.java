@@ -48,7 +48,8 @@ public class HomepageStocksViewModel extends ViewModel {
     }
 
     public LiveData<Result<List<PortfolioStock>>> getPortfolio() {
-        fetchPortfolio();
+        if(portfolioLiveData == null)
+            fetchPortfolio();
         return portfolioLiveData;
     }
 
@@ -57,7 +58,8 @@ public class HomepageStocksViewModel extends ViewModel {
     }
 
     public LiveData<Result<ChartData>> getPortfolioHistory() {
-        fetchPortfolioHistory();
+        if(portfolioHistoryLiveData == null)
+            fetchPortfolioHistory();
         return portfolioHistoryLiveData;
     }
 
@@ -86,15 +88,7 @@ public class HomepageStocksViewModel extends ViewModel {
         }
 
         if (stocksToUpdate.isEmpty()) {
-            double totalValue = 0;
-            for (PortfolioStock stock : portfolio) {
-                if (stock != null) {
-                    totalValue += stock.getQuantity() * stock.getAveragePrice();
-                }
-            }
-            if (!portfolio.isEmpty()) {
-                savePortfolioSnapshot(totalValue);
-            }
+            updatePortfolioHistory(alreadyUpdatedStocks);
             return;
         }
 
@@ -151,6 +145,8 @@ public class HomepageStocksViewModel extends ViewModel {
             totalValue += stock.getQuantity() * stock.getAveragePrice();
         }
         savePortfolioSnapshot(totalValue);
+
+        fetchPortfolioHistory();
     }
 
     public void savePortfolioSnapshot(double totalValue) {
@@ -165,5 +161,8 @@ public class HomepageStocksViewModel extends ViewModel {
         transaction.setName("Vendita di " + stock.getName());
         transactionRepository.insertTransaction(transaction);
         portfolioRepository.removeStockFromPortfolio(stock, quantityToRemove);
+
+        fetchPortfolio();
+        fetchPortfolioHistory();
     }
 }
