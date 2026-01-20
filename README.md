@@ -11,7 +11,7 @@
 
 ---
 
-## 🔑 API Key
+## 🔑 LOCAL.PROPERTIES
 
 Per il corretto funzionamento del progetto è necessario ottenere le seguenti API key:
 
@@ -19,8 +19,9 @@ Per il corretto funzionamento del progetto è necessario ottenere le seguenti AP
 sma_api_key="..."      # https://www.alphavantage.co
 stocks_api_key="..."  # https://financialmodelingprep.com
 REALTIME_DB_URL="..."
+debug=false
 ```
-Aggiungere la propria SHA-1 in Firebase -> Impostazioni progetto
+Inoltre, aggiungere la propria SHA-1 in Firebase -> Impostazioni progetto
 
 
 # Guida Repository - Le Basi
