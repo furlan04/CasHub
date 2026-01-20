@@ -48,6 +48,7 @@ import it.unimib.CasHub.ui.home.viewmodel.HomepageTransactionViewModel;
 import it.unimib.CasHub.ui.home.viewmodel.HomepageTransactionViewModelFactory;
 import it.unimib.CasHub.ui.home.viewmodel.RatesConversionViewModel;
 import it.unimib.CasHub.ui.home.viewmodel.RatesConversionViewModelFactory;
+import it.unimib.CasHub.utils.NetworkUtil;
 import it.unimib.CasHub.utils.ServiceLocator;
 
 public class HomepageTransactionFragment extends Fragment
@@ -223,10 +224,12 @@ public class HomepageTransactionFragment extends Fragment
                 setupExpensesChart(converted);
 
             } else if (result instanceof Result.Error) {
-                Toast.makeText(getContext(),
-                        "Errore: " +
-                                ((Result.Error<?>) result).getMessage(),
-                        Toast.LENGTH_SHORT).show();
+                if(NetworkUtil.isInternetAvailable(getContext())) {
+                    Toast.makeText(getContext(),
+                            "Errore: " +
+                                    ((Result.Error<?>) result).getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }

@@ -21,11 +21,12 @@ public class AgencyViewModel extends ViewModel {
     }
 
     public LiveData<Result<List<Agency>>> getAllAgencies(String query) {
-        fetchAgencies(query);
+        if (agencies == null)
+            fetchAgencies(query);
         return agencies;
     }
 
-    void fetchAgencies(String query) {
+    public void fetchAgencies(String query) {
         agencies = agencyRepository.getAllAgencies(query);
     }
 }

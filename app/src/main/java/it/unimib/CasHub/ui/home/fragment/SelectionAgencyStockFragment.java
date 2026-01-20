@@ -119,13 +119,49 @@ public class SelectionAgencyStockFragment extends Fragment implements AgencyResp
         //loadingIndicator.setVisibility(View.VISIBLE);
         recyclerView.setVisibility(View.GONE);
 
+        // Osserva LiveData
+        viewModel.getAllAgencies(searchEditText.getText().toString()).observe(getViewLifecycleOwner(), result -> {
+            if (result instanceof Result.Loading) {
+                // Mostra lo spinner
+                loadingIndicator.setVisibility(View.VISIBLE);
+                recyclerView.setVisibility(View.GONE);
+                noInternetMessage.setVisibility(View.GONE);
+            } else {
+                // Nascondi lo spinner
+                loadingIndicator.setVisibility(View.GONE);
+
+                if (result instanceof Result.Success) {
+                    List<Agency> agencies = ((Result.Success<List<Agency>>) result).getData();
+                    agencyList.clear();
+                    agencyList.addAll(agencies);
+                    adapter.notifyDataSetChanged();
+
+                    recyclerView.setVisibility(agencies.isEmpty() ? View.GONE : View.VISIBLE);
+
+                    if (agencies.isEmpty()) {
+                        noInternetMessage.setVisibility(View.VISIBLE);
+                        noInternetText.setText(getString(R.string.no_agency_found));
+                    } else {
+                        noInternetMessage.setVisibility(View.GONE);
+                    }
+
+                } else if (result instanceof Result.Error) {
+                    if(!searchEditText.getText().toString().isEmpty()) {
+                        noInternetMessage.setVisibility(View.VISIBLE);
+                        noInternetText.setText(R.string.no_agency_found);
+                        recyclerView.setVisibility(View.GONE);
+                    }
+                }
+            }
+        });
+
         if (!NetworkUtil.isInternetAvailable(requireContext())) {
             noInternetMessage.setVisibility(View.VISIBLE);
             noInternetText.setText(getString(R.string.no_internet_connection));
             loadingIndicator.setVisibility(View.GONE);
         } else {
             noInternetMessage.setVisibility(View.GONE);
-            viewModel.getAllAgencies("");
+            viewModel.fetchAgencies("");
         }
     }
 
@@ -180,38 +216,6 @@ public class SelectionAgencyStockFragment extends Fragment implements AgencyResp
 
         loadingIndicator.setVisibility(View.VISIBLE);
 
-        // Osserva LiveData
-        viewModel.getAllAgencies(query).observe(getViewLifecycleOwner(), result -> {
-            if (result instanceof Result.Loading) {
-                // Mostra lo spinner
-                loadingIndicator.setVisibility(View.VISIBLE);
-                recyclerView.setVisibility(View.GONE);
-                noInternetMessage.setVisibility(View.GONE);
-            } else {
-                // Nascondi lo spinner
-                loadingIndicator.setVisibility(View.GONE);
-
-                if (result instanceof Result.Success) {
-                    List<Agency> agencies = ((Result.Success<List<Agency>>) result).getData();
-                    agencyList.clear();
-                    agencyList.addAll(agencies);
-                    adapter.notifyDataSetChanged();
-
-                    recyclerView.setVisibility(agencies.isEmpty() ? View.GONE : View.VISIBLE);
-
-                    if (agencies.isEmpty()) {
-                        noInternetMessage.setVisibility(View.VISIBLE);
-                        noInternetText.setText(getString(R.string.no_agency_found));
-                    } else {
-                        noInternetMessage.setVisibility(View.GONE);
-                    }
-
-                } else if (result instanceof Result.Error) {
-                    noInternetMessage.setVisibility(View.VISIBLE);
-                    noInternetText.setText(getString(R.string.no_agency_found));
-                    recyclerView.setVisibility(View.GONE);
-                }
-            }
-        });
+        viewModel.fetchAgencies(query);
     }
 }
