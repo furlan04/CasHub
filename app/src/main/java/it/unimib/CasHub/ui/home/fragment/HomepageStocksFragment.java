@@ -57,16 +57,14 @@ public class HomepageStocksFragment extends Fragment {
     private boolean isFabOpen = false;
     private TextView textViewRendimentoPortafoglio;
     private LineChart portfolioChart;
+
     private static final String TAG = "HomepageStocksFragment";
     private HomepageStocksViewModel viewModel;
     private final List<PortfolioStock> portfolioStocks = new ArrayList<>();
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_homepage_stocks, container, false);
 
         // Views
@@ -87,7 +85,6 @@ public class HomepageStocksFragment extends Fragment {
 
         // RecyclerView
         recyclerViewPortfolio.setLayoutManager(new LinearLayoutManager(requireContext()));
-
         adapter = new PortfolioAdapter(stock -> {
             Bundle args = new Bundle();
             args.putString("agencySymbol", stock.getSymbol());
@@ -96,17 +93,14 @@ public class HomepageStocksFragment extends Fragment {
             args.putString("agencyExchange", stock.getExchange());
             args.putString("agencyExchangeFull", stock.getExchangeFullName());
             args.putBoolean("fromPortfolio", true);
-
             Navigation.findNavController(requireView()).navigate(R.id.stockDetailsFragment, args);
         });
-
         recyclerViewPortfolio.setAdapter(adapter);
 
         setupFab();
         setupPortfolioChart();
 
-        HomepageStocksViewModelFactory factory =
-                new HomepageStocksViewModelFactory(requireActivity().getApplication());
+        HomepageStocksViewModelFactory factory = new HomepageStocksViewModelFactory(requireActivity().getApplication());
         viewModel = new ViewModelProvider(this, factory).get(HomepageStocksViewModel.class);
 
         observePortfolio();
@@ -172,14 +166,15 @@ public class HomepageStocksFragment extends Fragment {
     private void handlePortfolio(List<PortfolioStock> stocks) {
         this.portfolioStocks.clear();
         this.portfolioStocks.addAll(stocks);
+
         progressBar.setVisibility(View.GONE);
 
         if (stocks.isEmpty()) {
-            tvEmpty.setText("Nessuna azione in portafoglio");
+            tvEmpty.setText(R.string.empty_portfolio);
             tvEmpty.setVisibility(View.VISIBLE);
             recyclerViewPortfolio.setVisibility(View.GONE);
-            textViewTitoli.setText("€0.00");
-            textViewRendimentoPortafoglio.setText("€0.00 (0.00%)");
+            textViewTitoli.setText(getString(R.string.price_format, 0.0));
+            textViewRendimentoPortafoglio.setText(getString(R.string.change_format, 0.0, 0.0));
         } else {
             tvEmpty.setVisibility(View.GONE);
             recyclerViewPortfolio.setVisibility(View.VISIBLE);
@@ -207,7 +202,7 @@ public class HomepageStocksFragment extends Fragment {
         List<Float> prices = chartData.getPrices();
 
         if (prices.isEmpty()) {
-            portfolioChart.setNoDataText("Dati storici non disponibili");
+            portfolioChart.setNoDataText(getString(R.string.historical_data_unavailable));
             portfolioChart.clear();
             portfolioChart.invalidate();
             return;
@@ -219,10 +214,11 @@ public class HomepageStocksFragment extends Fragment {
         }
 
         float lastPortfolioValue = prices.get(prices.size() - 1);
-        textViewTitoli.setText(String.format("€%.2f", lastPortfolioValue));
+        textViewTitoli.setText(getString(R.string.price_format, lastPortfolioValue));
 
         double change = 0.0;
         double changePercent = 0.0;
+
         if (prices.size() > 1) {
             float previousValue = prices.get(prices.size() - 2);
             change = lastPortfolioValue - previousValue;
@@ -231,7 +227,7 @@ public class HomepageStocksFragment extends Fragment {
             }
         }
 
-        String changeText = String.format("€%.2f (%.2f%%)", change, changePercent);
+        String changeText = getString(R.string.change_format, change, changePercent);
         textViewRendimentoPortafoglio.setText(changeText);
 
         if (change >= 0) {
@@ -240,7 +236,7 @@ public class HomepageStocksFragment extends Fragment {
             textViewRendimentoPortafoglio.setTextColor(Color.parseColor("#F44336"));
         }
 
-        LineDataSet dataSet = new LineDataSet(entries, "Valore Portafoglio");
+        LineDataSet dataSet = new LineDataSet(entries, getString(R.string.portfolio_value));
         dataSet.setColor(Color.parseColor("#4CAF50"));
         dataSet.setValueTextColor(Color.WHITE);
         dataSet.setDrawCircles(false);
@@ -261,10 +257,11 @@ public class HomepageStocksFragment extends Fragment {
 
         YAxis leftAxis = portfolioChart.getAxisLeft();
         leftAxis.setTextColor(Color.WHITE);
-        portfolioChart.getAxisRight().setEnabled(false);
 
+        portfolioChart.getAxisRight().setEnabled(false);
         portfolioChart.getDescription().setEnabled(false);
         portfolioChart.getLegend().setTextColor(Color.WHITE);
+
         portfolioChart.invalidate();
     }
 
@@ -296,7 +293,6 @@ public class HomepageStocksFragment extends Fragment {
     private void openFabMenu() {
         isFabOpen = true;
         fabOverlay.setVisibility(View.VISIBLE);
-
         fabAdd.setVisibility(View.VISIBLE);
         fabRemove.setVisibility(View.VISIBLE);
         tvAdd.setVisibility(View.VISIBLE);
@@ -345,12 +341,12 @@ public class HomepageStocksFragment extends Fragment {
     private void showRemoveStockDialog() {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         if (auth.getCurrentUser() == null) {
-            Toast.makeText(requireContext(), "Non sei loggato!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), R.string.not_logged_in, Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (portfolioStocks.isEmpty()) {
-            Toast.makeText(requireContext(), "Nessun titolo da vendere", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), R.string.no_stocks_to_sell, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -362,31 +358,29 @@ public class HomepageStocksFragment extends Fragment {
                 .inflate(R.layout.dialog_sell_stock, null);
 
         RecyclerView rv = dialogView.findViewById(R.id.rvSellStocks);
-
         LinearLayoutManager lm = new LinearLayoutManager(requireContext());
         rv.setLayoutManager(lm);
-
         rv.addItemDecoration(new androidx.recyclerview.widget.DividerItemDecoration(
                 requireContext(), lm.getOrientation()
         ));
 
         AlertDialog dialog = new AlertDialog.Builder(requireContext(), R.style.RoundedDialogStyle)
                 .setView(dialogView)
-                .setNegativeButton("Annulla", null)
+                .setNegativeButton(R.string.cancel, null)
                 .create();
 
         SellStockAdapter adapter = new SellStockAdapter(stocks, stock -> {
             dialog.dismiss();
             showQuantityInputDialog(stock);
         });
-        rv.setAdapter(adapter);
 
+        rv.setAdapter(adapter);
         dialog.show();
     }
 
     private void showQuantityInputDialog(PortfolioStock stock) {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext(), R.style.RoundedDialogStyle);
-        builder.setTitle("Quantità da vendere");
+        builder.setTitle(R.string.quantity_to_sell);
 
         LinearLayout layout = new LinearLayout(requireContext());
         layout.setOrientation(LinearLayout.VERTICAL);
@@ -396,18 +390,23 @@ public class HomepageStocksFragment extends Fragment {
 
         TextView info = new TextView(requireContext());
         double totalOwnedValue = stock.getQuantity() * stock.getAveragePrice();
-        info.setText(
-                stock.getName() + "\n" +
-                        "Possedute: " + stock.getQuantity() + " azioni\n" +
-                        "Prezzo medio: " + currencySymbol + String.format("%.2f", stock.getAveragePrice()) + "\n" +
-                        "Valore totale: " + currencySymbol + String.format("%.2f", totalOwnedValue)
-        );
+
+        String ownedStocks = getString(R.string.owned_stocks, String.valueOf(stock.getQuantity()));
+        String avgPrice = getString(R.string.average_price, currencySymbol, String.format("%.2f", stock.getAveragePrice()));
+        String totalValue = getString(R.string.total_value, currencySymbol, String.format("%.2f", totalOwnedValue));
+
+        info.setText(getString(R.string.stock_info_format,
+                stock.getName(),
+                ownedStocks,
+                avgPrice,
+                totalValue
+        ));
         info.setTextSize(14);
         info.setPadding(0, 0, 0, 30);
         layout.addView(info);
 
         final EditText quantityInput = new EditText(requireContext());
-        quantityInput.setHint("Quantità da vendere");
+        quantityInput.setHint(R.string.quantity_placeholder);
         quantityInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
         quantityInput.setText(String.valueOf(stock.getQuantity()));
         quantityInput.setSelectAllOnFocus(true);
@@ -429,38 +428,42 @@ public class HomepageStocksFragment extends Fragment {
             } catch (NumberFormatException ignored) {}
 
             if (q > maxQty) {
-                tvSellValue.setText("Non puoi vendere più di " + maxQty + " azioni");
+                tvSellValue.setText(getString(R.string.cannot_sell_more, String.valueOf(maxQty)));
                 tvSellValue.setTextColor(Color.parseColor("#F44336"));
                 return;
             }
 
             double sellValue = q * price;
-            tvSellValue.setText("Valore vendita: " + currencySymbol + String.format("%.2f", sellValue));
+            tvSellValue.setText(getString(R.string.sell_value, currencySymbol, String.format("%.2f", sellValue)));
             tvSellValue.setTextColor(Color.parseColor("#B0B0B0"));
         };
 
         updateSellValue.run();
 
         quantityInput.addTextChangedListener(new android.text.TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            @Override public void afterTextChanged(android.text.Editable s) {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(android.text.Editable s) {
                 updateSellValue.run();
             }
         });
 
         builder.setView(layout);
-        builder.setPositiveButton("VENDI", null);
-        builder.setNegativeButton("ANNULLA", null);
+        builder.setPositiveButton(R.string.sell, null);
+        builder.setNegativeButton(R.string.cancel, null);
 
         AlertDialog dialog = builder.create();
         dialog.show();
 
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             String quantityStr = quantityInput.getText().toString();
-
             if (quantityStr.isEmpty()) {
-                Toast.makeText(requireContext(), "Inserisci una quantità", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), R.string.insert_quantity, Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -468,13 +471,13 @@ public class HomepageStocksFragment extends Fragment {
                 double quantityToRemove = Double.parseDouble(quantityStr.replace(",", "."));
 
                 if (quantityToRemove <= 0) {
-                    Toast.makeText(requireContext(), "Quantità deve essere > 0", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), R.string.quantity_must_be_positive, Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 if (quantityToRemove > stock.getQuantity()) {
                     Toast.makeText(requireContext(),
-                            "Non puoi vendere più di " + stock.getQuantity() + " azioni",
+                            getString(R.string.cannot_sell_more_than_owned, String.valueOf(stock.getQuantity())),
                             Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -483,7 +486,7 @@ public class HomepageStocksFragment extends Fragment {
                 confirmRemoveStock(stock, quantityToRemove);
 
             } catch (NumberFormatException e) {
-                Toast.makeText(requireContext(), "Quantità non valida", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), R.string.invalid_quantity, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -501,26 +504,29 @@ public class HomepageStocksFragment extends Fragment {
         boolean removeAll = (quantityToRemove >= stock.getQuantity());
 
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext(), R.style.RoundedDialogStyle);
-        builder.setTitle("Conferma vendita");
+        builder.setTitle(R.string.confirm_sale);
 
-        String action = removeAll ? "vendere completamente" : "vendere";
-        String message = "Stai per " + action + ":\n\n" +
-                stock.getName() + "\n" +
-                "Quantità: " + quantityToRemove + " azioni\n" +
-                "Valore: " + currencySymbol + String.format("%.2f", valueToRemove) + "\n";
+        String action = removeAll ? getString(R.string.sell_completely) : getString(R.string.sell_action);
+        String message = getString(R.string.about_to_sell,
+                action,
+                stock.getName(),
+                String.valueOf(quantityToRemove),
+                currencySymbol,
+                String.format("%.2f", valueToRemove)
+        );
 
         if (!removeAll) {
             double remaining = stock.getQuantity() - quantityToRemove;
-            message += "\nRimarranno: " + remaining + " azioni";
+            message += getString(R.string.remaining_stocks, String.valueOf(remaining));
         }
 
-        message += "\n\nQuesta azione è irreversibile.";
+        message += getString(R.string.irreversible_action);
 
         builder.setMessage(message);
-        builder.setPositiveButton("VENDI", (dialog, which) -> {
+        builder.setPositiveButton(R.string.sell, (dialog, which) -> {
             viewModel.removeStockFromPortfolio(stock, quantityToRemove);
         });
-        builder.setNegativeButton("ANNULLA", null);
+        builder.setNegativeButton(R.string.cancel, null);
 
         AlertDialog dialog = builder.create();
         dialog.show();
@@ -533,20 +539,7 @@ public class HomepageStocksFragment extends Fragment {
         }
     }
 
-    private String getCurrencySymbol(String currencyCode) {
-        if (currencyCode == null) return "$";
-
-        switch (currencyCode.toUpperCase()) {
-            case "USD": return "$";
-            case "EUR": return "€";
-            case "GBP": return "£";
-            case "JPY": return "¥";
-            case "CHF": return "CHF ";
-            case "CAD": return "C$";
-            case "AUD": return "A$";
-            case "CNY": return "¥";
-            case "INR": return "₹";
-            default: return currencyCode + " ";
-        }
+    private String getCurrencySymbol(String currency) {
+        return "€";
     }
 }

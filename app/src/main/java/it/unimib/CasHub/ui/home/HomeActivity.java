@@ -60,30 +60,43 @@ public class HomeActivity extends AppCompatActivity {
         User loggedUser = userViewModel.getLoggedUser();
 
         if (loggedUser != null && loggedUser.getName() != null) {
-            toolbarTitle.setText("Ciao, " + loggedUser.getName() + "!");
+            toolbarTitle.setText(
+                    getString(R.string.welcome_user, loggedUser.getName())
+            );
         } else {
-            toolbarTitle.setText("Benvenuto su CasHub!");
+            toolbarTitle.setText(
+                    getString(R.string.welcome_app)
+            );
         }
 
         Button btnLogout = findViewById(R.id.btnLogout);
         btnLogout.setOnClickListener(v -> {
 
             new androidx.appcompat.app.AlertDialog.Builder(this)
-                    .setTitle("Conferma logout")
-                    .setMessage("Sei sicuro di voler effettuare il logout?")
-                    .setPositiveButton("Logout", (dialog, which) -> {
+                    .setTitle(R.string.logout_confirm_title)
+                    .setMessage(R.string.logout_confirm_message)
+                    .setPositiveButton(R.string.logout, (dialog, which) -> {
 
                         userViewModel.logout();
 
-                        Toast.makeText(HomeActivity.this,
-                                "Logout effettuato", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(
+                                HomeActivity.this,
+                                getString(R.string.logout_success),
+                                Toast.LENGTH_SHORT
+                        ).show();
 
-                        Intent intent = new Intent(HomeActivity.this, NavLoginHomeActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        Intent intent = new Intent(
+                                HomeActivity.this,
+                                NavLoginHomeActivity.class
+                        );
+                        intent.setFlags(
+                                Intent.FLAG_ACTIVITY_NEW_TASK |
+                                        Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        );
                         startActivity(intent);
                         finish();
                     })
-                    .setNegativeButton("Annulla", null)
+                    .setNegativeButton(R.string.cancel, null)
                     .show();
         });
 
