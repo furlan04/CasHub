@@ -76,9 +76,9 @@ public class TransactionRecyclerAdapter extends RecyclerView.Adapter<Transaction
             nameTextView.setText(transaction.getName());
             amountTextView.setText(String.valueOf(transaction.getAmount()));
             if (transaction.getAmount() < 0) {
-                amountTextView.setTextColor(Color.RED);
+                amountTextView.setTextColor(Color.parseColor("#D32F2F"));
             } else {
-                amountTextView.setTextColor(Color.GREEN);
+                amountTextView.setTextColor(Color.parseColor("#4CAF50"));
             }
             typeTextView.setText(transaction.getType().toString());
             currencyTextView.setText(transaction.getCurrency());
