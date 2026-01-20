@@ -208,7 +208,7 @@ public class SelectionAgencyStockFragment extends Fragment implements AgencyResp
 
                 } else if (result instanceof Result.Error) {
                     noInternetMessage.setVisibility(View.VISIBLE);
-                    noInternetText.setText("No agencies found");
+                    noInternetText.setText(getString(R.string.no_agency_found));
                     recyclerView.setVisibility(View.GONE);
                 }
             }
