@@ -166,4 +166,10 @@
     <string name="error_label">Error: %s</string>
     <string name="error_loading_data">Error loading data: %s</string>
     <string name="unable_to_load_chart">Unable to load chart</string>
+    <string name="welcome_user">Hi, %1$s!</string>
+    <string name="welcome_app">Welcome to CasHub!</string>
+    <string name="logout_confirm_title">Confirm logout</string>
+    <string name="logout_confirm_message">Are you sure you want to log out?</string>
+    <string name="logout">Logout</string>
+    <string name="logout_success">Logged out successfully</string>
 </resources>

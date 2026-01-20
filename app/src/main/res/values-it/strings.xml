@@ -116,4 +116,10 @@
     <string name="error_label">Errore: %s</string>
     <string name="error_loading_data">Errore caricamento dati: %s</string>
     <string name="unable_to_load_chart">Impossibile caricare il grafico</string>
+    <string name="welcome_user">Ciao, %1$s!</string>
+    <string name="welcome_app">Benvenuto su CasHub!</string>
+    <string name="logout_confirm_title">Conferma logout</string>
+    <string name="logout_confirm_message">Sei sicuro di voler effettuare il logout?</string>
+    <string name="logout">Logout</string>
+    <string name="logout_success">Logout effettuato</string>
 </resources>
