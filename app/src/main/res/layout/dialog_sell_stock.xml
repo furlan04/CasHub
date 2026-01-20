@@ -9,7 +9,7 @@
         android:id="@+id/tvDialogTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Vendi titolo"
+        android:text="@string/sellAction"
         android:textStyle="bold"
         android:textSize="18sp"
         android:paddingBottom="4dp"/>

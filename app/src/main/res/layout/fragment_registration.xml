@@ -24,7 +24,6 @@
             android:layout_marginBottom="8dp"
             app:srcCompat="@drawable/logonoback" />
 
-        <!-- hai già un account? accedi -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -32,8 +31,8 @@
             app:cardCornerRadius="16dp"
             app:cardElevation="2dp"
             app:strokeWidth="1dp"
-            app:strokeColor="#E0E0E0"
-            app:cardBackgroundColor="#FAFAFA">
+            app:cardBackgroundColor="@color/md_theme_background"
+            app:strokeColor="?attr/colorOutline">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -58,7 +57,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Hai già un account?"
+                    android:text="@string/already_have_account"
                     android:textSize="15sp"
                     android:textColor="#555555"
                     android:gravity="end"
@@ -66,7 +65,6 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Nome/Nickname -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -92,7 +90,6 @@
                 android:paddingEnd="16dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Email -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -115,7 +112,6 @@
                 android:paddingEnd="16dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Password -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -139,7 +135,6 @@
                 android:paddingEnd="16dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Bottone Registrati -->
         <Button
             android:id="@+id/register_button"
             style="Widget.Material3.Button.Filled"
@@ -148,8 +143,8 @@
             android:layout_height="56dp"
             android:text="@string/register"
             android:textAppearance="@style/FontMainMedium"
+            android:textColor="@color/md_theme_surface"
             app:cornerRadius="28dp"
             android:layout_marginBottom="20dp"/>
-
     </LinearLayout>
 </ScrollView>

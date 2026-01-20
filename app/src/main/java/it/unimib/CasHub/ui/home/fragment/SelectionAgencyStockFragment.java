@@ -146,9 +146,11 @@ public class SelectionAgencyStockFragment extends Fragment implements AgencyResp
                     }
 
                 } else if (result instanceof Result.Error) {
-                    noInternetMessage.setVisibility(View.VISIBLE);
-                    noInternetText.setText("No agencies found");
-                    recyclerView.setVisibility(View.GONE);
+                    if(!searchEditText.getText().toString().isEmpty()) {
+                        noInternetMessage.setVisibility(View.VISIBLE);
+                        noInternetText.setText(R.string.no_agency_found);
+                        recyclerView.setVisibility(View.GONE);
+                    }
                 }
             }
         });
@@ -159,7 +161,7 @@ public class SelectionAgencyStockFragment extends Fragment implements AgencyResp
             loadingIndicator.setVisibility(View.GONE);
         } else {
             noInternetMessage.setVisibility(View.GONE);
-            viewModel.getAllAgencies("");
+            viewModel.fetchAgencies("");
         }
     }
 

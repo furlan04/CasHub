@@ -17,7 +17,6 @@
         android:adjustViewBounds="true"
         app:srcCompat="@drawable/logonoback" />
 
-    <!-- Bottone: Sei già registrato? -->
     <Button
         android:id="@+id/goToLogin"
         style="@style/Widget.Material3.Button.TextButton"
@@ -29,7 +28,6 @@
         android:text="@string/register"
         android:textAppearance="@style/FontMainSmall" />
 
-    <!-- Nome -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -48,7 +46,6 @@
             android:background="#00000000"/>
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Email -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -67,7 +64,6 @@
             android:background="#00000000"/>
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Password -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -87,7 +83,6 @@
             android:background="#00000000"/>
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Conferma Password -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -107,7 +102,6 @@
             android:background="#00000000"/>
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Bottone Registrati -->
     <Button
         android:id="@+id/register_button"
         style="@style/Widget.Material3.Button.ElevatedButton"
@@ -119,7 +113,6 @@
         android:layout_marginEnd="50dp"
         android:textAppearance="@style/FontMainMedium" />
 
-    <!-- OPPURE con linee -->
     <RelativeLayout
         android:layout_marginTop="8dp"
         android:layout_width="match_parent"
@@ -152,7 +145,6 @@
             android:background="#555"/>
     </RelativeLayout>
 
-    <!-- Registrati con Google -->
     <Button
         android:id="@+id/register_google_button"
         style="@style/Widget.Material3.Button.ElevatedButton"
@@ -167,7 +159,6 @@
         app:iconGravity="textStart"
         app:iconTint="@null"/>
 
-    <!-- Spazio finale -->
     <Space
         android:layout_width="match_parent"
         android:layout_height="0dp"

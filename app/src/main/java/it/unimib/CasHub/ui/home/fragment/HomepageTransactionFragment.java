@@ -216,7 +216,7 @@ public class HomepageTransactionFragment extends Fragment
                 }
 
                 balanceTextView.setText(
-                        String.format("Saldo: %.2f %s",
+                        String.format(getString(R.string.balance) + ": %.2f %s",
                                 balance, baseCurrency.getCode()));
 
                 setupBalanceChart(converted);

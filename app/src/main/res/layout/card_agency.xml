@@ -18,7 +18,7 @@
         android:id="@+id/textCompanyName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Company Name"
+        android:text="@string/CompanyName"
         android:textStyle="bold"
         android:textSize="14sp" />
 
@@ -26,7 +26,7 @@
         android:id="@+id/textExchangeFull"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Exchange: NASDAQ Global Select"
+        android:text="@string/ExchangeFull"
         android:textSize="12sp"
         android:alpha="0.8"/>
 </LinearLayout>
