@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
-import it.unimib.CasHub.repository.ForexRepository;
+import it.unimib.CasHub.repository.forex.ForexRepository;
 
 public class RatesConversionViewModelFactory  implements ViewModelProvider.Factory {
     private final ForexRepository forexRepository;

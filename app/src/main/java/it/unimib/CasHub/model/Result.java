@@ -30,4 +30,6 @@ public abstract class Result<T> {
             return message;
         }
     }
+
+    public static class Loading<T> extends Result<T> { }
 }

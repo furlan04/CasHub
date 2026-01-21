@@ -24,16 +24,17 @@
             android:layout_marginBottom="24dp"
             app:srcCompat="@drawable/logonoback" />
 
-        <!-- Non hai un account? registrati -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dp"
+
             app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
+            app:cardElevation="1dp"
             app:strokeWidth="1dp"
-            app:strokeColor="#E0E0E0"
-            app:cardBackgroundColor="#FAFAFA">
+
+            app:cardBackgroundColor="@color/md_theme_background"
+            app:strokeColor="?attr/colorOutline">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -46,7 +47,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Non hai un account?"
+                    android:text="@string/not_account"
                     android:textSize="15sp"
                     android:textColor="#555555"
                     android:paddingEnd="8dp"/>
@@ -56,7 +57,7 @@
                     style="@style/Widget.Material3.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Registrati"
+                    android:text="@string/register"
                     android:textSize="15sp"
                     android:textStyle="bold"
                     android:minWidth="0dp"
@@ -65,7 +66,6 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Email -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -88,7 +88,6 @@
                 android:paddingEnd="16dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Password -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -112,18 +111,6 @@
                 android:paddingEnd="16dp"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <!-- Password dimenticata -->
-        <Button
-            android:id="@+id/forgotPasswordButton"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_marginBottom="8dp"
-            android:textAppearance="@style/FontMainSmall"
-            android:text="@string/did_you_forget_your_password" />
-
-        <!-- Accedi -->
         <Button
             android:id="@+id/login_button"
             style="Widget.Material3.Button.Filled"
@@ -131,11 +118,11 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:text="@string/login"
+            android:textColor="@color/md_theme_onBackground"
             android:textAppearance="@style/FontMainMedium"
             app:cornerRadius="28dp"
             android:layout_marginBottom="20dp"/>
 
-        <!-- Oppure -->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -149,7 +136,7 @@
                 android:layout_toStartOf="@id/text_or"
                 android:layout_marginEnd="12dp"
                 android:layout_centerInParent="true"
-                android:background="#CCCCCC"/>
+                android:background="@color/md_theme_onSurfaceVariant"/>
 
             <TextView
                 android:id="@+id/text_or"
@@ -163,14 +150,14 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginStart="12dp"
                 android:layout_toEndOf="@id/text_or"
+                android:layout_marginStart="12dp"
                 android:layout_centerInParent="true"
-                android:background="#CCCCCC"/>
+                android:background="@color/md_theme_onSurfaceVariant"/>
         </RelativeLayout>
 
-        <!-- Accedi con Google -->
         <Button
+            android:id="@+id/google_login_button"
             style="@style/Widget.Material3.Button.ElevatedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -1,14 +1,17 @@
 package it.unimib.CasHub.repository.portfolio;
 
-import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import it.unimib.CasHub.model.ChartData;
 import it.unimib.CasHub.model.PortfolioStock;
 import it.unimib.CasHub.model.Result;
 
+import java.util.List;
+
 public interface IPortfolioRepository {
-    LiveData<Result> getPortfolio();
+    MutableLiveData<Result<List<PortfolioStock>>> getPortfolio();
     void savePortfolioSnapshot(double totalValue);
-    LiveData<Result> removeStockFromPortfolio(PortfolioStock stock, double quantityToRemove);
-    LiveData<Result> getPortfolioHistory();
-    LiveData<Result> addStockToPortfolio(PortfolioStock stock);
+    void removeStockFromPortfolio(PortfolioStock stock, double quantityToRemove);
+    MutableLiveData<Result<ChartData>> getPortfolioHistory();
+    void addStockToPortfolio(PortfolioStock stock);
     void updateStockInPortfolio(PortfolioStock stock);
 }

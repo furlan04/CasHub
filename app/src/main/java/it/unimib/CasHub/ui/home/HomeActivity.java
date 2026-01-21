@@ -31,11 +31,12 @@ import it.unimib.CasHub.utils.ServiceLocator;
 
 public class HomeActivity extends AppCompatActivity {
 
-
+    private final android.os.Handler navigationHandler = new android.os.Handler(android.os.Looper.getMainLooper());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -44,9 +45,7 @@ public class HomeActivity extends AppCompatActivity {
             return insets;
         });
 
-
         //Gestione toolbar
-
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -61,32 +60,68 @@ public class HomeActivity extends AppCompatActivity {
         User loggedUser = userViewModel.getLoggedUser();
 
         if (loggedUser != null && loggedUser.getName() != null) {
-            toolbarTitle.setText("Ciao, " + loggedUser.getName() + "!");
+            toolbarTitle.setText(
+                    getString(R.string.welcome_user, loggedUser.getName())
+            );
         } else {
-            toolbarTitle.setText("Benvenuto su CasHub!");
+            toolbarTitle.setText(
+                    getString(R.string.welcome_app)
+            );
         }
 
         Button btnLogout = findViewById(R.id.btnLogout);
         btnLogout.setOnClickListener(v -> {
-            // 1. Esegui il logout (azione immediata)
-            userViewModel.logout();
 
-            // 2. Naviga immediatamente alla LoginActivity
-            Toast.makeText(HomeActivity.this, "Logout effettuato", Toast.LENGTH_SHORT).show();
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setTitle(R.string.logout_confirm_title)
+                    .setMessage(R.string.logout_confirm_message)
+                    .setPositiveButton(R.string.logout, (dialog, which) -> {
 
-            Intent intent = new Intent(HomeActivity.this, NavLoginHomeActivity.class);
-            // Pulisci lo stack così l'utente non può tornare indietro col tasto back
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            finish();
+                        userViewModel.logout();
+
+                        Toast.makeText(
+                                HomeActivity.this,
+                                getString(R.string.logout_success),
+                                Toast.LENGTH_SHORT
+                        ).show();
+
+                        Intent intent = new Intent(
+                                HomeActivity.this,
+                                NavLoginHomeActivity.class
+                        );
+                        intent.setFlags(
+                                Intent.FLAG_ACTIVITY_NEW_TASK |
+                                        Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        );
+                        startActivity(intent);
+                        finish();
+                    })
+                    .setNegativeButton(R.string.cancel, null)
+                    .show();
         });
-
-
 
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().
                 findFragmentById(R.id.fragmentContainerView);
 
         NavController navController = navHostFragment.getNavController();
+
+
+
+        navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
+            toolbar.post(() -> {
+                for (int i = 0; i < toolbar.getChildCount(); i++) {
+                    android.view.View child = toolbar.getChildAt(i);
+                    if (child instanceof android.widget.ImageButton) {
+                        child.setEnabled(false);
+                        navigationHandler.postDelayed(() -> {
+                            child.setEnabled(true);
+                        }, 1500);
+                        break;
+                    }
+                }
+            });
+        });
+
 
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigation);
 

@@ -4,18 +4,13 @@
 
     <item
         android:id="@+id/homepageTransactionFragment"
-        android:title="Transactions"     />
+        android:title="Transactions"
+        android:icon="@drawable/transaction_icon"/>
     <item
         android:id="@+id/homepageStocksFragment"
         android:title="Stocks"
+        android:icon="@drawable/stock_icon"
 
 
         />
-
-
-    <!-- android:icon="@drawable/outline_60fps_24" -->
-
-
-
-
 </menu>

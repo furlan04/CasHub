@@ -1,4 +1,4 @@
-package it.unimib.CasHub.adapter;  // ✅ NON ui.portfolio.adapter
+package it.unimib.CasHub.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -54,14 +54,13 @@ public class PortfolioAdapter extends RecyclerView.Adapter<PortfolioAdapter.View
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvCompanyName, tvCurrentValue, tvProfitLoss;
+        TextView tvCompanyName, tvCurrentValue;
         TextView tvQuantity, tvAveragePrice;
 
         ViewHolder(View itemView) {
             super(itemView);
             tvCompanyName = itemView.findViewById(R.id.tvCompanyName);
             tvCurrentValue = itemView.findViewById(R.id.tvCurrentValue);
-            tvProfitLoss = itemView.findViewById(R.id.tvProfitLoss);
             tvQuantity = itemView.findViewById(R.id.tvQuantity);
             tvAveragePrice = itemView.findViewById(R.id.tvAveragePrice);
 
@@ -89,13 +88,6 @@ public class PortfolioAdapter extends RecyclerView.Adapter<PortfolioAdapter.View
 
             String plText = String.format(Locale.US, "%s%.2f (%+.2f%%)",
                     stock.getCurrency(), profitLoss, profitLossPercent);
-            tvProfitLoss.setText(plText);
-
-            if (profitLoss >= 0) {
-                tvProfitLoss.setTextColor(0xFF4CAF50);
-            } else {
-                tvProfitLoss.setTextColor(0xFFF44336);
-            }
         }
     }
 

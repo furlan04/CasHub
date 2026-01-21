@@ -39,7 +39,6 @@ import it.unimib.CasHub.model.StockQuote;
 import it.unimib.CasHub.ui.home.viewmodel.StockDetailsViewModel;
 import it.unimib.CasHub.ui.home.viewmodel.StockDetailsViewModelFactory;
 import it.unimib.CasHub.utils.NetworkUtil;
-import it.unimib.CasHub.utils.StockCache;
 
 public class StockDetailsFragment extends Fragment {
 
@@ -55,14 +54,14 @@ public class StockDetailsFragment extends Fragment {
 
     private StockDetailsViewModel viewModel;
 
-    // Dati ricevuti dal Bundle
     private String symbol;
     private String companyName;
     private String currency;
     private String exchange;
     private String exchangeFull;
+    private boolean fromPortfolio = false;
 
-    private StockQuote currentStockQuote;
+    private StockQuote currentStock;
 
     public StockDetailsFragment() {}
 
@@ -76,6 +75,7 @@ public class StockDetailsFragment extends Fragment {
             currency = getArguments().getString("agencyCurrency");
             exchange = getArguments().getString("agencyExchange");
             exchangeFull = getArguments().getString("agencyExchangeFull");
+            fromPortfolio = getArguments().getBoolean("fromPortfolio", false);
         }
 
         StockDetailsViewModelFactory factory = new StockDetailsViewModelFactory(requireActivity().getApplication());
@@ -100,17 +100,21 @@ public class StockDetailsFragment extends Fragment {
         addToPortfolioButton = view.findViewById(R.id.btnAddToPortfolio);
         weeklyChart = view.findViewById(R.id.weeklyChart);
 
+        if (fromPortfolio) {
+            addToPortfolioButton.setVisibility(View.GONE);
+        }
+
         if (companyName != null) {
             stockNameTextView.setText(companyName);
         }
         if (symbol != null) {
-            symbolTextView.setText("Symbol: " + symbol);
+            symbolTextView.setText(getString(R.string.symbol_label, symbol));
         }
         if (currency != null) {
-            currencyTextView.setText("\nCurrency: " + currency);
+            currencyTextView.setText(getString(R.string.currency_label, currency));
         }
         if (exchange != null) {
-            exchangeTextView.setText("\nExchange: " + exchange);
+            exchangeTextView.setText(getString(R.string.exchange_label, exchange));
         }
 
         addToPortfolioButton.setOnClickListener(v -> addToPortfolio());
@@ -119,9 +123,11 @@ public class StockDetailsFragment extends Fragment {
 
         if (symbol != null && !symbol.isEmpty()) {
             observeStockQuote();
-            observeChartData();
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                observeChartData();
+            }, 1500);
         } else {
-            Toast.makeText(requireContext(), "Simbolo non valido", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), R.string.invalid_symbol, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -154,15 +160,15 @@ public class StockDetailsFragment extends Fragment {
 
     private void observeStockQuote() {
         if (!NetworkUtil.isInternetAvailable(requireContext())) {
-            Toast.makeText(requireContext(), "Nessuna connessione internet", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), R.string.no_internet_connection, Toast.LENGTH_SHORT).show();
             return;
         }
 
         addToPortfolioButton.setEnabled(false);
         viewModel.getStockQuote(symbol).observe(getViewLifecycleOwner(), result -> {
             if (result instanceof Result.Success) {
-                currentStockQuote = ((Result.Success<StockQuote>) result).getData();
-                handleStockQuoteSuccess(currentStockQuote);
+                currentStock = ((Result.Success<StockQuote>) result).getData();
+                handleStockQuoteSuccess(currentStock);
             } else {
                 handleStockQuoteFailure(((Result.Error) result).getMessage());
             }
@@ -178,8 +184,8 @@ public class StockDetailsFragment extends Fragment {
             if (result instanceof Result.Success) {
                 populateChart(((Result.Success<ChartData>) result).getData());
             } else {
-                Log.e(TAG, "Error loading chart: " + ((Result.Error) result).getMessage());
-                Toast.makeText(requireContext(), "Impossibile caricare il grafico", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, getString(R.string.error_loading_data, ((Result.Error) result).getMessage()));
+                Toast.makeText(requireContext(), R.string.unable_to_load_chart, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -196,7 +202,7 @@ public class StockDetailsFragment extends Fragment {
         boolean isPositiveTrend = prices.get(prices.size() - 1) >= prices.get(0);
         int lineColor = isPositiveTrend ? Color.parseColor("#4CAF50") : Color.parseColor("#F44336");
 
-        LineDataSet dataSet = new LineDataSet(entries, "Prezzo");
+        LineDataSet dataSet = new LineDataSet(entries, getString(R.string.price_label));
         dataSet.setColor(lineColor);
         dataSet.setLineWidth(3f);
         dataSet.setDrawCircles(false);
@@ -230,7 +236,7 @@ public class StockDetailsFragment extends Fragment {
         weeklyChart.animateX(800);
     }
 
-    private void handleStockQuoteSuccess(StockQuote stockQuote) {
+    private void handleStockQuoteSuccess(StockQuote stock) {
         if (getActivity() == null) return;
 
         requireActivity().runOnUiThread(() -> {
@@ -238,13 +244,16 @@ public class StockDetailsFragment extends Fragment {
 
             String currencySymbol = getCurrencySymbol(currency);
 
-            String price = stockQuote.getPrice();
-            String change = stockQuote.getChange();
-            String changePercent = stockQuote.getChangePercent();
+            String price = stock.getPrice();
+            String change = stock.getChange();
+            String changePercent = stock.getChangePercent();
 
-            String priceInfo = "Prezzo: " + currencySymbol + price +
-                    "\n\nVariazione giornaliera: " + currencySymbol + change +
-                    " (" + changePercent + ")";
+            String priceInfo = getString(R.string.price_info,
+                    currencySymbol,
+                    price,
+                    change,
+                    changePercent
+            );
 
             exchangeFullTextView.setText(priceInfo);
         });
@@ -255,20 +264,20 @@ public class StockDetailsFragment extends Fragment {
 
         requireActivity().runOnUiThread(() -> {
             addToPortfolioButton.setEnabled(true);
-            Toast.makeText(requireContext(), "Errore: " + errorMessage, Toast.LENGTH_LONG).show();
-            Log.e(TAG, "Errore caricamento dati: " + errorMessage);
+            Toast.makeText(requireContext(), getString(R.string.error_label, errorMessage), Toast.LENGTH_LONG).show();
+            Log.e(TAG, getString(R.string.error_loading_data, errorMessage));
         });
     }
 
     private void addToPortfolio() {
-        if (currentStockQuote == null) {
-            Toast.makeText(requireContext(), "Dati non ancora caricati", Toast.LENGTH_SHORT).show();
+        if (currentStock == null) {
+            Toast.makeText(requireContext(), R.string.data_not_loaded, Toast.LENGTH_SHORT).show();
             return;
         }
 
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser == null) {
-            Toast.makeText(requireContext(), "ERRORE: Non sei loggato!", Toast.LENGTH_LONG).show();
+            Toast.makeText(requireContext(), R.string.error_not_logged_in, Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -277,27 +286,29 @@ public class StockDetailsFragment extends Fragment {
 
     private void showBuyStockDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle("Compra " + companyName);
+        builder.setTitle(getString(R.string.buy_stock_title, companyName));
 
         LinearLayout layout = new LinearLayout(requireContext());
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(50, 40, 50, 10);
 
         TextView priceInfo = new TextView(requireContext());
-        priceInfo.setText("Prezzo attuale: " + getCurrencySymbol(currency) + currentStockQuote.getPrice());
+        priceInfo.setText(getString(R.string.current_price,
+                getCurrencySymbol(currency),
+                currentStock.getPrice()));
         priceInfo.setTextSize(16);
         priceInfo.setPadding(0, 0, 0, 20);
         layout.addView(priceInfo);
 
         final EditText quantityInput = new EditText(requireContext());
-        quantityInput.setHint("Quantità");
+        quantityInput.setHint(R.string.quantity_hint);
         quantityInput.setInputType(android.text.InputType.TYPE_CLASS_NUMBER | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
         layout.addView(quantityInput);
 
         builder.setView(layout);
 
-        builder.setPositiveButton("CONFERMA", null);
-        builder.setNegativeButton("ANNULLA", (dialog, which) -> dialog.cancel());
+        builder.setPositiveButton(R.string.confirm, null);
+        builder.setNegativeButton(R.string.cancel, (dialog, which) -> dialog.cancel());
 
         AlertDialog dialog = builder.create();
         dialog.show();
@@ -306,7 +317,7 @@ public class StockDetailsFragment extends Fragment {
             String quantityStr = quantityInput.getText().toString();
 
             if (quantityStr.isEmpty()) {
-                Toast.makeText(requireContext(), "Inserisci una quantità", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), R.string.insert_quantity, Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -314,7 +325,7 @@ public class StockDetailsFragment extends Fragment {
                 double quantity = Double.parseDouble(quantityStr);
 
                 if (quantity <= 0) {
-                    Toast.makeText(requireContext(), "Quantità deve essere > 0", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), R.string.quantity_must_be_positive, Toast.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -322,22 +333,22 @@ public class StockDetailsFragment extends Fragment {
                 savePurchase(quantity);
 
             } catch (NumberFormatException e) {
-                Toast.makeText(requireContext(), "Quantità non valida", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), R.string.invalid_quantity, Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void savePurchase(double quantity) {
-        if (currentStockQuote == null) {
-            Toast.makeText(requireContext(), "Errore: dati prezzo mancanti", Toast.LENGTH_SHORT).show();
+        if (currentStock == null) {
+            Toast.makeText(requireContext(), R.string.error_missing_price, Toast.LENGTH_SHORT).show();
             return;
         }
 
         double currentPrice;
         try {
-            currentPrice = Double.parseDouble(currentStockQuote.getPrice());
+            currentPrice = Double.parseDouble(currentStock.getPrice());
         } catch (Exception e) {
-            Toast.makeText(requireContext(), "Errore parsing prezzo", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), R.string.error_parsing_price, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -353,18 +364,10 @@ public class StockDetailsFragment extends Fragment {
 
         viewModel.addStockToPortfolio(portfolioStock);
 
-        StockCache.saveStock(
-                requireContext(),
-                symbol,
-                companyName != null ? companyName : symbol,
-                currency != null ? currency : "USD",
-                exchange != null ? exchange : "N/A",
-                exchangeFull != null ? exchangeFull : "N/A",
-                currentPrice
-        );
-
-        Toast.makeText(requireContext(), "Acquistate " + quantity + " azioni di " + symbol + "!", Toast.LENGTH_SHORT).show();
-        addToPortfolioButton.setText("Aggiunto ✓");
+        Toast.makeText(requireContext(),
+                getString(R.string.purchase_success, String.valueOf(quantity), symbol),
+                Toast.LENGTH_SHORT).show();
+        addToPortfolioButton.setText(R.string.added_checkmark);
     }
 
     private String getCurrencySymbol(String currencyCode) {

@@ -153,7 +153,7 @@ public class RegistrationFragment extends Fragment {
     private boolean isPasswordOk(String password) {
         // Check if the password length is correct
         if (password.isEmpty() || password.length() < Constants.MINIMUM_LENGTH_PASSWORD) {
-            textInputPassword.setError(getString(R.string.error_password_login));
+            textInputPassword.setError(getString(R.string.error_password_login), null);
             return false;
         } else {
             textInputPassword.setError(null);

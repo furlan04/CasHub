@@ -29,7 +29,7 @@ import it.unimib.CasHub.model.Result;
 import it.unimib.CasHub.model.TransactionEntity;
 import it.unimib.CasHub.model.TransactionMode;
 import it.unimib.CasHub.model.TransactionType;
-import it.unimib.CasHub.repository.ForexRepository;
+import it.unimib.CasHub.repository.forex.ForexRepository;
 import it.unimib.CasHub.ui.home.viewmodel.HomepageTransactionViewModel;
 import it.unimib.CasHub.ui.home.viewmodel.HomepageTransactionViewModelFactory;
 import it.unimib.CasHub.ui.home.viewmodel.CurrencyListViewModel;
@@ -134,7 +134,21 @@ public class TransactionFragment extends Fragment {
             }
         });
     }
+    private void setupCategorySpinner() {
+        List<String> categories = new ArrayList<>();
+        for (TransactionType type : TransactionType.values()) {
+            categories.add(type.name());
+        }
 
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                requireContext(),
+                android.R.layout.simple_spinner_item,
+                categories
+        );
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerCategoria.setAdapter(adapter);
+    }
     private void saveTransaction(EditText etNome, EditText etQuantita, Spinner spinnerValuta, Spinner spinnerCategoria) {
         String amountString = etQuantita.getText().toString();
         if (amountString.isEmpty()) {

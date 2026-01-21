@@ -2,21 +2,30 @@ package it.unimib.CasHub.utils;
 
 import android.app.Application;
 
+import it.unimib.CasHub.R;
 import it.unimib.CasHub.database.CurrencyDao;
 import it.unimib.CasHub.database.CurrencyRoomDatabase;
 import it.unimib.CasHub.database.TransactionDao;
 import it.unimib.CasHub.database.TransactionRoomDatabase;
-import it.unimib.CasHub.repository.ForexRepository;
+import it.unimib.CasHub.repository.agency.AgencyAPIRepository;
+import it.unimib.CasHub.repository.forex.ForexRepository;
 import it.unimib.CasHub.repository.portfolio.PortfolioRepository;
+import it.unimib.CasHub.repository.stock.StockRepository;
 import it.unimib.CasHub.repository.transaction.TransactionRepository;
 import it.unimib.CasHub.repository.user.IUserRepository;
 import it.unimib.CasHub.repository.user.UserRepository;
 import it.unimib.CasHub.service.AgencyAPIService;
 import it.unimib.CasHub.service.ForexAPIService;
-import it.unimib.CasHub.source.BaseForexDataSource;
-import it.unimib.CasHub.source.ForexAPIDataSource;
-import it.unimib.CasHub.source.ForexMockDataSource;
+import it.unimib.CasHub.service.StockAPIService;
+import it.unimib.CasHub.source.agency.AgencyDataSource;
+import it.unimib.CasHub.source.agency.BaseAgencyDataSource;
+import it.unimib.CasHub.source.forex.BaseForexDataSource;
+import it.unimib.CasHub.source.forex.ForexAPIDataSource;
+import it.unimib.CasHub.source.forex.ForexLocalDataSource;
+import it.unimib.CasHub.source.forex.ForexMockDataSource;
 import it.unimib.CasHub.source.portfolio.PortfolioFirebaseDataSource;
+import it.unimib.CasHub.source.stock.BaseStockDataSource;
+import it.unimib.CasHub.source.stock.StockDataSource;
 import it.unimib.CasHub.source.transaction.BaseFirebaseTransactionDataSource;
 import it.unimib.CasHub.source.transaction.BaseLocalTransactionDataSource;
 import it.unimib.CasHub.source.transaction.TransactionFirebaseDataSource;
@@ -73,6 +82,14 @@ public class ServiceLocator {
                 .build();
         return retrofit.create(AgencyAPIService.class);
     }
+    public StockAPIService getStockAPIService() {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(Constants.STOCK_BASE_URL)
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        return retrofit.create(StockAPIService.class);
+    }
 
     private CurrencyRoomDatabase getCurrencyDB(Application application) {
         return CurrencyRoomDatabase.getDatabase(application);
@@ -85,17 +102,33 @@ public class ServiceLocator {
     public ForexRepository getForexRepository(Application application, boolean debugMode) {
         ForexAPIService apiService = getForexAPIService();
         JSONParserUtils jsonParserUtils = new JSONParserUtils(application);
+
+        BaseForexDataSource remoteDataSource = new ForexAPIDataSource(apiService);
+        BaseForexDataSource localDataSource;
         CurrencyDao currencyDao = getCurrencyDB(application).currencyDao();
 
-        BaseForexDataSource dataSource;
 
         if (debugMode) {
-            dataSource = new ForexMockDataSource(jsonParserUtils);
+            localDataSource = new ForexMockDataSource(jsonParserUtils);
         } else {
-            dataSource = new ForexAPIDataSource(apiService);
+            localDataSource = new ForexLocalDataSource(currencyDao);
         }
 
-        return new ForexRepository(dataSource, currencyDao);
+        return new ForexRepository(remoteDataSource, localDataSource);
+    }
+
+    public StockRepository getStockRepository(Application application) {
+        StockAPIService apiService = getStockAPIService();
+        String apiKey = application.getString(R.string.sma_api_key);
+        BaseStockDataSource dataSource = new StockDataSource(apiService, apiKey);
+        return new StockRepository(dataSource);
+    }
+
+    public AgencyAPIRepository getAgencyRepository(Application application) {
+        AgencyAPIService apiService = getAgencyAPIService();
+        String apiKey = application.getString(R.string.stocks_api_key);
+        BaseAgencyDataSource dataSource = new AgencyDataSource(apiService, apiKey);
+        return new AgencyAPIRepository(dataSource);
     }
 
     public TransactionRepository getTransactionRepository(Application application, boolean debugMode) {

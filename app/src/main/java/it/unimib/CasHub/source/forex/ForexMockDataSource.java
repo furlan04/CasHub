@@ -1,4 +1,4 @@
-package it.unimib.CasHub.source;
+package it.unimib.CasHub.source.forex;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,5 +45,10 @@ public class ForexMockDataSource extends BaseForexDataSource {
             e.printStackTrace();
             callback.onCurrenciesFailureFromRemote(new Exception("Error reading mock currencies data: " + e.getMessage()));
         }
+    }
+
+    @Override
+    public void saveCurrencies(List<CurrencyEntity> currencies) {
+
     }
 }
